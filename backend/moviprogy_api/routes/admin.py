@@ -55,6 +55,12 @@ def create_cliente(cliente: Cliente, request: Request) -> Cliente:
     return cliente
 
 
+@router.get("/clientes", response_model=list[Cliente])
+def list_clientes(request: Request) -> list[Cliente]:
+    repository = _core_repository(request)
+    return repository.list_clientes()
+
+
 @router.get("/clientes/{cliente_id}", response_model=Cliente)
 def get_cliente(cliente_id: str, request: Request) -> Cliente:
     repository = _core_repository(request)
@@ -83,6 +89,23 @@ def create_dispositivo(dispositivo: Dispositivo, request: Request) -> Dispositiv
     return dispositivo
 
 
+@router.get("/dispositivos", response_model=list[Dispositivo])
+def list_dispositivos(request: Request) -> list[Dispositivo]:
+    repository = _core_repository(request)
+    return repository.list_dispositivos()
+
+
+@router.get("/dispositivos/{dispositivo_id}/eventos")
+def get_dispositivo_events(dispositivo_id: str, request: Request) -> dict[str, list[dict]]:
+    repository = _core_repository(request)
+    if repository.get_dispositivo(dispositivo_id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="dispositivo nao encontrado",
+        )
+    return repository.get_player_events_for_device(dispositivo_id)
+
+
 @router.get("/dispositivos/{dispositivo_id}", response_model=Dispositivo)
 def get_dispositivo(dispositivo_id: str, request: Request) -> Dispositivo:
     repository = _core_repository(request)
@@ -109,6 +132,12 @@ def create_midia(midia: Midia, request: Request) -> Midia:
         )
     repository.save_midia(midia)
     return midia
+
+
+@router.get("/midias", response_model=list[Midia])
+def list_midias(request: Request) -> list[Midia]:
+    repository = _core_repository(request)
+    return repository.list_midias()
 
 
 @router.post(
@@ -202,6 +231,12 @@ def create_playlist(playlist: Playlist, request: Request) -> Playlist:
         )
     repository.save_playlist(playlist)
     return playlist
+
+
+@router.get("/playlists", response_model=list[Playlist])
+def list_playlists(request: Request) -> list[Playlist]:
+    repository = _core_repository(request)
+    return repository.list_playlists()
 
 
 @router.get("/playlists/{playlist_id}", response_model=Playlist)

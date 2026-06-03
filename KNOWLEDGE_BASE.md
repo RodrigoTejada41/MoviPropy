@@ -154,13 +154,18 @@ Persistencia atual:
 ## Rotas administrativas atuais
 
 - `POST /api/admin/clientes`
+- `GET /api/admin/clientes`
 - `GET /api/admin/clientes/{cliente_id}`
 - `POST /api/admin/dispositivos`
+- `GET /api/admin/dispositivos`
 - `GET /api/admin/dispositivos/{dispositivo_id}`
+- `GET /api/admin/dispositivos/{dispositivo_id}/eventos`
 - `POST /api/admin/midias`
 - `POST /api/admin/midias/upload`
+- `GET /api/admin/midias`
 - `GET /api/admin/midias/{midia_id}`
 - `POST /api/admin/playlists`
+- `GET /api/admin/playlists`
 - `GET /api/admin/playlists/{playlist_id}`
 - `POST /api/admin/playlists/{playlist_id}/midias`
 
@@ -178,6 +183,7 @@ Regras de negocio atuais:
 - Midia so pode ser criada para cliente existente.
 - Playlist so pode ser criada para cliente existente.
 - Midia so pode ser vinculada a playlist do mesmo cliente.
+- Listagens administrativas atuais ainda nao possuem paginacao/filtros.
 
 ## Autenticacao administrativa
 

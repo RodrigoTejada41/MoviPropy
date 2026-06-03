@@ -83,13 +83,18 @@ Endpoints iniciais:
 - `POST /api/player/logs`
 - `POST /api/player/sincronizacao/confirmar`
 - `POST /api/admin/clientes`
+- `GET /api/admin/clientes`
 - `GET /api/admin/clientes/{cliente_id}`
 - `POST /api/admin/dispositivos`
+- `GET /api/admin/dispositivos`
 - `GET /api/admin/dispositivos/{dispositivo_id}`
+- `GET /api/admin/dispositivos/{dispositivo_id}/eventos`
 - `POST /api/admin/midias`
 - `POST /api/admin/midias/upload`
+- `GET /api/admin/midias`
 - `GET /api/admin/midias/{midia_id}`
 - `POST /api/admin/playlists`
+- `GET /api/admin/playlists`
 - `GET /api/admin/playlists/{playlist_id}`
 - `POST /api/admin/playlists/{playlist_id}/midias`
 

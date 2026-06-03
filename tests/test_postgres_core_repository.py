@@ -81,6 +81,10 @@ def test_postgres_core_repository_persists_core_entities():
         dispositivo.id,
         f"midia-invalida-{suffix}",
     ) is None
+    assert cliente in repository.list_clientes()
+    assert dispositivo in repository.list_dispositivos()
+    assert midia in repository.list_midias()
+    assert playlist in repository.list_playlists()
 
 
 def test_player_update_check_uses_postgres_playlist_version():

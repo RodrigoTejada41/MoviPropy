@@ -46,6 +46,20 @@ class PostgresCoreRepository:
             return None
         return Cliente(id=row[0], nome=row[1], documento=row[2], ativo=row[3])
 
+    def list_clientes(self) -> list[Cliente]:
+        with psycopg.connect(self._database_url) as connection:
+            rows = connection.execute(
+                """
+                SELECT id, nome, documento, ativo
+                FROM clientes
+                ORDER BY nome ASC, id ASC
+                """
+            ).fetchall()
+        return [
+            Cliente(id=row[0], nome=row[1], documento=row[2], ativo=row[3])
+            for row in rows
+        ]
+
     def save_dispositivo(self, dispositivo: Dispositivo) -> None:
         with psycopg.connect(self._database_url) as connection:
             connection.execute(
@@ -105,6 +119,33 @@ class PostgresCoreRepository:
             bloqueado=row[4],
             playlist_atual_id=row[5],
         )
+
+    def list_dispositivos(self) -> list[Dispositivo]:
+        with psycopg.connect(self._database_url) as connection:
+            rows = connection.execute(
+                """
+                SELECT
+                    id,
+                    cliente_id,
+                    nome,
+                    codigo_ativacao,
+                    bloqueado,
+                    playlist_atual_id
+                FROM dispositivos
+                ORDER BY nome ASC, id ASC
+                """
+            ).fetchall()
+        return [
+            Dispositivo(
+                id=row[0],
+                cliente_id=row[1],
+                nome=row[2],
+                codigo_ativacao=row[3],
+                bloqueado=row[4],
+                playlist_atual_id=row[5],
+            )
+            for row in rows
+        ]
 
     def get_dispositivo_by_activation_code(
         self,
@@ -212,6 +253,39 @@ class PostgresCoreRepository:
             ativo=row[8],
         )
 
+    def list_midias(self) -> list[Midia]:
+        with psycopg.connect(self._database_url) as connection:
+            rows = connection.execute(
+                """
+                SELECT
+                    id,
+                    cliente_id,
+                    nome,
+                    tipo,
+                    caminho,
+                    tamanho,
+                    sha256,
+                    duracao_segundos,
+                    ativo
+                FROM midias
+                ORDER BY nome ASC, id ASC
+                """
+            ).fetchall()
+        return [
+            Midia(
+                id=row[0],
+                cliente_id=row[1],
+                nome=row[2],
+                tipo=row[3],
+                caminho=row[4],
+                tamanho=row[5],
+                sha256=row[6],
+                duracao_segundos=row[7],
+                ativo=row[8],
+            )
+            for row in rows
+        ]
+
     def save_playlist(self, playlist: Playlist) -> None:
         with psycopg.connect(self._database_url) as connection:
             connection.execute(
@@ -255,6 +329,26 @@ class PostgresCoreRepository:
             versao=row[3],
             ativa=row[4],
         )
+
+    def list_playlists(self) -> list[Playlist]:
+        with psycopg.connect(self._database_url) as connection:
+            rows = connection.execute(
+                """
+                SELECT id, cliente_id, nome, versao, ativa
+                FROM playlists
+                ORDER BY nome ASC, id ASC
+                """
+            ).fetchall()
+        return [
+            Playlist(
+                id=row[0],
+                cliente_id=row[1],
+                nome=row[2],
+                versao=row[3],
+                ativa=row[4],
+            )
+            for row in rows
+        ]
 
     def add_midia_to_playlist(
         self,

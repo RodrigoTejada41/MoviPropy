@@ -30,6 +30,8 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Repository PostgreSQL core criado para persistir entidades iniciais do dominio.
 - Rotas administrativas iniciais criadas para clientes e dispositivos.
 - Rotas administrativas criadas para midias e playlists.
+- Listagens administrativas criadas para clientes, dispositivos, midias e playlists.
+- Consulta administrativa de eventos do player criada por dispositivo.
 - Vinculo administrativo de midia em playlist criado.
 - Upload fisico local de midias criado em `POST /api/admin/midias/upload`.
 - Autenticacao minima por `ADMIN_API_TOKEN` criada como fallback local legado.
@@ -110,4 +112,4 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 
 ## Proximo passo recomendado
 
-Focar no backend: criar listagens administrativas para painel e consulta de eventos do player.
+Focar no backend: adicionar paginacao/filtros nas listagens administrativas ou iniciar frontend.

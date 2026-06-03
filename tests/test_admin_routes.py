@@ -28,11 +28,17 @@ class FakeCoreRepository:
     def get_cliente(self, cliente_id: str) -> Cliente | None:
         return self.clientes.get(cliente_id)
 
+    def list_clientes(self) -> list[Cliente]:
+        return list(self.clientes.values())
+
     def save_dispositivo(self, dispositivo: Dispositivo) -> None:
         self.dispositivos[dispositivo.id] = dispositivo
 
     def get_dispositivo(self, dispositivo_id: str) -> Dispositivo | None:
         return self.dispositivos.get(dispositivo_id)
+
+    def list_dispositivos(self) -> list[Dispositivo]:
+        return list(self.dispositivos.values())
 
     def save_midia(self, midia: Midia) -> None:
         self.midias[midia.id] = midia
@@ -40,11 +46,17 @@ class FakeCoreRepository:
     def get_midia(self, midia_id: str) -> Midia | None:
         return self.midias.get(midia_id)
 
+    def list_midias(self) -> list[Midia]:
+        return list(self.midias.values())
+
     def save_playlist(self, playlist: Playlist) -> None:
         self.playlists[playlist.id] = playlist
 
     def get_playlist(self, playlist_id: str) -> Playlist | None:
         return self.playlists.get(playlist_id)
+
+    def list_playlists(self) -> list[Playlist]:
+        return list(self.playlists.values())
 
     def add_midia_to_playlist(
         self,
@@ -56,6 +68,15 @@ class FakeCoreRepository:
         self.playlist_midias.append(
             (playlist_id, midia_id, ordem, duracao_override)
         )
+
+    def get_player_events_for_device(self, device_id: str) -> dict[str, list[dict]]:
+        if device_id not in self.dispositivos:
+            return {"status": [], "logs": [], "sync": []}
+        return {
+            "status": [{"status": "online", "versao_player": "0.1.0"}],
+            "logs": [{"nivel": "info", "evento": "teste", "dados": {}}],
+            "sync": [{"playlist_id": "playlist-001", "versao": 1, "status": "ok"}],
+        }
 
 
 class FakeAuthRepository:
@@ -145,6 +166,29 @@ def test_admin_creates_and_gets_cliente():
     assert get_response.json()["nome"] == "Cliente Um"
 
 
+def test_admin_lists_clientes():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-002", "nome": "Cliente Dois"},
+    )
+
+    response = client.get("/api/admin/clientes", headers=ADMIN_HEADERS)
+
+    assert response.status_code == 200
+    assert [cliente["id"] for cliente in response.json()] == [
+        "cliente-001",
+        "cliente-002",
+    ]
+
+
 def test_admin_returns_404_for_missing_cliente():
     app = _create_test_app()
     client = TestClient(app)
@@ -186,6 +230,59 @@ def test_admin_creates_and_gets_dispositivo():
     assert create_response.json()["codigo_ativacao"] == "CODE-001"
     assert get_response.status_code == 200
     assert get_response.json()["nome"] == "TV Entrada"
+
+
+def test_admin_lists_dispositivos():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+    client.post(
+        "/api/admin/dispositivos",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "device-001",
+            "cliente_id": "cliente-001",
+            "nome": "TV Entrada",
+            "codigo_ativacao": "CODE-001",
+        },
+    )
+
+    response = client.get("/api/admin/dispositivos", headers=ADMIN_HEADERS)
+
+    assert response.status_code == 200
+    assert response.json()[0]["id"] == "device-001"
+
+
+def test_admin_gets_dispositivo_events():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+    client.post(
+        "/api/admin/dispositivos",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "device-001",
+            "cliente_id": "cliente-001",
+            "nome": "TV Entrada",
+            "codigo_ativacao": "CODE-001",
+        },
+    )
+
+    response = client.get(
+        "/api/admin/dispositivos/device-001/eventos",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"][0]["status"] == "online"
 
 
 def test_admin_rejects_dispositivo_for_missing_cliente():
@@ -239,6 +336,34 @@ def test_admin_creates_and_gets_midia():
     assert create_response.json()["nome"] == "Video Entrada"
     assert get_response.status_code == 200
     assert get_response.json()["sha256"] == "a" * 64
+
+
+def test_admin_lists_midias():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+    client.post(
+        "/api/admin/midias",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "midia-001",
+            "cliente_id": "cliente-001",
+            "nome": "Video Entrada",
+            "tipo": "video",
+            "caminho": "media/video.mp4",
+            "tamanho": 1024,
+            "sha256": "a" * 64,
+        },
+    )
+
+    response = client.get("/api/admin/midias", headers=ADMIN_HEADERS)
+
+    assert response.status_code == 200
+    assert response.json()[0]["id"] == "midia-001"
 
 
 def test_admin_rejects_midia_for_missing_cliente():
@@ -403,6 +528,30 @@ def test_admin_creates_and_gets_playlist():
     assert create_response.json()["ativa"] is True
     assert get_response.status_code == 200
     assert get_response.json()["nome"] == "Playlist Principal"
+
+
+def test_admin_lists_playlists():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+    client.post(
+        "/api/admin/playlists",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "playlist-001",
+            "cliente_id": "cliente-001",
+            "nome": "Playlist Principal",
+        },
+    )
+
+    response = client.get("/api/admin/playlists", headers=ADMIN_HEADERS)
+
+    assert response.status_code == 200
+    assert response.json()[0]["id"] == "playlist-001"
 
 
 def test_admin_links_midia_to_playlist():

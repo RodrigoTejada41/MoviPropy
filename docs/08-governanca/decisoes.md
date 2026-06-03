@@ -114,7 +114,7 @@ Motivo:
 
 Impacto:
 - Criadas tabelas `player_status_events`, `player_log_events` e `player_sync_confirmations`.
-- Ainda faltam telas/listagens administrativas para consultar os eventos.
+- Listagens administrativas de eventos foram definidas depois na D-009.
 
 ## D-008 - Consulta de atualizacao do player
 
@@ -130,3 +130,19 @@ Motivo:
 Impacto:
 - Player recebe `possui_atualizacao` e `nova_versao`.
 - Se houver atualizacao, o player deve buscar `GET /api/player/playlist`.
+
+## D-009 - Listagens administrativas iniciais
+
+Status: aprovado.
+
+Decisao:
+- Criar listagens administrativas para clientes, dispositivos, midias e playlists.
+- Criar consulta de eventos por dispositivo.
+
+Motivo:
+- Desbloquear telas principais do painel.
+- Permitir monitorar eventos do player.
+
+Impacto:
+- Rotas ficam protegidas por sessao admin.
+- Paginacao, filtros e isolamento granular por cliente seguem pendentes.

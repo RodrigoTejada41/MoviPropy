@@ -55,13 +55,13 @@ Resposta: cliente encontrado ou 404.
 Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
 Limite: RBAC granular ainda pendente.
 
-### GET /api/clientes
+### GET /api/admin/clientes
 
-Finalidade: listar clientes permitidos.
-Quem usa: painel web.
-Parametros: filtros opcionais.
-Resposta: lista paginada.
-Seguranca: RBAC e isolamento por permissao.
+Finalidade: listar clientes.
+Quem usa: painel administrativo.
+Resposta: lista de clientes.
+Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Limite: RBAC granular e paginacao ainda pendentes.
 
 ## Dispositivos
 
@@ -81,6 +81,22 @@ Quem usa: painel administrativo.
 Resposta: dispositivo encontrado ou 404.
 Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
 Limite: RBAC granular ainda pendente.
+
+### GET /api/admin/dispositivos
+
+Finalidade: listar dispositivos.
+Quem usa: painel administrativo.
+Resposta: lista de dispositivos.
+Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Limite: RBAC granular e paginacao ainda pendentes.
+
+### GET /api/admin/dispositivos/{dispositivo_id}/eventos
+
+Finalidade: consultar status, logs e confirmacoes de sincronizacao do dispositivo.
+Quem usa: painel administrativo.
+Resposta: status, logs e sync.
+Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Limite: RBAC granular, filtro por periodo e paginacao ainda pendentes.
 
 ### POST /api/dispositivos
 
@@ -134,6 +150,14 @@ Quem usa: painel administrativo.
 Resposta: midia encontrada ou 404.
 Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
 
+### GET /api/admin/midias
+
+Finalidade: listar midias.
+Quem usa: painel administrativo.
+Resposta: lista de midias.
+Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Limite: RBAC granular e paginacao ainda pendentes.
+
 ## Playlists
 
 ### POST /api/admin/playlists
@@ -151,6 +175,14 @@ Finalidade: obter playlist por id.
 Quem usa: painel administrativo.
 Resposta: playlist encontrada ou 404.
 Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+
+### GET /api/admin/playlists
+
+Finalidade: listar playlists.
+Quem usa: painel administrativo.
+Resposta: lista de playlists.
+Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Limite: RBAC granular e paginacao ainda pendentes.
 
 ### POST /api/admin/playlists/{playlist_id}/midias
 

@@ -12,9 +12,14 @@ Definir criterios para aprovar uma versao.
 - Rotas admin exigem token.
 - Usuario sem permissao recebe 403.
 - Cliente pode ser criado.
+- Clientes podem ser listados.
 - Dispositivo pode ser criado.
+- Dispositivos podem ser listados.
+- Eventos do dispositivo podem ser consultados.
 - Midia pode ser criada.
+- Midias podem ser listadas.
 - Playlist pode ser criada.
+- Playlists podem ser listadas.
 - Midia pode ser vinculada a playlist.
 - Player ativa por codigo real.
 - Player recebe manifesto real.

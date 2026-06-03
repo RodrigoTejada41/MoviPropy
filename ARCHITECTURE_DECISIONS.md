@@ -584,7 +584,7 @@ Motivo:
 
 Consequencias:
 - Volume de logs pode crescer e exigira politica de retencao.
-- Ainda faltam listagens administrativas para consulta desses eventos.
+- Listagens administrativas de eventos foram definidas posteriormente na ADR-022.
 - Consulta de atualizacao foi definida posteriormente na ADR-021.
 
 ---
@@ -614,4 +614,34 @@ Motivo:
 Consequencias:
 - Player ainda precisa consultar manifesto quando houver atualizacao.
 - Sem playlist ativa, API retorna erro controlado.
-- Listagens administrativas continuam pendentes.
+- Listagens administrativas iniciais foram definidas posteriormente na ADR-022.
+
+---
+
+### ADR-022 - Listagens administrativas iniciais para painel
+
+Status: Aprovada
+
+Data: 2026-06-03
+
+Contexto:
+- O painel frontend precisa consultar colecoes de clientes, dispositivos, midias e playlists.
+- Eventos do player ja sao persistidos em PostgreSQL.
+- O backend possuia apenas criacao e consulta por ID.
+
+Decisao:
+- Criar `GET /api/admin/clientes`.
+- Criar `GET /api/admin/dispositivos`.
+- Criar `GET /api/admin/midias`.
+- Criar `GET /api/admin/playlists`.
+- Criar `GET /api/admin/dispositivos/{dispositivo_id}/eventos`.
+- Exigir sessao administrativa em todas as rotas.
+
+Motivo:
+- Desbloqueia telas principais do painel.
+- Permite consultar saude/eventos do player.
+- Mantem as rotas dentro do namespace administrativo protegido.
+
+Consequencias:
+- Listagens iniciais ainda nao possuem paginacao, filtros ou isolamento granular por cliente.
+- Performance deve ser revisada antes de producao com muitos registros.
