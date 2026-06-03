@@ -36,6 +36,7 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 
 - Backend definido: Python 3.12+ com FastAPI.
 - Testes definidos: pytest com FastAPI TestClient.
+- Documentacao funcional, tecnica, operacional e de homologacao foi fechada como baseline antes de continuar backend/frontend.
 - Banco definido para ambiente Docker local: PostgreSQL.
 - Contratos iniciais do player persistem sessoes no PostgreSQL quando `DATABASE_URL` existe.
 - Contratos do player consultam dispositivo e manifesto real no PostgreSQL quando `core_repository` existe.
@@ -47,6 +48,26 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 - Google Drive esta documentado como opcao planejada de storage externo controlado pelo backend.
 - Player ainda nao definido.
 - Deploy ainda nao definido alem do container local.
+
+## Documentacao baseline
+
+Arquivos obrigatorios para continuidade:
+- `docs/10-frontend/especificacao-frontend.md`
+- `docs/11-seguranca/rbac-permissoes.md`
+- `docs/12-storage/upload-download.md`
+- `docs/13-player/especificacao-player.md`
+- `docs/14-operacao/deploy-producao.md`
+- `docs/14-operacao/backup-restore.md`
+- `docs/14-operacao/observabilidade-logs.md`
+- `docs/15-homologacao/checklist-homologacao.md`
+- `docs/15-homologacao/matriz-testes.md`
+- `docs/16-manuais/manual-admin.md`
+- `docs/16-manuais/manual-operacional.md`
+
+Regra:
+- Antes de implementar backend, consultar docs de API, banco, storage, seguranca, testes e operacao.
+- Antes de implementar frontend, consultar `docs/10-frontend/especificacao-frontend.md`.
+- Antes de implementar player, consultar `docs/13-player/especificacao-player.md`.
 
 ## Banco local
 

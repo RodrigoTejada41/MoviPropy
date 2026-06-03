@@ -469,3 +469,30 @@ Consequencias:
 - Playlist precisa estar ativa.
 - Midias precisam estar vinculadas por `playlist_midias`.
 - Ainda falta endpoint de download controlado para arquivos.
+
+---
+
+### ADR-017 - Baseline documental antes da proxima fase
+
+Status: Aprovada
+
+Data: 2026-06-03
+
+Contexto:
+- O backend ja possui base operacional.
+- O frontend ainda nao existe.
+- Faltavam documentos de telas, RBAC, storage, player, deploy, backup, observabilidade, homologacao e manuais.
+
+Decisao:
+- Fechar baseline documental antes de continuar backend e frontend.
+- Usar a documentacao como fonte de verdade para proximas implementacoes.
+
+Motivo:
+- Reduz ambiguidade.
+- Evita retrabalho.
+- Permite executar backend e frontend por escopo validado.
+
+Consequencias:
+- Toda implementacao futura deve referenciar o documento correspondente.
+- Mudancas de escopo devem atualizar a documentacao antes do codigo.
+- Homologacao passa a usar checklist e matriz de testes documentados.

@@ -52,3 +52,20 @@ Motivo:
 Impacto:
 - `GET /api/player/playlist` usa midias vinculadas a playlist atual.
 - Demo permanece apenas como fallback local.
+
+## D-004 - Fechamento documental antes de backend/frontend
+
+Status: aprovado.
+
+Decisao:
+- Completar documentacao funcional, tecnica, operacional e de homologacao antes de continuar implementacao.
+
+Motivo:
+- Reduz retrabalho.
+- Evita implementar frontend sem mapa de telas.
+- Evita backend sem regras de storage, RBAC, deploy e homologacao.
+
+Impacto:
+- Proxima fase pode focar em backend.
+- Frontend deve seguir `docs/10-frontend/especificacao-frontend.md`.
+- Homologacao deve seguir `docs/15-homologacao/checklist-homologacao.md`.

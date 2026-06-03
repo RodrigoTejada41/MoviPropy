@@ -132,6 +132,17 @@ $headers = @{ Authorization = "Bearer $($login.access_token)" }
 - `docs/08-governanca/backlog.md`
 - `docs/08-governanca/decisoes.md`
 - `docs/09-google-drive/integracao-google-drive.md`
+- `docs/10-frontend/especificacao-frontend.md`
+- `docs/11-seguranca/rbac-permissoes.md`
+- `docs/12-storage/upload-download.md`
+- `docs/13-player/especificacao-player.md`
+- `docs/14-operacao/deploy-producao.md`
+- `docs/14-operacao/backup-restore.md`
+- `docs/14-operacao/observabilidade-logs.md`
+- `docs/15-homologacao/checklist-homologacao.md`
+- `docs/15-homologacao/matriz-testes.md`
+- `docs/16-manuais/manual-admin.md`
+- `docs/16-manuais/manual-operacional.md`
 
 ## Regra principal
 

@@ -40,6 +40,13 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Manifesto do player usa `playlist_atual_id` do dispositivo e midias vinculadas quando disponivel.
 - Script de simulacao do player criado.
 - Escopo tecnico da integracao Google Drive documentado.
+- Especificacao completa do frontend documentada.
+- RBAC granular planejado e documentado.
+- Storage, upload e download controlado documentados.
+- Especificacao do player real documentada.
+- Deploy de producao, backup/restore e observabilidade documentados.
+- Checklist de homologacao e matriz de testes documentados.
+- Manual admin e manual operacional documentados.
 - Repositorio Git inicializado localmente.
 - Testes iniciais criados com pytest.
 
@@ -51,6 +58,17 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - `LESSONS_LEARNED.md`
 - `KNOWLEDGE_BASE.md`
 - `ARCHITECTURE_DECISIONS.md`
+- `docs/10-frontend/especificacao-frontend.md`
+- `docs/11-seguranca/rbac-permissoes.md`
+- `docs/12-storage/upload-download.md`
+- `docs/13-player/especificacao-player.md`
+- `docs/14-operacao/deploy-producao.md`
+- `docs/14-operacao/backup-restore.md`
+- `docs/14-operacao/observabilidade-logs.md`
+- `docs/15-homologacao/checklist-homologacao.md`
+- `docs/15-homologacao/matriz-testes.md`
+- `docs/16-manuais/manual-admin.md`
+- `docs/16-manuais/manual-operacional.md`
 
 ## Decisoes ja assumidas
 
@@ -63,7 +81,6 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 ## Pendencias de aprovacao
 
 - Stack frontend.
-- RBAC granular por permissao/cliente.
 - Tecnologia do player.
 - Implementacao da integracao Google Drive.
 
@@ -85,4 +102,4 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 
 ## Proximo passo recomendado
 
-Criar upload de midias ou endpoint de download controlado para o player.
+Focar no backend: criar upload de midias ou endpoint de download controlado para o player.
