@@ -115,3 +115,18 @@ Motivo:
 Impacto:
 - Criadas tabelas `player_status_events`, `player_log_events` e `player_sync_confirmations`.
 - Ainda faltam telas/listagens administrativas para consultar os eventos.
+
+## D-008 - Consulta de atualizacao do player
+
+Status: aprovado.
+
+Decisao:
+- Player consulta `GET /api/player/atualizacao` para comparar sua versao local com a playlist ativa.
+
+Motivo:
+- Reduz trafego.
+- Evita baixar manifesto completo sem necessidade.
+
+Impacto:
+- Player recebe `possui_atualizacao` e `nova_versao`.
+- Se houver atualizacao, o player deve buscar `GET /api/player/playlist`.

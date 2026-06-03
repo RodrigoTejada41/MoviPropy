@@ -83,6 +83,36 @@ def test_postgres_core_repository_persists_core_entities():
     ) is None
 
 
+def test_player_update_check_uses_postgres_playlist_version():
+    assert DATABASE_URL is not None
+    run_migrations(DATABASE_URL)
+    repository = PostgresCoreRepository(DATABASE_URL)
+    suffix = uuid.uuid4().hex
+    cliente = Cliente(id=f"cliente-update-{suffix}", nome="Cliente Update")
+    playlist = Playlist(
+        id=f"playlist-update-{suffix}",
+        cliente_id=cliente.id,
+        nome="Playlist Update",
+        versao=5,
+        ativa=True,
+    )
+    dispositivo = Dispositivo(
+        id=f"device-update-{suffix}",
+        cliente_id=cliente.id,
+        nome="TV Update",
+        codigo_ativacao=f"UPDATE-{suffix}",
+        playlist_atual_id=playlist.id,
+    )
+    repository.save_cliente(cliente)
+    repository.save_playlist(playlist)
+    repository.save_dispositivo(dispositivo)
+
+    manifest = repository.get_playlist_manifest_for_device(dispositivo.id)
+
+    assert manifest is not None
+    assert manifest.version == 5
+
+
 def test_postgres_core_repository_persists_player_events():
     assert DATABASE_URL is not None
     run_migrations(DATABASE_URL)

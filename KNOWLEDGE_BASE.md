@@ -115,6 +115,7 @@ Limite:
 
 - `POST /api/player/ativar`: ativa dispositivo por codigo e retorna token.
 - `GET /api/player/playlist`: retorna manifesto ativo mediante token Bearer.
+- `GET /api/player/atualizacao`: compara versao local com versao da playlist ativa.
 - `POST /api/player/status`: registra status operacional do dispositivo.
 - `POST /api/player/logs`: registra evento/log enviado pelo dispositivo.
 - `POST /api/player/sincronizacao/confirmar`: registra resultado de sincronizacao.

@@ -104,12 +104,13 @@ Telas:
 Atual:
 - `POST /api/player/ativar`.
 - `GET /api/player/playlist`.
+- `GET /api/player/atualizacao`.
 - `POST /api/player/status`.
 - `POST /api/player/logs`.
 - `POST /api/player/sincronizacao/confirmar`.
 
 Pendente:
-- `GET /api/player/atualizacao`.
+- Listagens administrativas de eventos do player.
 
 Implementado:
 - `GET /api/player/midias/{midia_id}/download`.

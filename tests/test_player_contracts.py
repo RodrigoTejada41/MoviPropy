@@ -400,3 +400,67 @@ def test_player_sync_confirmation_records_success():
     assert response.json() == {"status": "registrado"}
     assert repository.sync_confirmations[0].device_id == "device-real-001"
     assert repository.sync_confirmations[0].status == "concluida"
+
+
+def test_player_update_check_requires_bearer_token():
+    client = TestClient(create_app())
+
+    response = client.get(
+        "/api/player/atualizacao",
+        params={"playlist_versao_atual": 1},
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "token do dispositivo ausente"}
+
+
+def test_player_update_check_returns_false_when_playlist_is_current():
+    app = create_app()
+    app.state.core_repository = FakeCoreRepository()
+    client = TestClient(app)
+    activation = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "REAL-CODE-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    ).json()
+
+    response = client.get(
+        "/api/player/atualizacao",
+        headers={"Authorization": f"Bearer {activation['token']}"},
+        params={"playlist_versao_atual": 3},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "possui_atualizacao": False,
+        "nova_versao": 3,
+    }
+
+
+def test_player_update_check_returns_true_when_remote_playlist_is_newer():
+    app = create_app()
+    app.state.core_repository = FakeCoreRepository()
+    client = TestClient(app)
+    activation = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "REAL-CODE-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    ).json()
+
+    response = client.get(
+        "/api/player/atualizacao",
+        headers={"Authorization": f"Bearer {activation['token']}"},
+        params={"playlist_versao_atual": 2},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "possui_atualizacao": True,
+        "nova_versao": 3,
+    }

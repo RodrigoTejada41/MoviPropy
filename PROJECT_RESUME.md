@@ -40,6 +40,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Ativacao do player usa `codigo_ativacao` real do banco quando disponivel.
 - Manifesto do player usa `playlist_atual_id` do dispositivo e midias vinculadas quando disponivel.
 - Download controlado de midia para player criado em `GET /api/player/midias/{midia_id}/download`.
+- Consulta de atualizacao do player criada em `GET /api/player/atualizacao`.
 - Telemetria do player criada:
   - `POST /api/player/status`
   - `POST /api/player/logs`
@@ -109,4 +110,4 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 
 ## Proximo passo recomendado
 
-Focar no backend: criar consulta de atualizacao do player e listagens administrativas.
+Focar no backend: criar listagens administrativas para painel e consulta de eventos do player.

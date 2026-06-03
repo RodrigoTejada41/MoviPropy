@@ -77,6 +77,7 @@ Endpoints iniciais:
 - `POST /api/auth/login`
 - `POST /api/player/ativar`
 - `GET /api/player/playlist`
+- `GET /api/player/atualizacao`
 - `GET /api/player/midias/{midia_id}/download`
 - `POST /api/player/status`
 - `POST /api/player/logs`

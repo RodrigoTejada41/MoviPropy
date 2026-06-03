@@ -18,6 +18,7 @@ Definir criterios para aprovar uma versao.
 - Midia pode ser vinculada a playlist.
 - Player ativa por codigo real.
 - Player recebe manifesto real.
+- Player consulta atualizacao da playlist.
 - Player baixa midia por endpoint controlado.
 - Player envia status.
 - Player envia logs.

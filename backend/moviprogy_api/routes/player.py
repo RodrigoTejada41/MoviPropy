@@ -79,6 +79,36 @@ def get_active_playlist(
     return manifest
 
 
+@router.get("/atualizacao")
+def check_player_update(
+    playlist_versao_atual: int,
+    request: Request,
+    authorization: str | None = Header(default=None),
+) -> dict[str, int | bool]:
+    token = _extract_bearer_token(authorization)
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="token do dispositivo ausente",
+        )
+    session = request.app.state.device_registry.get_session(token)
+    if session is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="token do dispositivo invalido",
+        )
+    manifest = _device_manifest(request, session.device_id, token)
+    if manifest is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="playlist ativa nao encontrada",
+        )
+    return {
+        "possui_atualizacao": manifest.version > playlist_versao_atual,
+        "nova_versao": manifest.version,
+    }
+
+
 @router.get("/midias/{midia_id}/download")
 def download_media(
     midia_id: str,
@@ -187,6 +217,17 @@ def _device_session(request: Request, authorization: str | None):
             detail="token do dispositivo invalido",
         )
     return session
+
+
+def _device_manifest(
+    request: Request,
+    device_id: str,
+    token: str,
+) -> PlaylistManifest | None:
+    repository = getattr(request.app.state, "core_repository", None)
+    if repository is not None:
+        return repository.get_playlist_manifest_for_device(device_id)
+    return request.app.state.device_registry.get_manifest(token)
 
 
 def _core_repository(request: Request):

@@ -585,4 +585,33 @@ Motivo:
 Consequencias:
 - Volume de logs pode crescer e exigira politica de retencao.
 - Ainda faltam listagens administrativas para consulta desses eventos.
-- Ainda falta `GET /api/player/atualizacao`.
+- Consulta de atualizacao foi definida posteriormente na ADR-021.
+
+---
+
+### ADR-021 - Consulta leve de atualizacao do player
+
+Status: Aprovada
+
+Data: 2026-06-03
+
+Contexto:
+- O player precisa saber se existe nova playlist sem baixar manifesto completo a cada ciclo.
+- A playlist ativa ja possui campo `versao`.
+- A sincronizacao deve reduzir trafego e preservar operacao offline.
+
+Decisao:
+- Criar `GET /api/player/atualizacao`.
+- Exigir token Bearer do dispositivo.
+- Receber `playlist_versao_atual`.
+- Comparar com a versao da playlist atual ativa do dispositivo.
+
+Motivo:
+- Permite polling leve.
+- Evita download desnecessario de manifesto.
+- Mantem sincronizacao baseada em versionamento.
+
+Consequencias:
+- Player ainda precisa consultar manifesto quando houver atualizacao.
+- Sem playlist ativa, API retorna erro controlado.
+- Listagens administrativas continuam pendentes.

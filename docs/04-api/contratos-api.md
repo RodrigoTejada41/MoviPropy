@@ -217,6 +217,13 @@ Parametros: playlist_versao_atual.
 Resposta: possui_atualizacao, nova_versao.
 Seguranca: token do dispositivo.
 
+Implementacao atual:
+- Rota: `GET /api/player/atualizacao`
+- Autenticacao: `Authorization: Bearer <token>`
+- Query: `playlist_versao_atual`
+- Compara com `playlists.versao` da playlist atual ativa do dispositivo.
+- Resposta: `possui_atualizacao`, `nova_versao`
+
 ### POST /api/player/sincronizacao/confirmar
 
 Finalidade: confirmar sincronizacao concluida.
