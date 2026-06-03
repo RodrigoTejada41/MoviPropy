@@ -1,0 +1,59 @@
+services:
+  moviprogy-db:
+    image: postgres:16-alpine
+    container_name: moviprogy-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-moviprogy}
+      POSTGRES_USER: ${POSTGRES_USER:-moviprogy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-moviprogy_dev_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./runtime/postgres/data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+  moviprogy-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: moviprogy-api
+    ports:
+      - "8000:8000"
+    environment:
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:-moviprogy_admin_dev_token}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-moviprogy}:${POSTGRES_PASSWORD:-moviprogy_dev_password}@moviprogy-db:5432/${POSTGRES_DB:-moviprogy}
+      MOVIPROGY_ADMIN_EMAIL: ${MOVIPROGY_ADMIN_EMAIL:-admin@moviprogy.local}
+      MOVIPROGY_ADMIN_PASSWORD: ${MOVIPROGY_ADMIN_PASSWORD:-moviprogy_admin_dev_password}
+      MOVIPROGY_DATA_DIR: /app/runtime/data
+      MOVIPROGY_MEDIA_DIR: /app/runtime/media
+      MOVIPROGY_TMP_DIR: /app/runtime/tmp
+    volumes:
+      - ./runtime/data:/app/runtime/data
+      - ./runtime/media:/app/runtime/media
+      - ./runtime/tmp:/app/runtime/tmp
+      - ./logs:/app/logs
+    read_only: true
+    tmpfs:
+      - /tmp
+    depends_on:
+      moviprogy-db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
