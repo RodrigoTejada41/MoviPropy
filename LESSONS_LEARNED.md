@@ -27,6 +27,40 @@ Status:
 
 ## Licoes registradas
 
+### ERR-013
+
+Data: 2026-06-03
+
+Descricao do Problema:
+- Rotas administrativas autenticavam usuario, mas diferenciavam apenas o perfil legado `admin`.
+- Esse modelo nao validava permissao granular por cliente e acao.
+
+Causa Raiz:
+- A camada inicial de RBAC foi criada apenas para bloquear acesso anonimo.
+- Ainda nao existiam tabelas de vinculo usuario/cliente e permissoes.
+
+Solucao Aplicada:
+- Criadas tabelas `usuarios_clientes` e `permissoes`.
+- Criados checks por `recurso`, `acao` e `cliente_id`.
+- Mantido perfil legado `admin` com acesso total para compatibilidade local.
+
+Como Evitar no Futuro:
+- Toda rota administrativa nova deve chamar validacao de permissao granular.
+- Toda rota com `cliente_id` deve validar vinculo do usuario com o cliente.
+- Perfis escopados nao devem listar dados multi-cliente sem filtro `cliente_id`.
+
+Arquivos Afetados:
+- `backend/moviprogy_api/security.py`
+- `backend/moviprogy_api/routes/admin.py`
+- `backend/moviprogy_api/repositories/postgres_auth.py`
+- `backend/moviprogy_api/migrations/004_rbac.sql`
+- `tests/test_admin_routes.py`
+- `tests/test_postgres_auth_repository.py`
+
+Status: Resolvido
+
+---
+
 ### ERR-012
 
 Data: 2026-06-03

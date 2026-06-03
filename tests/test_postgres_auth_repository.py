@@ -55,3 +55,28 @@ def test_postgres_auth_repository_persists_user_and_session():
     assert persisted_session is not None
     assert persisted_session.user_id == user.id
     assert persisted_session.perfil == "admin"
+
+
+def test_postgres_auth_repository_checks_cliente_permissions():
+    assert DATABASE_URL is not None
+    run_migrations(DATABASE_URL)
+    repository = PostgresAuthRepository(DATABASE_URL)
+    suffix = uuid.uuid4().hex
+    user = UserAccount(
+        id=f"user-rbac-{suffix}",
+        nome="Admin Cliente",
+        email=f"rbac-{suffix}@moviprogy.local",
+        senha_hash=hash_password("senha-segura"),
+        perfil="admin_cliente",
+        ativo=True,
+    )
+    cliente_id = f"cliente-rbac-{suffix}"
+
+    repository.save_user(user)
+    repository.link_user_cliente(user.id, cliente_id)
+    repository.grant_permission(user.id, "midias", "criar", cliente_id)
+
+    assert repository.has_cliente_access(user.id, cliente_id) is True
+    assert repository.has_permission(user.id, "midias", "criar", cliente_id) is True
+    assert repository.has_permission(user.id, "midias", "excluir", cliente_id) is False
+    assert repository.has_cliente_access(user.id, f"outro-{cliente_id}") is False

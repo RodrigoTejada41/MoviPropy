@@ -23,7 +23,7 @@ from moviprogy_api.domain.core import (
     PlaylistMidia,
     PlaylistMidiaRequest,
 )
-from moviprogy_api.security import require_admin_user
+from moviprogy_api.security import require_admin_permission, require_admin_user
 
 
 router = APIRouter(
@@ -52,6 +52,7 @@ _ALLOWED_UPLOADS = {
 )
 def create_cliente(cliente: Cliente, request: Request) -> Cliente:
     repository = _core_repository(request)
+    require_admin_permission(request, "clientes", "criar")
     repository.save_cliente(cliente)
     return cliente
 
@@ -64,12 +65,14 @@ def list_clientes(
     ativo: bool | None = None,
 ) -> list[Cliente]:
     repository = _core_repository(request)
+    require_admin_permission(request, "clientes", "ler")
     return repository.list_clientes(limit=limit, offset=offset, ativo=ativo)
 
 
 @router.get("/clientes/{cliente_id}", response_model=Cliente)
 def get_cliente(cliente_id: str, request: Request) -> Cliente:
     repository = _core_repository(request)
+    require_admin_permission(request, "clientes", "ler", cliente_id)
     cliente = repository.get_cliente(cliente_id)
     if cliente is None:
         raise HTTPException(
@@ -91,6 +94,12 @@ def create_dispositivo(dispositivo: Dispositivo, request: Request) -> Dispositiv
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="cliente_id invalido",
         )
+    require_admin_permission(
+        request,
+        "dispositivos",
+        "criar",
+        dispositivo.cliente_id,
+    )
     repository.save_dispositivo(dispositivo)
     return dispositivo
 
@@ -104,6 +113,7 @@ def list_dispositivos(
     bloqueado: bool | None = None,
 ) -> list[Dispositivo]:
     repository = _core_repository(request)
+    _require_scoped_list_permission(request, "dispositivos", "ler", cliente_id)
     return repository.list_dispositivos(
         limit=limit,
         offset=offset,
@@ -115,11 +125,13 @@ def list_dispositivos(
 @router.get("/dispositivos/{dispositivo_id}/eventos")
 def get_dispositivo_events(dispositivo_id: str, request: Request) -> dict[str, list[dict]]:
     repository = _core_repository(request)
-    if repository.get_dispositivo(dispositivo_id) is None:
+    dispositivo = repository.get_dispositivo(dispositivo_id)
+    if dispositivo is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="dispositivo nao encontrado",
         )
+    require_admin_permission(request, "logs", "ler", dispositivo.cliente_id)
     return repository.get_player_events_for_device(dispositivo_id)
 
 
@@ -132,6 +144,7 @@ def get_dispositivo(dispositivo_id: str, request: Request) -> Dispositivo:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="dispositivo nao encontrado",
         )
+    require_admin_permission(request, "dispositivos", "ler", dispositivo.cliente_id)
     return dispositivo
 
 
@@ -147,6 +160,7 @@ def create_midia(midia: Midia, request: Request) -> Midia:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="cliente_id invalido",
         )
+    require_admin_permission(request, "midias", "criar", midia.cliente_id)
     repository.save_midia(midia)
     return midia
 
@@ -160,6 +174,7 @@ def list_midias(
     ativo: bool | None = None,
 ) -> list[Midia]:
     repository = _core_repository(request)
+    _require_scoped_list_permission(request, "midias", "ler", cliente_id)
     return repository.list_midias(
         limit=limit,
         offset=offset,
@@ -186,6 +201,7 @@ async def upload_midia(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="cliente_id invalido",
         )
+    require_admin_permission(request, "midias", "upload", cliente_id)
 
     suffix = Path(arquivo.filename or "").suffix.lower()
     if not _is_allowed_upload(tipo, suffix, arquivo.content_type):
@@ -242,6 +258,7 @@ def get_midia(midia_id: str, request: Request) -> Midia:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="midia nao encontrada",
         )
+    require_admin_permission(request, "midias", "ler", midia.cliente_id)
     return midia
 
 
@@ -257,6 +274,7 @@ def create_playlist(playlist: Playlist, request: Request) -> Playlist:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="cliente_id invalido",
         )
+    require_admin_permission(request, "playlists", "criar", playlist.cliente_id)
     repository.save_playlist(playlist)
     return playlist
 
@@ -270,6 +288,7 @@ def list_playlists(
     ativa: bool | None = None,
 ) -> list[Playlist]:
     repository = _core_repository(request)
+    _require_scoped_list_permission(request, "playlists", "ler", cliente_id)
     return repository.list_playlists(
         limit=limit,
         offset=offset,
@@ -287,6 +306,7 @@ def get_playlist(playlist_id: str, request: Request) -> Playlist:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="playlist nao encontrada",
         )
+    require_admin_permission(request, "playlists", "ler", playlist.cliente_id)
     return playlist
 
 
@@ -307,6 +327,7 @@ def add_midia_to_playlist(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="playlist nao encontrada",
         )
+    require_admin_permission(request, "playlists", "editar", playlist.cliente_id)
     midia = repository.get_midia(payload.midia_id)
     if midia is None:
         raise HTTPException(
@@ -352,3 +373,19 @@ def _core_repository(request: Request):
             detail="repository indisponivel",
         )
     return repository
+
+
+def _require_scoped_list_permission(
+    request: Request,
+    recurso: str,
+    acao: str,
+    cliente_id: str | None,
+) -> None:
+    session = getattr(request.state, "admin_session", None)
+    if session is not None and session.perfil not in {"admin", "super_admin"}:
+        if cliente_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="cliente_id obrigatorio",
+            )
+    require_admin_permission(request, recurso, acao, cliente_id)

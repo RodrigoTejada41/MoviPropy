@@ -96,6 +96,95 @@ class PostgresAuthRepository:
             expires_at=row[3],
         )
 
+    def link_user_cliente(
+        self,
+        user_id: str,
+        cliente_id: str,
+        ativo: bool = True,
+    ) -> None:
+        with psycopg.connect(self._database_url) as connection:
+            connection.execute(
+                """
+                INSERT INTO usuarios_clientes (usuario_id, cliente_id, ativo)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (usuario_id, cliente_id)
+                DO UPDATE SET ativo = EXCLUDED.ativo
+                """,
+                (user_id, cliente_id, ativo),
+            )
+            connection.commit()
+
+    def grant_permission(
+        self,
+        user_id: str,
+        recurso: str,
+        acao: str,
+        cliente_id: str | None = None,
+        permitido: bool = True,
+    ) -> str:
+        permission_id = f"perm-{uuid4().hex}"
+        with psycopg.connect(self._database_url) as connection:
+            connection.execute(
+                """
+                INSERT INTO permissoes (
+                    id,
+                    usuario_id,
+                    cliente_id,
+                    recurso,
+                    acao,
+                    permitido
+                )
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """,
+                (permission_id, user_id, cliente_id, recurso, acao, permitido),
+            )
+            connection.commit()
+        return permission_id
+
+    def has_cliente_access(self, user_id: str, cliente_id: str) -> bool:
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                """
+                SELECT 1
+                FROM usuarios_clientes
+                WHERE usuario_id = %s
+                  AND cliente_id = %s
+                  AND ativo = TRUE
+                """,
+                (user_id, cliente_id),
+            ).fetchone()
+        return row is not None
+
+    def has_permission(
+        self,
+        user_id: str,
+        recurso: str,
+        acao: str,
+        cliente_id: str | None = None,
+    ) -> bool:
+        if cliente_id is None:
+            params = (user_id, recurso, acao)
+            clause = "cliente_id IS NULL"
+        else:
+            params = (user_id, recurso, acao, cliente_id)
+            clause = "(cliente_id = %s OR cliente_id IS NULL)"
+
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                f"""
+                SELECT 1
+                FROM permissoes
+                WHERE usuario_id = %s
+                  AND recurso = %s
+                  AND acao = %s
+                  AND permitido = TRUE
+                  AND {clause}
+                LIMIT 1
+                """,
+                params,
+            ).fetchone()
+        return row is not None
+
     def ensure_default_admin(self, email: str, password: str) -> None:
         if self.get_user_by_email(email) is not None:
             return

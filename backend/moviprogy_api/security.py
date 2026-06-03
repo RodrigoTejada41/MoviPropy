@@ -5,9 +5,12 @@ from hmac import compare_digest
 
 from fastapi import Header, HTTPException, Request, status
 
+from moviprogy_api.domain.auth import AdminSession
+
 
 PASSWORD_HASH_ALGORITHM = "pbkdf2_sha256"
 PASSWORD_HASH_ITERATIONS = 240_000
+_FULL_ACCESS_PROFILES = {"admin", "super_admin"}
 
 
 def require_admin_token(authorization: str | None = Header(default=None)) -> None:
@@ -35,12 +38,12 @@ def require_admin_token(authorization: str | None = Header(default=None)) -> Non
 def require_admin_user(
     request: Request,
     authorization: str | None = Header(default=None),
-) -> None:
+) -> AdminSession | None:
     token = _require_bearer_token(authorization)
     repository = getattr(request.app.state, "auth_repository", None)
     if repository is None:
         require_admin_token(authorization)
-        return
+        return None
 
     session = repository.get_session(hash_token(token))
     if session is None:
@@ -48,7 +51,47 @@ def require_admin_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="token invalido",
         )
-    if not session.ativo or session.perfil != "admin":
+    if not session.ativo:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="permissao insuficiente",
+        )
+    request.state.admin_session = session
+    return session
+
+
+def require_admin_permission(
+    request: Request,
+    recurso: str,
+    acao: str,
+    cliente_id: str | None = None,
+) -> None:
+    session = getattr(request.state, "admin_session", None)
+    if session is None:
+        if getattr(request.app.state, "auth_repository", None) is None:
+            return
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="permissao insuficiente",
+        )
+    if session.perfil in _FULL_ACCESS_PROFILES:
+        return
+
+    repository = getattr(request.app.state, "auth_repository", None)
+    if repository is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="permissao insuficiente",
+        )
+    if cliente_id is not None and not repository.has_cliente_access(
+        session.user_id,
+        cliente_id,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="permissao insuficiente",
+        )
+    if not repository.has_permission(session.user_id, recurso, acao, cliente_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="permissao insuficiente",

@@ -675,3 +675,33 @@ Consequencias:
 - Ainda falta retorno de `total` para paginacao completa no painel.
 - RBAC granular por cliente/acao continua pendente.
 - Indices devem ser revisitados quando houver carga real.
+
+---
+
+### ADR-024 - RBAC granular inicial por cliente e acao
+
+Status: Aprovada
+
+Data: 2026-06-03
+
+Contexto:
+- O backend ja possui login administrativo e sessao Bearer.
+- O perfil unico `admin` nao atende isolamento multi-cliente.
+- Rotas administrativas manipulam clientes, dispositivos, midias, playlists e logs.
+
+Decisao:
+- Manter o perfil legado `admin` com acesso total para compatibilidade local.
+- Criar `usuarios_clientes` para vincular usuario a cliente.
+- Criar `permissoes` com `recurso`, `acao` e `cliente_id` opcional.
+- Exigir permissao granular nas rotas administrativas.
+- Bloquear usuario escopado sem `cliente_id` em listagens de dados por cliente.
+
+Motivo:
+- Reduz risco de vazamento entre clientes.
+- Prepara perfis como `admin_cliente`, `operador`, `suporte` e `visualizador`.
+- Mantem compatibilidade com o admin seed atual.
+
+Consequencias:
+- Auditoria de acessos ainda precisa ser implementada.
+- Tela de gestao de usuarios/permissoes ainda nao existe.
+- Retorno de listagens para usuario escopado exige filtro por cliente.

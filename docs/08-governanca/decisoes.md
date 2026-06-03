@@ -20,7 +20,7 @@ Impacto:
 - Frontend.
 - Storage externo.
 - Deploy.
-- RBAC granular por cliente/acao.
+- Auditoria de acessos administrativos.
 
 ## D-002 - Login administrativo antes de Google Drive
 
@@ -34,8 +34,9 @@ Motivo:
 - Rotas administrativas nao podem depender apenas de token global.
 
 Impacto:
-- `/api/admin/*` passa a exigir usuario com perfil `admin`.
+- `/api/admin/*` passa a exigir usuario autenticado.
 - `ADMIN_API_TOKEN` fica como fallback legado local.
+- RBAC granular foi definido depois na D-011.
 
 ## D-003 - Manifesto real do player
 
@@ -146,7 +147,7 @@ Motivo:
 Impacto:
 - Rotas ficam protegidas por sessao admin.
 - Paginacao e filtros foram definidos depois na D-010.
-- Isolamento granular por cliente segue pendente.
+- Isolamento granular por cliente foi definido depois na D-011.
 
 ## D-010 - Paginacao e filtros administrativos
 
@@ -166,3 +167,22 @@ Impacto:
 - Midias filtram por `cliente_id` e `ativo`.
 - Playlists filtram por `cliente_id` e `ativa`.
 - `total` para paginacao completa segue pendente.
+
+## D-011 - RBAC granular por cliente e acao
+
+Status: aprovado.
+
+Decisao:
+- Manter perfil legado `admin` com acesso total.
+- Validar perfis escopados por vinculo de cliente e permissao `recurso:acao`.
+- Criar tabelas `usuarios_clientes` e `permissoes`.
+
+Motivo:
+- Garantir isolamento multi-cliente.
+- Preparar perfis operacionais antes do frontend.
+
+Impacto:
+- Usuario escopado sem permissao recebe 403.
+- Usuario escopado sem vinculo com cliente recebe 403.
+- Listagens por dados de cliente exigem `cliente_id` para usuario escopado.
+- Auditoria de acessos segue pendente.

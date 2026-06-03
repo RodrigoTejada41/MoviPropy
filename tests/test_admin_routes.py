@@ -126,10 +126,19 @@ class FakeCoreRepository:
 
 
 class FakeAuthRepository:
-    def __init__(self, perfil: str = "admin") -> None:
+    def __init__(
+        self,
+        perfil: str = "admin",
+        user_id: str = "user-001",
+        clientes: set[str] | None = None,
+        permissions: set[tuple[str, str, str | None]] | None = None,
+    ) -> None:
+        self.user_id = user_id
+        self.clientes = clientes or set()
+        self.permissions = permissions or set()
         self.sessions = {
             hash_token(ADMIN_TOKEN): AdminSession(
-                user_id="user-001",
+                user_id=user_id,
                 perfil=perfil,
                 ativo=True,
             )
@@ -138,11 +147,37 @@ class FakeAuthRepository:
     def get_session(self, token_hash: str) -> AdminSession | None:
         return self.sessions.get(token_hash)
 
+    def has_cliente_access(self, user_id: str, cliente_id: str) -> bool:
+        return user_id == self.user_id and cliente_id in self.clientes
 
-def _create_test_app(perfil: str = "admin"):
+    def has_permission(
+        self,
+        user_id: str,
+        recurso: str,
+        acao: str,
+        cliente_id: str | None = None,
+    ) -> bool:
+        if user_id != self.user_id:
+            return False
+        return (recurso, acao, cliente_id) in self.permissions or (
+            recurso,
+            acao,
+            None,
+        ) in self.permissions
+
+
+def _create_test_app(
+    perfil: str = "admin",
+    clientes: set[str] | None = None,
+    permissions: set[tuple[str, str, str | None]] | None = None,
+):
     app = create_app()
     app.state.core_repository = FakeCoreRepository()
-    app.state.auth_repository = FakeAuthRepository(perfil=perfil)
+    app.state.auth_repository = FakeAuthRepository(
+        perfil=perfil,
+        clientes=clientes,
+        permissions=permissions,
+    )
     return app
 
 
@@ -181,6 +216,93 @@ def test_admin_rejects_non_admin_user():
         "/api/admin/clientes",
         headers=ADMIN_HEADERS,
         json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {"detail": "permissao insuficiente"}
+
+
+def test_admin_allows_scoped_user_with_cliente_and_permission():
+    app = _create_test_app(
+        perfil="admin_cliente",
+        clientes={"cliente-001"},
+        permissions={("midias", "criar", "cliente-001")},
+    )
+    client = TestClient(app)
+    app.state.core_repository.save_cliente(
+        Cliente(id="cliente-001", nome="Cliente Um")
+    )
+
+    response = client.post(
+        "/api/admin/midias",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "midia-001",
+            "cliente_id": "cliente-001",
+            "nome": "Video Entrada",
+            "tipo": "video",
+            "caminho": "media/video.mp4",
+            "tamanho": 1024,
+            "sha256": "a" * 64,
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["id"] == "midia-001"
+
+
+def test_admin_blocks_scoped_user_for_unlinked_cliente():
+    app = _create_test_app(
+        perfil="admin_cliente",
+        clientes={"cliente-001"},
+        permissions={("midias", "criar", "cliente-002")},
+    )
+    client = TestClient(app)
+    app.state.core_repository.save_cliente(
+        Cliente(id="cliente-002", nome="Cliente Dois")
+    )
+
+    response = client.post(
+        "/api/admin/midias",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "midia-001",
+            "cliente_id": "cliente-002",
+            "nome": "Video Entrada",
+            "tipo": "video",
+            "caminho": "media/video.mp4",
+            "tamanho": 1024,
+            "sha256": "a" * 64,
+        },
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {"detail": "permissao insuficiente"}
+
+
+def test_admin_blocks_scoped_user_without_action_permission():
+    app = _create_test_app(
+        perfil="admin_cliente",
+        clientes={"cliente-001"},
+        permissions={("midias", "ler", "cliente-001")},
+    )
+    client = TestClient(app)
+    app.state.core_repository.save_cliente(
+        Cliente(id="cliente-001", nome="Cliente Um")
+    )
+
+    response = client.post(
+        "/api/admin/midias",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "midia-001",
+            "cliente_id": "cliente-001",
+            "nome": "Video Entrada",
+            "tipo": "video",
+            "caminho": "media/video.mp4",
+            "tamanho": 1024,
+            "sha256": "a" * 64,
+        },
     )
 
     assert response.status_code == 403

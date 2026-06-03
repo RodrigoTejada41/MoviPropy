@@ -38,7 +38,9 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Autenticacao minima por `ADMIN_API_TOKEN` criada como fallback local legado.
 - Login administrativo criado em `POST /api/auth/login`.
 - RBAC minimo criado para `/api/admin/*` com perfil `admin`.
+- RBAC granular inicial criado com vinculo usuario/cliente e permissoes `recurso:acao`.
 - Migration de auth criada para `usuarios` e `admin_sessions`.
+- Migration RBAC criada para `usuarios_clientes` e `permissoes`.
 - Simulacao do player persiste sessoes no PostgreSQL quando executada via Docker.
 - Ativacao do player usa `codigo_ativacao` real do banco quando disponivel.
 - Manifesto do player usa `playlist_atual_id` do dispositivo e midias vinculadas quando disponivel.
@@ -106,7 +108,9 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Rotas administrativas atuais exigem sessao de usuario admin quando `auth_repository` esta disponivel.
 - Listagens administrativas retornam lista simples paginada, sem envelope com total.
 - `ADMIN_API_TOKEN` permanece apenas como fallback legado sem banco.
-- RBAC atual diferencia apenas perfil `admin`; ainda falta permissao granular por cliente/acao.
+- Perfil legado `admin` possui acesso total.
+- Perfis escopados dependem de vinculo com cliente e permissao por recurso/acao.
+- Auditoria de acessos RBAC ainda esta pendente.
 - Rotas de midias/playlists ainda sao CRUD inicial com upload fisico local para midias.
 - Manifesto real depende de `dispositivos.playlist_atual_id`, playlist ativa e midias vinculadas.
 - Download controlado atual serve arquivo local de `MOVIPROGY_MEDIA_DIR`.
@@ -114,4 +118,4 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 
 ## Proximo passo recomendado
 
-Focar no backend: implementar RBAC granular por cliente/acao ou iniciar frontend administrativo.
+Focar no backend: adicionar auditoria de acessos administrativos ou iniciar frontend administrativo.

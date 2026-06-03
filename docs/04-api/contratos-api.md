@@ -44,16 +44,16 @@ Finalidade: cadastrar cliente.
 Quem usa: painel administrativo.
 Parametros: id, nome, documento, ativo.
 Resposta: cliente criado.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular ainda pendente.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
+Limite: gestao de usuarios/permissoes via painel ainda pendente.
 
 ### GET /api/admin/clientes/{cliente_id}
 
 Finalidade: obter cliente por id.
 Quem usa: painel administrativo.
 Resposta: cliente encontrado ou 404.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular ainda pendente.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
+Limite: gestao de usuarios/permissoes via painel ainda pendente.
 
 ### GET /api/admin/clientes
 
@@ -61,8 +61,8 @@ Finalidade: listar clientes.
 Quem usa: painel administrativo.
 Query: `limit`, `offset`, `ativo`.
 Resposta: lista de clientes.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular e retorno de `total` ainda pendentes.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
+Limite: retorno de `total` ainda pendente.
 
 ## Dispositivos
 
@@ -72,16 +72,16 @@ Finalidade: cadastrar dispositivo administrativo vinculado a cliente.
 Quem usa: painel administrativo.
 Parametros: id, cliente_id, nome, codigo_ativacao, bloqueado, playlist_atual_id.
 Resposta: dispositivo criado.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular ainda pendente.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
+Limite: gestao de usuarios/permissoes via painel ainda pendente.
 
 ### GET /api/admin/dispositivos/{dispositivo_id}
 
 Finalidade: obter dispositivo por id.
 Quem usa: painel administrativo.
 Resposta: dispositivo encontrado ou 404.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular ainda pendente.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
+Limite: gestao de usuarios/permissoes via painel ainda pendente.
 
 ### GET /api/admin/dispositivos
 
@@ -89,16 +89,16 @@ Finalidade: listar dispositivos.
 Quem usa: painel administrativo.
 Query: `limit`, `offset`, `cliente_id`, `bloqueado`.
 Resposta: lista de dispositivos.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular e retorno de `total` ainda pendentes.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
+Limite: retorno de `total` ainda pendente.
 
 ### GET /api/admin/dispositivos/{dispositivo_id}/eventos
 
 Finalidade: consultar status, logs e confirmacoes de sincronizacao do dispositivo.
 Quem usa: painel administrativo.
 Resposta: status, logs e sync.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular, filtro por periodo e paginacao ainda pendentes.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
+Limite: filtro por periodo e paginacao de eventos ainda pendentes.
 
 ### POST /api/dispositivos
 
@@ -132,7 +132,7 @@ Finalidade: cadastrar metadados de midia.
 Quem usa: painel administrativo.
 Parametros: id, cliente_id, nome, tipo, caminho, tamanho, sha256, duracao_segundos, ativo.
 Resposta: midia criada.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 Regra: `cliente_id` precisa existir.
 
 ### POST /api/admin/midias/upload
@@ -141,7 +141,7 @@ Finalidade: enviar arquivo fisico e registrar metadados da midia.
 Quem usa: painel administrativo.
 Parametros: cliente_id, tipo, duracao_segundos opcional, arquivo multipart.
 Resposta: midia criada.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 Regra: cliente precisa existir; extensao, MIME type e tamanho sao validados.
 Storage: arquivo local sob `MOVIPROGY_MEDIA_DIR`.
 
@@ -150,7 +150,7 @@ Storage: arquivo local sob `MOVIPROGY_MEDIA_DIR`.
 Finalidade: obter midia por id.
 Quem usa: painel administrativo.
 Resposta: midia encontrada ou 404.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 
 ### GET /api/admin/midias
 
@@ -158,8 +158,8 @@ Finalidade: listar midias.
 Quem usa: painel administrativo.
 Query: `limit`, `offset`, `cliente_id`, `ativo`.
 Resposta: lista de midias.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular e retorno de `total` ainda pendentes.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
+Limite: retorno de `total` ainda pendente.
 
 ## Playlists
 
@@ -169,7 +169,7 @@ Finalidade: cadastrar playlist.
 Quem usa: painel administrativo.
 Parametros: id, cliente_id, nome, versao, ativa.
 Resposta: playlist criada.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 Regra: `cliente_id` precisa existir.
 
 ### GET /api/admin/playlists/{playlist_id}
@@ -177,7 +177,7 @@ Regra: `cliente_id` precisa existir.
 Finalidade: obter playlist por id.
 Quem usa: painel administrativo.
 Resposta: playlist encontrada ou 404.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 
 ### GET /api/admin/playlists
 
@@ -185,8 +185,8 @@ Finalidade: listar playlists.
 Quem usa: painel administrativo.
 Query: `limit`, `offset`, `cliente_id`, `ativa`.
 Resposta: lista de playlists.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular e retorno de `total` ainda pendentes.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
+Limite: retorno de `total` ainda pendente.
 
 ### POST /api/admin/playlists/{playlist_id}/midias
 
@@ -194,7 +194,7 @@ Finalidade: vincular midia a playlist.
 Quem usa: painel administrativo.
 Parametros: midia_id, ordem, duracao_override.
 Resposta: vinculo criado.
-Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 Regra: midia e playlist devem pertencer ao mesmo cliente.
 
 ### GET /api/player/playlist

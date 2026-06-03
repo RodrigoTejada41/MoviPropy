@@ -84,6 +84,7 @@ Limite:
 - Rotas administrativas existem para clientes, dispositivos, midias e playlists.
 - Vinculo de midia em playlist existe via rota administrativa.
 - Tabelas `usuarios` e `admin_sessions` implementam login administrativo inicial.
+- Tabelas `usuarios_clientes` e `permissoes` implementam RBAC granular inicial.
 
 ## Integracao Google Drive planejada
 
@@ -171,11 +172,12 @@ Persistencia atual:
 
 Seguranca:
 - Exigem `Authorization: Bearer <access_token>` retornado por `POST /api/auth/login`.
-- Usuario precisa ter perfil `admin`.
+- Perfil legado `admin` possui acesso total.
+- Perfis escopados precisam de vinculo em `usuarios_clientes` e permissao em `permissoes`.
 - `ADMIN_API_TOKEN` existe apenas como fallback local quando `auth_repository` nao esta disponivel.
 
 Limite:
-- RBAC atual ainda nao possui permissao granular por cliente/acao.
+- Auditoria de acessos administrativos ainda nao foi implementada.
 - Sessao admin usa hash SHA-256 do token no banco.
 - Senha usa PBKDF2-HMAC-SHA256 com salt individual.
 
@@ -202,6 +204,8 @@ Regras de negocio atuais:
 - Token real e retornado apenas no login.
 - Banco armazena somente hash do token.
 - Senha nunca deve ser salva em texto puro.
+- Permissoes usam formato `recurso:acao`, com escopo opcional por `cliente_id`.
+- Usuario escopado sem `cliente_id` em listagens de dados por cliente recebe 403.
 
 ## Simulacao local
 

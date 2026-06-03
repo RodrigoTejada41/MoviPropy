@@ -8,14 +8,17 @@ Definir o controle de acesso definitivo do painel e da API administrativa.
 
 - Login administrativo existe.
 - Sessao admin usa Bearer token.
-- `/api/admin/*` exige perfil `admin`.
+- `/api/admin/*` exige usuario autenticado.
+- Perfil legado `admin` possui acesso total.
+- Perfis escopados validam vinculo por cliente e permissao `recurso:acao`.
+- Tabelas `usuarios_clientes` e `permissoes` existem.
 - `ADMIN_API_TOKEN` e fallback local sem repository de auth.
 
 ## Limite atual
 
-- Ainda nao existe permissao granular por cliente.
-- Ainda nao existe perfil operacional.
 - Ainda nao existe auditoria completa.
+- Ainda nao existe tela administrativa para manter usuarios, vinculos e permissoes.
+- Ainda nao existe seed automatico de perfis operacionais.
 
 ## Perfis planejados
 
@@ -107,6 +110,8 @@ Acoes:
 
 ### usuarios_clientes
 
+Status: implementado.
+
 Campos:
 - usuario_id.
 - cliente_id.
@@ -114,6 +119,8 @@ Campos:
 - criado_em.
 
 ### permissoes
+
+Status: implementado.
 
 Campos:
 - id.
@@ -124,6 +131,8 @@ Campos:
 - permitido.
 
 ### auditoria_acessos
+
+Status: pendente.
 
 Campos:
 - id.
@@ -138,10 +147,9 @@ Campos:
 
 ## Criterios de aceite
 
-- Usuario sem permissao recebe 403.
-- Usuario sem cliente vinculado nao enxerga dados do cliente.
+- Usuario sem permissao recebe 403. Implementado.
+- Usuario sem cliente vinculado nao enxerga dados do cliente. Implementado nas rotas administrativas com `cliente_id`.
 - Super Admin enxerga todos os clientes.
 - Admin Cliente nao altera configuracao global.
 - Operador nao gerencia usuarios.
 - Visualizador nao executa POST/PATCH/DELETE.
-
