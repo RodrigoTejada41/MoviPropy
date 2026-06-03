@@ -1,0 +1,22 @@
+[project]
+name = "moviprogy"
+version = "0.1.0"
+description = "Sistema Online de Midia Indoor com Sincronizacao Offline"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "psycopg[binary]",
+    "uvicorn",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+
+[tool.pytest.ini_options]
+pythonpath = ["backend"]
+testpaths = ["tests"]
