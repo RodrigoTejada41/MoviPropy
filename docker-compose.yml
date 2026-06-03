@@ -32,6 +32,7 @@ services:
       MOVIPROGY_ADMIN_PASSWORD: ${MOVIPROGY_ADMIN_PASSWORD:-moviprogy_admin_dev_password}
       MOVIPROGY_DATA_DIR: /app/runtime/data
       MOVIPROGY_MEDIA_DIR: /app/runtime/media
+      MOVIPROGY_MAX_UPLOAD_BYTES: ${MOVIPROGY_MAX_UPLOAD_BYTES:-536870912}
       MOVIPROGY_TMP_DIR: /app/runtime/tmp
     volumes:
       - ./runtime/data:/app/runtime/data

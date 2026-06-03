@@ -1,3 +1,7 @@
+import hashlib
+import errno
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from moviprogy_api.domain.auth import AdminSession
@@ -257,6 +261,117 @@ def test_admin_rejects_midia_for_missing_cliente():
 
     assert response.status_code == 400
     assert response.json() == {"detail": "cliente_id invalido"}
+
+
+def test_admin_uploads_valid_video_midia(tmp_path):
+    app = _create_test_app()
+    app.state.media_dir = tmp_path / "media"
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+    content = b"video-content"
+
+    response = client.post(
+        "/api/admin/midias/upload",
+        headers=ADMIN_HEADERS,
+        data={
+            "cliente_id": "cliente-001",
+            "tipo": "video",
+            "duracao_segundos": "30",
+        },
+        files={"arquivo": ("entrada.mp4", content, "video/mp4")},
+    )
+
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["cliente_id"] == "cliente-001"
+    assert payload["nome"] == "entrada.mp4"
+    assert payload["tipo"] == "video"
+    assert payload["tamanho"] == len(content)
+    assert payload["sha256"] == hashlib.sha256(content).hexdigest()
+    saved = app.state.media_dir / payload["caminho"]
+    assert saved.read_bytes() == content
+    assert app.state.core_repository.get_midia(payload["id"]) == Midia(**payload)
+
+
+def test_admin_upload_rejects_invalid_file_type(tmp_path):
+    app = _create_test_app()
+    app.state.media_dir = tmp_path / "media"
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+
+    response = client.post(
+        "/api/admin/midias/upload",
+        headers=ADMIN_HEADERS,
+        data={"cliente_id": "cliente-001", "tipo": "video"},
+        files={"arquivo": ("entrada.exe", b"invalid", "application/octet-stream")},
+    )
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "arquivo invalido"}
+    assert app.state.core_repository.midias == {}
+
+
+def test_admin_upload_rejects_file_over_size_limit(tmp_path):
+    app = _create_test_app()
+    app.state.media_dir = tmp_path / "media"
+    app.state.max_upload_bytes = 4
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+
+    response = client.post(
+        "/api/admin/midias/upload",
+        headers=ADMIN_HEADERS,
+        data={"cliente_id": "cliente-001", "tipo": "video"},
+        files={"arquivo": ("entrada.mp4", b"12345", "video/mp4")},
+    )
+
+    assert response.status_code == 413
+    assert response.json() == {"detail": "arquivo excede tamanho maximo"}
+    assert app.state.core_repository.midias == {}
+    assert not any((tmp_path / "media").rglob("*"))
+
+
+def test_admin_upload_handles_cross_device_tmp_and_media_dirs(
+    tmp_path,
+    monkeypatch,
+):
+    app = _create_test_app()
+    app.state.media_dir = tmp_path / "media"
+    app.state.tmp_dir = tmp_path / "tmp"
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+
+    def fail_replace(self, target):
+        raise OSError(errno.EXDEV, "Invalid cross-device link")
+
+    monkeypatch.setattr(Path, "replace", fail_replace)
+
+    response = client.post(
+        "/api/admin/midias/upload",
+        headers=ADMIN_HEADERS,
+        data={"cliente_id": "cliente-001", "tipo": "video"},
+        files={"arquivo": ("entrada.mp4", b"video", "video/mp4")},
+    )
+
+    assert response.status_code == 201
+    saved = app.state.media_dir / response.json()["caminho"]
+    assert saved.read_bytes() == b"video"
 
 
 def test_admin_creates_and_gets_playlist():

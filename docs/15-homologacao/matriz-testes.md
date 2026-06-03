@@ -16,7 +16,7 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Playlists | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Vinculo playlist/midia | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Manifesto player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
-| Upload midia | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
+| Upload midia | Sim | Pendente | Sim | Sim | Pendente | Implementado parcial |
 | Download player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Status player | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
 | Logs player | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |

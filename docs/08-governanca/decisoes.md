@@ -18,10 +18,9 @@ Impacto:
 ## Pendentes
 
 - Frontend.
-- Storage.
+- Storage externo.
 - Deploy.
 - RBAC granular por cliente/acao.
-- Upload fisico de midias.
 
 ## D-002 - Login administrativo antes de Google Drive
 
@@ -84,4 +83,20 @@ Motivo:
 
 Impacto:
 - `GET /api/player/midias/{midia_id}/download` valida token e playlist atual.
-- Proximo passo de storage e upload fisico.
+- Upload fisico foi definido depois na D-006.
+
+## D-006 - Upload fisico local de midias
+
+Status: aprovado.
+
+Decisao:
+- Admin pode enviar arquivo por `POST /api/admin/midias/upload`.
+- Backend gera caminho relativo e calcula hash SHA-256.
+
+Motivo:
+- Fechar fluxo minimo upload -> playlist -> download.
+- Evitar caminho fisico informado pelo usuario.
+
+Impacto:
+- Arquivos ficam sob `MOVIPROGY_MEDIA_DIR`.
+- Storage externo continua pendente para escala.

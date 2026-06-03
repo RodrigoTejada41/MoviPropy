@@ -7,7 +7,7 @@ Definir como arquivos de midia serao recebidos, armazenados, validados e entregu
 ## Estado atual
 
 - Metadados de midia existem no banco.
-- Upload fisico ainda nao existe.
+- Upload fisico local existe para admin.
 - Download controlado local existe para o player.
 - Google Drive esta documentado como storage planejado.
 
@@ -42,7 +42,7 @@ Regras:
 
 ## Upload
 
-Endpoint planejado:
+Endpoint implementado:
 - `POST /api/admin/midias/upload`
 
 Campos:
@@ -59,6 +59,7 @@ Validacoes:
 - Tamanho maximo.
 - Hash SHA-256 calculado pelo backend.
 - Arquivo salvo primeiro em pasta temporaria.
+- Caminho relativo gerado pelo servidor.
 
 Tipos permitidos iniciais:
 - Video: `.mp4`
@@ -73,6 +74,14 @@ Fluxo:
 6. Mover para `runtime/media`.
 7. Registrar midia no banco.
 8. Retornar metadados.
+
+Implementacao atual:
+- Usa `MOVIPROGY_MEDIA_DIR`.
+- Usa `MOVIPROGY_TMP_DIR`.
+- Usa `MOVIPROGY_MAX_UPLOAD_BYTES`, default 512 MB.
+- Exige `Authorization: Bearer <access_token>` de usuario admin.
+- Salva em `clientes/{cliente_id}/midias/{midia_id}/original.ext`.
+- Retorna modelo `Midia`.
 
 ## Download controlado
 

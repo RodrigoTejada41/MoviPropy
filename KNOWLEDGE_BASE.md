@@ -44,7 +44,7 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 - Docker Compose executa o backend em `moviprogy-api`.
 - Docker Compose executa PostgreSQL em `moviprogy-db`.
 - Dados de runtime do container devem usar bind mounts em `runtime/` e `logs/` dentro do projeto.
-- Storage ainda nao definido.
+- Storage local inicial definido em `MOVIPROGY_MEDIA_DIR`.
 - Google Drive esta documentado como opcao planejada de storage externo controlado pelo backend.
 - Player ainda nao definido.
 - Deploy ainda nao definido alem do container local.
@@ -128,7 +128,7 @@ Limite:
 - Manifesto demo ainda existe como fallback sem playlist real.
 - Sessoes do player usam PostgreSQL quando `DATABASE_URL` existe.
 - JSON e apenas fallback para execucao sem banco.
-- Upload fisico ainda nao existe.
+- Upload fisico local existe em `POST /api/admin/midias/upload`.
 - Download controlado implementado em `GET /api/player/midias/{midia_id}/download`.
 - Download so libera midia ativa vinculada a playlist atual ativa do dispositivo.
 
@@ -142,6 +142,8 @@ Persistencia atual:
 - Manifesto real e retornado quando dispositivo possui playlist atual ativa no banco.
 - Arquivos locais sao servidos a partir de `MOVIPROGY_MEDIA_DIR`.
 - Caminhos de midia sao resolvidos dentro do diretorio base para bloquear path traversal.
+- Upload local salva arquivos em `clientes/{cliente_id}/midias/{midia_id}/original.ext`.
+- Limite padrao de upload: `MOVIPROGY_MAX_UPLOAD_BYTES`, default 512 MB.
 
 ## Rotas administrativas atuais
 
@@ -150,6 +152,7 @@ Persistencia atual:
 - `POST /api/admin/dispositivos`
 - `GET /api/admin/dispositivos/{dispositivo_id}`
 - `POST /api/admin/midias`
+- `POST /api/admin/midias/upload`
 - `GET /api/admin/midias/{midia_id}`
 - `POST /api/admin/playlists`
 - `GET /api/admin/playlists/{playlist_id}`

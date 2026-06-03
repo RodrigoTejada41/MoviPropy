@@ -31,6 +31,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Rotas administrativas iniciais criadas para clientes e dispositivos.
 - Rotas administrativas criadas para midias e playlists.
 - Vinculo administrativo de midia em playlist criado.
+- Upload fisico local de midias criado em `POST /api/admin/midias/upload`.
 - Autenticacao minima por `ADMIN_API_TOKEN` criada como fallback local legado.
 - Login administrativo criado em `POST /api/auth/login`.
 - RBAC minimo criado para `/api/admin/*` com perfil `admin`.
@@ -97,11 +98,11 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Rotas administrativas atuais exigem sessao de usuario admin quando `auth_repository` esta disponivel.
 - `ADMIN_API_TOKEN` permanece apenas como fallback legado sem banco.
 - RBAC atual diferencia apenas perfil `admin`; ainda falta permissao granular por cliente/acao.
-- Rotas de midias/playlists ainda sao CRUD inicial; nao fazem upload fisico.
+- Rotas de midias/playlists ainda sao CRUD inicial com upload fisico local para midias.
 - Manifesto real depende de `dispositivos.playlist_atual_id`, playlist ativa e midias vinculadas.
 - Download controlado atual serve arquivo local de `MOVIPROGY_MEDIA_DIR`.
 - Google Drive esta documentado como plano, mas ainda nao possui codigo, migration, OAuth ou endpoints reais.
 
 ## Proximo passo recomendado
 
-Focar no backend: criar upload fisico de midias.
+Focar no backend: criar status/logs do player e confirmacao de sincronizacao.

@@ -522,6 +522,37 @@ Motivo:
 - Prepara o backend para Google Drive e storage externo controlado.
 
 Consequencias:
-- Upload fisico ainda precisa ser implementado.
+- Upload fisico local foi definido posteriormente na ADR-019.
 - Midias existentes precisam ter `caminho` relativo ao diretorio de midias.
 - Download nao deve aceitar caminho informado pelo player.
+
+---
+
+### ADR-019 - Upload fisico local de midias
+
+Status: Aprovada
+
+Data: 2026-06-03
+
+Contexto:
+- O cadastro de midias ja persistia metadados.
+- O player ja possui download controlado por backend.
+- Faltava entrada fisica dos arquivos no storage local.
+
+Decisao:
+- Criar `POST /api/admin/midias/upload`.
+- Exigir sessao administrativa.
+- Validar cliente, tipo, extensao, MIME type e tamanho.
+- Calcular SHA-256 no backend.
+- Salvar arquivo sob `MOVIPROGY_MEDIA_DIR`.
+- Gerar caminho relativo no servidor.
+
+Motivo:
+- Fecha o fluxo minimo upload -> playlist -> download.
+- Evita aceitar caminho fisico informado pelo usuario.
+- Mantem o storage local isolado por cliente e midia.
+
+Consequencias:
+- Upload local inicial nao substitui storage externo futuro.
+- Videos grandes ainda exigirao testes de performance e espaco em disco.
+- RBAC granular por cliente continua pendente antes de producao.

@@ -25,9 +25,19 @@ def _media_dir() -> Path:
     return Path(os.getenv("MOVIPROGY_MEDIA_DIR", "runtime/media"))
 
 
+def _tmp_dir() -> Path:
+    return Path(os.getenv("MOVIPROGY_TMP_DIR", "runtime/tmp"))
+
+
+def _max_upload_bytes() -> int:
+    return int(os.getenv("MOVIPROGY_MAX_UPLOAD_BYTES", str(512 * 1024 * 1024)))
+
+
 def create_app() -> FastAPI:
     app = FastAPI(title="MoviProgy API", version="0.1.0")
     app.state.media_dir = _media_dir()
+    app.state.tmp_dir = _tmp_dir()
+    app.state.max_upload_bytes = _max_upload_bytes()
     database_url = get_database_url()
     if database_url:
         run_migrations(database_url)

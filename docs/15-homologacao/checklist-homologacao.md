@@ -32,7 +32,7 @@ Definir criterios para aprovar uma versao.
 
 - Ativa dispositivo.
 - Consulta manifesto.
-- Baixa midias quando download existir.
+- Baixa midias pelo endpoint controlado.
 - Valida tamanho/hash.
 - Continua offline.
 - Nao troca playlist em download falho.

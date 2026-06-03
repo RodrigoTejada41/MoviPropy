@@ -116,7 +116,16 @@ Parametros: id, cliente_id, nome, tipo, caminho, tamanho, sha256, duracao_segund
 Resposta: midia criada.
 Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
 Regra: `cliente_id` precisa existir.
-Limite: nao faz upload fisico de arquivo.
+
+### POST /api/admin/midias/upload
+
+Finalidade: enviar arquivo fisico e registrar metadados da midia.
+Quem usa: painel administrativo.
+Parametros: cliente_id, tipo, duracao_segundos opcional, arquivo multipart.
+Resposta: midia criada.
+Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
+Regra: cliente precisa existir; extensao, MIME type e tamanho sao validados.
+Storage: arquivo local sob `MOVIPROGY_MEDIA_DIR`.
 
 ### GET /api/admin/midias/{midia_id}
 

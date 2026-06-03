@@ -83,6 +83,7 @@ Endpoints iniciais:
 - `POST /api/admin/dispositivos`
 - `GET /api/admin/dispositivos/{dispositivo_id}`
 - `POST /api/admin/midias`
+- `POST /api/admin/midias/upload`
 - `GET /api/admin/midias/{midia_id}`
 - `POST /api/admin/playlists`
 - `GET /api/admin/playlists/{playlist_id}`
@@ -100,6 +101,12 @@ Banco local:
 - Migration inicial: `backend/moviprogy_api/migrations/001_initial.sql`.
 - Migration core: `backend/moviprogy_api/migrations/002_core_domain.sql`.
 - Migration auth: `backend/moviprogy_api/migrations/003_auth.sql`.
+
+Upload local:
+- Arquivos ficam em `runtime/media`.
+- Temporarios ficam em `runtime/tmp`.
+- Limite padrao: 512 MB por arquivo.
+- Variavel: `MOVIPROGY_MAX_UPLOAD_BYTES`.
 
 Login admin local padrao do Compose:
 

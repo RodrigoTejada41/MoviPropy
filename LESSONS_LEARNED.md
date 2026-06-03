@@ -27,6 +27,36 @@ Status:
 
 ## Licoes registradas
 
+### ERR-011
+
+Data: 2026-06-03
+
+Descricao do Problema:
+- Upload fisico falhou no Docker com `Invalid cross-device link`.
+- O erro ocorreu ao mover arquivo de `runtime/tmp` para `runtime/media`.
+
+Causa Raiz:
+- `runtime/tmp` e `runtime/media` sao bind mounts separados no container.
+- `Path.replace` usa operacao atomica que nao funciona entre filesystems diferentes.
+
+Solucao Aplicada:
+- Trocar movimentacao final para `shutil.move`.
+- Adicionar teste de regressao simulando `errno.EXDEV`.
+
+Como Evitar no Futuro:
+- Nao usar `Path.replace`/`os.replace` para mover arquivos entre pastas que podem estar em volumes diferentes.
+- Fluxos com `MOVIPROGY_TMP_DIR` e `MOVIPROGY_MEDIA_DIR` devem aceitar mounts separados.
+- Validar upload real dentro do Docker apos alterar storage.
+
+Arquivos Afetados:
+- `backend/moviprogy_api/routes/admin.py`
+- `tests/test_admin_routes.py`
+- `LESSONS_LEARNED.md`
+
+Status: Resolvido
+
+---
+
 ### ERR-010
 
 Data: 2026-06-01
