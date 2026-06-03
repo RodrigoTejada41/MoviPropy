@@ -34,7 +34,7 @@ Regras:
 - Arquivos sao montados a partir de `playlist_midias`.
 - Apenas midias ativas entram no manifesto.
 - Manifesto demo permanece apenas como fallback local sem dados reais.
-- Ainda falta endpoint de download controlado para arquivos.
+- Download controlado existe em `GET /api/player/midias/{midia_id}/download`.
 
 ## Sincronizacao segura
 

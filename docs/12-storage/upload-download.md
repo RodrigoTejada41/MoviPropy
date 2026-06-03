@@ -8,7 +8,7 @@ Definir como arquivos de midia serao recebidos, armazenados, validados e entregu
 
 - Metadados de midia existem no banco.
 - Upload fisico ainda nao existe.
-- Download controlado ainda nao existe.
+- Download controlado local existe para o player.
 - Google Drive esta documentado como storage planejado.
 
 ## Principios
@@ -76,7 +76,7 @@ Fluxo:
 
 ## Download controlado
 
-Endpoint planejado:
+Endpoint implementado:
 - `GET /api/player/midias/{midia_id}/download`
 
 Autenticacao:
@@ -94,6 +94,14 @@ Resposta:
 - Headers de tamanho.
 - Content-Type correto.
 - Cache controlado.
+
+Implementacao atual:
+- Usa `MOVIPROGY_MEDIA_DIR`.
+- Valida token do dispositivo.
+- Valida se midia pertence a playlist atual ativa do dispositivo.
+- Valida se midia esta ativa.
+- Resolve caminho dentro do diretorio base.
+- Retorna 404 quando arquivo fisico nao existe.
 
 Regras:
 - Nao aceitar caminho por query string.
@@ -129,4 +137,3 @@ Regra:
 - Bloqueio para midia fora da playlist.
 - Bloqueio para dispositivo bloqueado.
 - Arquivo ausente retorna erro controlado.
-

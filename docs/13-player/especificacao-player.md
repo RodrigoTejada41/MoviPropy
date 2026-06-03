@@ -105,11 +105,13 @@ Atual:
 - `GET /api/player/playlist`.
 
 Pendente:
-- `GET /api/player/midias/{midia_id}/download`.
 - `POST /api/player/status`.
 - `POST /api/player/logs`.
 - `POST /api/player/sincronizacao/confirmar`.
 - `GET /api/player/atualizacao`.
+
+Implementado:
+- `GET /api/player/midias/{midia_id}/download`.
 
 ## Criterios de aceite
 
@@ -122,4 +124,3 @@ Pendente:
 - Opera offline.
 - Nao substitui playlist valida por download incompleto.
 - Recupera sincronizacao quando internet volta.
-

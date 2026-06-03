@@ -278,3 +278,15 @@ Quem usa: player.
 Resposta: redirect temporario ou stream controlado.
 Seguranca: token do dispositivo.
 Regra: nao expor credenciais Google ao player.
+
+Implementacao atual:
+- Rota: `GET /api/player/midias/{midia_id}/download`
+- Autenticacao: `Authorization: Bearer <token>`
+- Storage: arquivo local sob `MOVIPROGY_MEDIA_DIR`
+- Retorno: stream de arquivo via backend
+
+Regras:
+- Midia precisa estar na playlist atual ativa do dispositivo.
+- Midia precisa estar ativa.
+- Caminho fisico e resolvido dentro do diretorio base.
+- Nao aceita caminho por query string.

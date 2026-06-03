@@ -38,6 +38,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Simulacao do player persiste sessoes no PostgreSQL quando executada via Docker.
 - Ativacao do player usa `codigo_ativacao` real do banco quando disponivel.
 - Manifesto do player usa `playlist_atual_id` do dispositivo e midias vinculadas quando disponivel.
+- Download controlado de midia para player criado em `GET /api/player/midias/{midia_id}/download`.
 - Script de simulacao do player criado.
 - Escopo tecnico da integracao Google Drive documentado.
 - Especificacao completa do frontend documentada.
@@ -98,8 +99,9 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - RBAC atual diferencia apenas perfil `admin`; ainda falta permissao granular por cliente/acao.
 - Rotas de midias/playlists ainda sao CRUD inicial; nao fazem upload fisico.
 - Manifesto real depende de `dispositivos.playlist_atual_id`, playlist ativa e midias vinculadas.
+- Download controlado atual serve arquivo local de `MOVIPROGY_MEDIA_DIR`.
 - Google Drive esta documentado como plano, mas ainda nao possui codigo, migration, OAuth ou endpoints reais.
 
 ## Proximo passo recomendado
 
-Focar no backend: criar upload de midias ou endpoint de download controlado para o player.
+Focar no backend: criar upload fisico de midias.

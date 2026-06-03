@@ -313,3 +313,47 @@ class PostgresCoreRepository:
                 for row in media_rows
             ],
         )
+
+    def get_downloadable_midia_for_device(
+        self,
+        device_id: str,
+        midia_id: str,
+    ) -> Midia | None:
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                """
+                SELECT
+                    m.id,
+                    m.cliente_id,
+                    m.nome,
+                    m.tipo,
+                    m.caminho,
+                    m.tamanho,
+                    m.sha256,
+                    m.duracao_segundos,
+                    m.ativo
+                FROM dispositivos d
+                JOIN playlists p ON p.id = d.playlist_atual_id
+                JOIN playlist_midias pm ON pm.playlist_id = p.id
+                JOIN midias m ON m.id = pm.midia_id
+                WHERE d.id = %s
+                  AND d.bloqueado = FALSE
+                  AND p.ativa = TRUE
+                  AND m.ativo = TRUE
+                  AND m.id = %s
+                """,
+                (device_id, midia_id),
+            ).fetchone()
+        if row is None:
+            return None
+        return Midia(
+            id=row[0],
+            cliente_id=row[1],
+            nome=row[2],
+            tipo=row[3],
+            caminho=row[4],
+            tamanho=row[5],
+            sha256=row[6],
+            duracao_segundos=row[7],
+            ativo=row[8],
+        )

@@ -128,7 +128,9 @@ Limite:
 - Manifesto demo ainda existe como fallback sem playlist real.
 - Sessoes do player usam PostgreSQL quando `DATABASE_URL` existe.
 - JSON e apenas fallback para execucao sem banco.
-- Ainda falta endpoint de download controlado.
+- Upload fisico ainda nao existe.
+- Download controlado implementado em `GET /api/player/midias/{midia_id}/download`.
+- Download so libera midia ativa vinculada a playlist atual ativa do dispositivo.
 
 Persistencia atual:
 - Tabela: `device_sessions`.
@@ -138,6 +140,8 @@ Persistencia atual:
 - Tokens sao armazenados somente como SHA-256.
 - Manifestos demo ainda ficam em memoria.
 - Manifesto real e retornado quando dispositivo possui playlist atual ativa no banco.
+- Arquivos locais sao servidos a partir de `MOVIPROGY_MEDIA_DIR`.
+- Caminhos de midia sao resolvidos dentro do diretorio base para bloquear path traversal.
 
 ## Rotas administrativas atuais
 

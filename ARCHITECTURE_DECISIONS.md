@@ -468,7 +468,7 @@ Consequencias:
 - Dispositivo precisa ter `playlist_atual_id` para receber manifesto real.
 - Playlist precisa estar ativa.
 - Midias precisam estar vinculadas por `playlist_midias`.
-- Ainda falta endpoint de download controlado para arquivos.
+- Download controlado foi definido posteriormente na ADR-018.
 
 ---
 
@@ -496,3 +496,32 @@ Consequencias:
 - Toda implementacao futura deve referenciar o documento correspondente.
 - Mudancas de escopo devem atualizar a documentacao antes do codigo.
 - Homologacao passa a usar checklist e matriz de testes documentados.
+
+---
+
+### ADR-018 - Download controlado de midias pelo backend
+
+Status: Aprovada
+
+Data: 2026-06-03
+
+Contexto:
+- O player recebe manifesto com arquivos.
+- O player precisa baixar midias sem acessar storage diretamente.
+- O storage local inicial usa `MOVIPROGY_MEDIA_DIR`.
+
+Decisao:
+- Criar `GET /api/player/midias/{midia_id}/download`.
+- Validar token do dispositivo.
+- Liberar somente midia ativa presente na playlist atual ativa do dispositivo.
+- Resolver caminho do arquivo dentro do diretorio base de midias.
+
+Motivo:
+- Evita expor caminho interno ou credenciais de storage.
+- Preserva isolamento por dispositivo/playlist.
+- Prepara o backend para Google Drive e storage externo controlado.
+
+Consequencias:
+- Upload fisico ainda precisa ser implementado.
+- Midias existentes precisam ter `caminho` relativo ao diretorio de midias.
+- Download nao deve aceitar caminho informado pelo player.

@@ -17,7 +17,7 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Vinculo playlist/midia | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Manifesto player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Upload midia | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
-| Download player | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
+| Download player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Status player | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
 | Logs player | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
 | Google Drive | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
@@ -30,4 +30,3 @@ Mapear funcionalidades, tipos de teste e status esperado.
 - Bug corrigido deve gerar teste de regressao.
 - Teste real de banco depende de `DATABASE_URL`.
 - Teste offline do player e obrigatorio antes de homologacao.
-

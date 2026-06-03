@@ -68,3 +68,11 @@ def test_postgres_core_repository_persists_core_entities():
     assert manifest.files[0].file_name == midia.caminho
     assert manifest.files[0].size == midia.tamanho
     assert manifest.files[0].sha256 == midia.sha256
+    assert repository.get_downloadable_midia_for_device(
+        dispositivo.id,
+        midia.id,
+    ) == midia
+    assert repository.get_downloadable_midia_for_device(
+        dispositivo.id,
+        f"midia-invalida-{suffix}",
+    ) is None

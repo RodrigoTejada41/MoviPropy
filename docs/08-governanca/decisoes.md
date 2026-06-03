@@ -21,7 +21,7 @@ Impacto:
 - Storage.
 - Deploy.
 - RBAC granular por cliente/acao.
-- Download controlado de midias para player.
+- Upload fisico de midias.
 
 ## D-002 - Login administrativo antes de Google Drive
 
@@ -69,3 +69,19 @@ Impacto:
 - Proxima fase pode focar em backend.
 - Frontend deve seguir `docs/10-frontend/especificacao-frontend.md`.
 - Homologacao deve seguir `docs/15-homologacao/checklist-homologacao.md`.
+
+## D-005 - Download controlado pelo backend
+
+Status: aprovado.
+
+Decisao:
+- Player baixa midias por endpoint do backend, nao por caminho direto.
+
+Motivo:
+- Controlar permissao por dispositivo.
+- Evitar exposicao de storage.
+- Preservar operacao offline com arquivo local no player.
+
+Impacto:
+- `GET /api/player/midias/{midia_id}/download` valida token e playlist atual.
+- Proximo passo de storage e upload fisico.

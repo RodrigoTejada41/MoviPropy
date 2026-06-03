@@ -21,8 +21,13 @@ def _device_registry_file() -> Path | None:
     return Path(data_dir) / "device_registry.json"
 
 
+def _media_dir() -> Path:
+    return Path(os.getenv("MOVIPROGY_MEDIA_DIR", "runtime/media"))
+
+
 def create_app() -> FastAPI:
     app = FastAPI(title="MoviProgy API", version="0.1.0")
+    app.state.media_dir = _media_dir()
     database_url = get_database_url()
     if database_url:
         run_migrations(database_url)

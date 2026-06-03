@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from fastapi import APIRouter, Header, HTTPException, Request, status
+from fastapi.responses import FileResponse
 
 from moviprogy_api.domain.devices import ActivationRequest, ActivationResult
 from moviprogy_api.domain.sync import PlaylistManifest
@@ -64,6 +67,58 @@ def get_active_playlist(
     return manifest
 
 
+@router.get("/midias/{midia_id}/download")
+def download_media(
+    midia_id: str,
+    request: Request,
+    authorization: str | None = Header(default=None),
+) -> FileResponse:
+    token = _extract_bearer_token(authorization)
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="token do dispositivo ausente",
+        )
+
+    session = request.app.state.device_registry.get_session(token)
+    if session is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="token do dispositivo invalido",
+        )
+
+    repository = getattr(request.app.state, "core_repository", None)
+    if repository is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="repository indisponivel",
+        )
+
+    midia = repository.get_downloadable_midia_for_device(
+        session.device_id,
+        midia_id,
+    )
+    if midia is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="midia fora da playlist atual",
+        )
+
+    media_dir = Path(request.app.state.media_dir)
+    file_path = _safe_media_path(media_dir, midia.caminho)
+    if file_path is None or not file_path.is_file():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="arquivo da midia nao encontrado",
+        )
+
+    return FileResponse(
+        file_path,
+        media_type=_media_type(midia.tipo),
+        filename=Path(midia.caminho).name,
+    )
+
+
 def _extract_bearer_token(authorization: str | None) -> str | None:
     if not authorization:
         return None
@@ -71,3 +126,21 @@ def _extract_bearer_token(authorization: str | None) -> str | None:
     if scheme.lower() != "bearer" or not token:
         return None
     return token
+
+
+def _safe_media_path(media_dir: Path, stored_path: str) -> Path | None:
+    base_path = media_dir.resolve()
+    candidate = (base_path / stored_path).resolve()
+    try:
+        candidate.relative_to(base_path)
+    except ValueError:
+        return None
+    return candidate
+
+
+def _media_type(tipo: str) -> str:
+    if tipo == "video":
+        return "video/mp4"
+    if tipo == "imagem":
+        return "image/jpeg"
+    return "application/octet-stream"

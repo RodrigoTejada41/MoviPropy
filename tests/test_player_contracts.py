@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from moviprogy_api.domain.core import Dispositivo
+from moviprogy_api.domain.core import Dispositivo, Midia
 from moviprogy_api.domain.sync import MediaFile, PlaylistManifest
 from moviprogy_api.main import create_app
 
@@ -25,6 +25,17 @@ class FakeCoreRepository:
                 )
             ],
         )
+        self.midias = {
+            "midia-real-001": Midia(
+                id="midia-real-001",
+                cliente_id="cliente-001",
+                nome="Video Real",
+                tipo="video",
+                caminho="media/video-real.mp4",
+                tamanho=2048,
+                sha256="b" * 64,
+            )
+        }
 
     def get_dispositivo_by_activation_code(
         self,
@@ -41,6 +52,15 @@ class FakeCoreRepository:
         if device_id == self.dispositivo.id:
             return self.manifest
         return None
+
+    def get_downloadable_midia_for_device(
+        self,
+        device_id: str,
+        midia_id: str,
+    ) -> Midia | None:
+        if device_id != self.dispositivo.id:
+            return None
+        return self.midias.get(midia_id)
 
 
 def test_player_activation_returns_device_token():
@@ -162,3 +182,85 @@ def test_player_playlist_returns_real_manifest_for_activated_device():
             }
         ],
     }
+
+
+def test_player_media_download_requires_bearer_token():
+    client = TestClient(create_app())
+
+    response = client.get("/api/player/midias/midia-real-001/download")
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "token do dispositivo ausente"}
+
+
+def test_player_media_download_rejects_media_outside_device_playlist(tmp_path):
+    app = create_app()
+    app.state.core_repository = FakeCoreRepository()
+    app.state.media_dir = tmp_path
+    client = TestClient(app)
+    activation = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "REAL-CODE-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    ).json()
+
+    response = client.get(
+        "/api/player/midias/midia-invalida/download",
+        headers={"Authorization": f"Bearer {activation['token']}"},
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "midia fora da playlist atual"}
+
+
+def test_player_media_download_returns_404_when_file_is_missing(tmp_path):
+    app = create_app()
+    app.state.core_repository = FakeCoreRepository()
+    app.state.media_dir = tmp_path
+    client = TestClient(app)
+    activation = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "REAL-CODE-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    ).json()
+
+    response = client.get(
+        "/api/player/midias/midia-real-001/download",
+        headers={"Authorization": f"Bearer {activation['token']}"},
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "arquivo da midia nao encontrado"}
+
+
+def test_player_media_download_returns_file_for_current_playlist(tmp_path):
+    media_file = tmp_path / "media" / "video-real.mp4"
+    media_file.parent.mkdir(parents=True)
+    media_file.write_bytes(b"video-content")
+    app = create_app()
+    app.state.core_repository = FakeCoreRepository()
+    app.state.media_dir = tmp_path
+    client = TestClient(app)
+    activation = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "REAL-CODE-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    ).json()
+
+    response = client.get(
+        "/api/player/midias/midia-real-001/download",
+        headers={"Authorization": f"Bearer {activation['token']}"},
+    )
+
+    assert response.status_code == 200
+    assert response.content == b"video-content"
+    assert response.headers["content-length"] == str(len(b"video-content"))
