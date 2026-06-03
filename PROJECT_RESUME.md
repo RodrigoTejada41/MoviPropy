@@ -40,6 +40,10 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Ativacao do player usa `codigo_ativacao` real do banco quando disponivel.
 - Manifesto do player usa `playlist_atual_id` do dispositivo e midias vinculadas quando disponivel.
 - Download controlado de midia para player criado em `GET /api/player/midias/{midia_id}/download`.
+- Telemetria do player criada:
+  - `POST /api/player/status`
+  - `POST /api/player/logs`
+  - `POST /api/player/sincronizacao/confirmar`
 - Script de simulacao do player criado.
 - Escopo tecnico da integracao Google Drive documentado.
 - Especificacao completa do frontend documentada.
@@ -89,7 +93,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 ## Limitacoes atuais
 
 - Manifesto demo permanece apenas como fallback sem playlist real no banco.
-- Codigo de ativacao demo: `MOVI-DEMO-001`.
+- Codigo de ativacao demo `MOVI-DEMO-001` funciona apenas sem repository/banco.
 - Hash do token do dispositivo e persistido no PostgreSQL quando `DATABASE_URL` esta configurado.
 - JSON local permanece apenas como fallback sem banco.
 - Docker atual sobe backend e PostgreSQL.
@@ -105,4 +109,4 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 
 ## Proximo passo recomendado
 
-Focar no backend: criar status/logs do player e confirmacao de sincronizacao.
+Focar no backend: criar consulta de atualizacao do player e listagens administrativas.

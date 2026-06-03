@@ -4,6 +4,14 @@ from fastapi import APIRouter, Header, HTTPException, Request, status
 from fastapi.responses import FileResponse
 
 from moviprogy_api.domain.devices import ActivationRequest, ActivationResult
+from moviprogy_api.domain.player_events import (
+    PlayerLogEvent,
+    PlayerLogPayload,
+    PlayerStatusEvent,
+    PlayerStatusPayload,
+    SyncConfirmation,
+    SyncConfirmationPayload,
+)
 from moviprogy_api.domain.sync import PlaylistManifest
 
 
@@ -28,6 +36,10 @@ def activate_player(
                 request=payload,
                 playlist_version=playlist_version,
             )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="codigo de ativacao invalido",
+        )
 
     result = request.app.state.device_registry.activate(payload)
     if result is None:
@@ -117,6 +129,74 @@ def download_media(
         media_type=_media_type(midia.tipo),
         filename=Path(midia.caminho).name,
     )
+
+
+@router.post("/status", status_code=status.HTTP_202_ACCEPTED)
+def record_player_status(
+    payload: PlayerStatusPayload,
+    request: Request,
+    authorization: str | None = Header(default=None),
+) -> dict[str, str]:
+    session = _device_session(request, authorization)
+    repository = _core_repository(request)
+    repository.save_player_status(
+        PlayerStatusEvent(device_id=session.device_id, **payload.model_dump())
+    )
+    return {"status": "registrado"}
+
+
+@router.post("/logs", status_code=status.HTTP_202_ACCEPTED)
+def record_player_log(
+    payload: PlayerLogPayload,
+    request: Request,
+    authorization: str | None = Header(default=None),
+) -> dict[str, str]:
+    session = _device_session(request, authorization)
+    repository = _core_repository(request)
+    repository.save_player_log(
+        PlayerLogEvent(device_id=session.device_id, **payload.model_dump())
+    )
+    return {"status": "registrado"}
+
+
+@router.post("/sincronizacao/confirmar", status_code=status.HTTP_202_ACCEPTED)
+def confirm_player_sync(
+    payload: SyncConfirmationPayload,
+    request: Request,
+    authorization: str | None = Header(default=None),
+) -> dict[str, str]:
+    session = _device_session(request, authorization)
+    repository = _core_repository(request)
+    repository.save_sync_confirmation(
+        SyncConfirmation(device_id=session.device_id, **payload.model_dump())
+    )
+    return {"status": "registrado"}
+
+
+def _device_session(request: Request, authorization: str | None):
+    token = _extract_bearer_token(authorization)
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="token do dispositivo ausente",
+        )
+    session = request.app.state.device_registry.get_session(token)
+    if session is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="token do dispositivo invalido",
+        )
+    return session
+
+
+def _core_repository(request: Request):
+    repository = getattr(request.app.state, "core_repository", None)
+    if repository is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="repository indisponivel",
+        )
+    return repository
 
 
 def _extract_bearer_token(authorization: str | None) -> str | None:

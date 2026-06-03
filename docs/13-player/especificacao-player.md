@@ -8,6 +8,7 @@ Definir o comportamento do player em Android TV Box, Android, Windows, Linux e n
 
 - Backend possui ativacao por codigo real.
 - Backend retorna manifesto real quando dispositivo tem playlist atual ativa.
+- Backend registra status, logs e confirmacao de sincronizacao do player.
 - Player real ainda nao foi implementado.
 
 ## Plataformas alvo
@@ -103,11 +104,11 @@ Telas:
 Atual:
 - `POST /api/player/ativar`.
 - `GET /api/player/playlist`.
-
-Pendente:
 - `POST /api/player/status`.
 - `POST /api/player/logs`.
 - `POST /api/player/sincronizacao/confirmar`.
+
+Pendente:
 - `GET /api/player/atualizacao`.
 
 Implementado:

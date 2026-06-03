@@ -100,3 +100,18 @@ Motivo:
 Impacto:
 - Arquivos ficam sob `MOVIPROGY_MEDIA_DIR`.
 - Storage externo continua pendente para escala.
+
+## D-007 - Telemetria do player
+
+Status: aprovado.
+
+Decisao:
+- Player envia status, logs e confirmacao de sincronizacao para o backend.
+
+Motivo:
+- Permitir monitoramento de dispositivos.
+- Registrar falhas e sucesso de sincronizacao.
+
+Impacto:
+- Criadas tabelas `player_status_events`, `player_log_events` e `player_sync_confirmations`.
+- Ainda faltam telas/listagens administrativas para consultar os eventos.

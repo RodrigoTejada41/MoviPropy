@@ -36,6 +36,9 @@ class FakeCoreRepository:
                 sha256="b" * 64,
             )
         }
+        self.status_events = []
+        self.log_events = []
+        self.sync_confirmations = []
 
     def get_dispositivo_by_activation_code(
         self,
@@ -62,8 +65,18 @@ class FakeCoreRepository:
             return None
         return self.midias.get(midia_id)
 
+    def save_player_status(self, event) -> None:
+        self.status_events.append(event)
 
-def test_player_activation_returns_device_token():
+    def save_player_log(self, event) -> None:
+        self.log_events.append(event)
+
+    def save_sync_confirmation(self, confirmation) -> None:
+        self.sync_confirmations.append(confirmation)
+
+
+def test_player_activation_returns_device_token(monkeypatch):
+    monkeypatch.delenv("DATABASE_URL", raising=False)
     client = TestClient(create_app())
 
     response = client.post(
@@ -103,6 +116,24 @@ def test_player_activation_uses_real_device_activation_code():
     assert body["playlist_version"] == 3
 
 
+def test_player_activation_with_repository_rejects_demo_fallback_code():
+    app = create_app()
+    app.state.core_repository = FakeCoreRepository()
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "MOVI-DEMO-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "codigo de ativacao invalido"}
+
+
 def test_player_activation_rejects_invalid_code():
     client = TestClient(create_app())
 
@@ -128,7 +159,8 @@ def test_player_playlist_requires_bearer_token():
     assert response.json() == {"detail": "token do dispositivo ausente"}
 
 
-def test_player_playlist_returns_active_manifest_for_valid_token():
+def test_player_playlist_returns_active_manifest_for_valid_token(monkeypatch):
+    monkeypatch.delenv("DATABASE_URL", raising=False)
     client = TestClient(create_app())
     activation = client.post(
         "/api/player/ativar",
@@ -264,3 +296,107 @@ def test_player_media_download_returns_file_for_current_playlist(tmp_path):
     assert response.status_code == 200
     assert response.content == b"video-content"
     assert response.headers["content-length"] == str(len(b"video-content"))
+
+
+def test_player_status_requires_bearer_token():
+    client = TestClient(create_app())
+
+    response = client.post(
+        "/api/player/status",
+        json={"status": "online", "versao_player": "0.1.0"},
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "token do dispositivo ausente"}
+
+
+def test_player_status_records_device_status():
+    app = create_app()
+    repository = FakeCoreRepository()
+    app.state.core_repository = repository
+    client = TestClient(app)
+    activation = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "REAL-CODE-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    ).json()
+
+    response = client.post(
+        "/api/player/status",
+        headers={"Authorization": f"Bearer {activation['token']}"},
+        json={
+            "status": "online",
+            "playlist_atual": "playlist-real-001",
+            "versao_player": "0.1.0",
+            "espaco_livre": 1024,
+        },
+    )
+
+    assert response.status_code == 202
+    assert response.json() == {"status": "registrado"}
+    assert repository.status_events[0].device_id == "device-real-001"
+    assert repository.status_events[0].status == "online"
+
+
+def test_player_logs_records_device_log():
+    app = create_app()
+    repository = FakeCoreRepository()
+    app.state.core_repository = repository
+    client = TestClient(app)
+    activation = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "REAL-CODE-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    ).json()
+
+    response = client.post(
+        "/api/player/logs",
+        headers={"Authorization": f"Bearer {activation['token']}"},
+        json={
+            "nivel": "info",
+            "evento": "download_concluido",
+            "dados": {"midia_id": "midia-real-001"},
+        },
+    )
+
+    assert response.status_code == 202
+    assert response.json() == {"status": "registrado"}
+    assert repository.log_events[0].device_id == "device-real-001"
+    assert repository.log_events[0].evento == "download_concluido"
+
+
+def test_player_sync_confirmation_records_success():
+    app = create_app()
+    repository = FakeCoreRepository()
+    app.state.core_repository = repository
+    client = TestClient(app)
+    activation = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "REAL-CODE-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    ).json()
+
+    response = client.post(
+        "/api/player/sincronizacao/confirmar",
+        headers={"Authorization": f"Bearer {activation['token']}"},
+        json={
+            "playlist_id": "playlist-real-001",
+            "versao": 3,
+            "arquivos_baixados": ["midia-real-001"],
+            "status": "concluida",
+        },
+    )
+
+    assert response.status_code == 202
+    assert response.json() == {"status": "registrado"}
+    assert repository.sync_confirmations[0].device_id == "device-real-001"
+    assert repository.sync_confirmations[0].status == "concluida"

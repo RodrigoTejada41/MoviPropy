@@ -78,6 +78,9 @@ Endpoints iniciais:
 - `POST /api/player/ativar`
 - `GET /api/player/playlist`
 - `GET /api/player/midias/{midia_id}/download`
+- `POST /api/player/status`
+- `POST /api/player/logs`
+- `POST /api/player/sincronizacao/confirmar`
 - `POST /api/admin/clientes`
 - `GET /api/admin/clientes/{cliente_id}`
 - `POST /api/admin/dispositivos`
@@ -101,6 +104,7 @@ Banco local:
 - Migration inicial: `backend/moviprogy_api/migrations/001_initial.sql`.
 - Migration core: `backend/moviprogy_api/migrations/002_core_domain.sql`.
 - Migration auth: `backend/moviprogy_api/migrations/003_auth.sql`.
+- Migration eventos player: `backend/moviprogy_api/migrations/004_player_events.sql`.
 
 Upload local:
 - Arquivos ficam em `runtime/media`.

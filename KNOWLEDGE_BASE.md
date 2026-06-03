@@ -115,6 +115,9 @@ Limite:
 
 - `POST /api/player/ativar`: ativa dispositivo por codigo e retorna token.
 - `GET /api/player/playlist`: retorna manifesto ativo mediante token Bearer.
+- `POST /api/player/status`: registra status operacional do dispositivo.
+- `POST /api/player/logs`: registra evento/log enviado pelo dispositivo.
+- `POST /api/player/sincronizacao/confirmar`: registra resultado de sincronizacao.
 
 Implementacao atual:
 - Ativacao real usa `dispositivos.codigo_ativacao`.
@@ -125,16 +128,18 @@ Implementacao atual:
 - Somente midias ativas entram no manifesto.
 
 Limite:
-- Manifesto demo ainda existe como fallback sem playlist real.
+- Manifesto demo ainda existe apenas como fallback sem repository/banco.
 - Sessoes do player usam PostgreSQL quando `DATABASE_URL` existe.
 - JSON e apenas fallback para execucao sem banco.
 - Upload fisico local existe em `POST /api/admin/midias/upload`.
 - Download controlado implementado em `GET /api/player/midias/{midia_id}/download`.
 - Download so libera midia ativa vinculada a playlist atual ativa do dispositivo.
+- Telemetria do player persiste eventos em PostgreSQL quando `DATABASE_URL` existe.
 
 Persistencia atual:
 - Tabela: `device_sessions`.
 - Tabelas core: `clientes`, `dispositivos`, `midias`, `playlists`, `playlist_midias`.
+- Tabelas de telemetria: `player_status_events`, `player_log_events`, `player_sync_confirmations`.
 - Variavel: `DATABASE_URL`.
 - Escopo: sessoes de dispositivo.
 - Tokens sao armazenados somente como SHA-256.
@@ -200,7 +205,7 @@ Pastas locais do projeto:
 - `logs`
 
 Limite:
-- Simulacao usa codigo demo `MOVI-DEMO-001`.
+- Simulacao sem banco usa codigo demo `MOVI-DEMO-001`.
 - Nao testa banco porque ainda nao ha banco definido.
 - Docker Desktop ainda armazena imagens e cache no local global configurado no Docker.
 - Persistencia JSON e apenas fallback sem banco.

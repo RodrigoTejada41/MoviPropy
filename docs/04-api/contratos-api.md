@@ -104,7 +104,7 @@ Implementacao atual:
 - Resposta: `device_id`, `token`, `playlist_version`
 - Persistencia: PostgreSQL quando `DATABASE_URL` existe.
 - Fluxo real: consulta `dispositivos.codigo_ativacao`.
-- Fallback: codigo demo local `MOVI-DEMO-001`.
+- Fallback: codigo demo local `MOVI-DEMO-001` apenas sem repository/banco.
 
 ## Midias
 
@@ -189,6 +189,12 @@ Parametros: status, playlist_atual, versao_player, espaco_livre.
 Resposta: confirmacao.
 Seguranca: token do dispositivo.
 
+Implementacao atual:
+- Rota: `POST /api/player/status`
+- Autenticacao: `Authorization: Bearer <token>`
+- Resposta: `202 {"status": "registrado"}`
+- Persistencia: tabela `player_status_events`
+
 ### POST /api/player/logs
 
 Finalidade: enviar logs do player.
@@ -196,6 +202,12 @@ Quem usa: player.
 Parametros: nivel, evento, dados, criado_em.
 Resposta: confirmacao.
 Seguranca: token do dispositivo.
+
+Implementacao atual:
+- Rota: `POST /api/player/logs`
+- Autenticacao: `Authorization: Bearer <token>`
+- Resposta: `202 {"status": "registrado"}`
+- Persistencia: tabela `player_log_events`
 
 ### GET /api/player/atualizacao
 
@@ -212,6 +224,12 @@ Quem usa: player.
 Parametros: playlist_id, versao, arquivos_baixados, status.
 Resposta: confirmacao.
 Seguranca: token do dispositivo.
+
+Implementacao atual:
+- Rota: `POST /api/player/sincronizacao/confirmar`
+- Autenticacao: `Authorization: Bearer <token>`
+- Resposta: `202 {"status": "registrado"}`
+- Persistencia: tabela `player_sync_confirmations`
 
 ## Google Drive
 

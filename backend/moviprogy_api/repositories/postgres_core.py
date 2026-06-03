@@ -1,6 +1,13 @@
+import json
+
 import psycopg
 
 from moviprogy_api.domain.core import Cliente, Dispositivo, Midia, Playlist
+from moviprogy_api.domain.player_events import (
+    PlayerLogEvent,
+    PlayerStatusEvent,
+    SyncConfirmation,
+)
 from moviprogy_api.domain.sync import MediaFile, PlaylistManifest
 
 
@@ -357,3 +364,126 @@ class PostgresCoreRepository:
             duracao_segundos=row[7],
             ativo=row[8],
         )
+
+    def save_player_status(self, event: PlayerStatusEvent) -> None:
+        with psycopg.connect(self._database_url) as connection:
+            connection.execute(
+                """
+                INSERT INTO player_status_events (
+                    device_id,
+                    status,
+                    playlist_atual,
+                    versao_player,
+                    espaco_livre
+                )
+                VALUES (%s, %s, %s, %s, %s)
+                """,
+                (
+                    event.device_id,
+                    event.status,
+                    event.playlist_atual,
+                    event.versao_player,
+                    event.espaco_livre,
+                ),
+            )
+            connection.commit()
+
+    def save_player_log(self, event: PlayerLogEvent) -> None:
+        with psycopg.connect(self._database_url) as connection:
+            connection.execute(
+                """
+                INSERT INTO player_log_events (
+                    device_id,
+                    nivel,
+                    evento,
+                    dados,
+                    criado_em
+                )
+                VALUES (%s, %s, %s, %s::jsonb, %s)
+                """,
+                (
+                    event.device_id,
+                    event.nivel,
+                    event.evento,
+                    json.dumps(event.dados),
+                    event.criado_em,
+                ),
+            )
+            connection.commit()
+
+    def save_sync_confirmation(self, confirmation: SyncConfirmation) -> None:
+        with psycopg.connect(self._database_url) as connection:
+            connection.execute(
+                """
+                INSERT INTO player_sync_confirmations (
+                    device_id,
+                    playlist_id,
+                    versao,
+                    arquivos_baixados,
+                    status
+                )
+                VALUES (%s, %s, %s, %s::jsonb, %s)
+                """,
+                (
+                    confirmation.device_id,
+                    confirmation.playlist_id,
+                    confirmation.versao,
+                    json.dumps(confirmation.arquivos_baixados),
+                    confirmation.status,
+                ),
+            )
+            connection.commit()
+
+    def get_player_events_for_device(self, device_id: str) -> dict[str, list[dict]]:
+        with psycopg.connect(self._database_url) as connection:
+            status_rows = connection.execute(
+                """
+                SELECT status, playlist_atual, versao_player, espaco_livre
+                FROM player_status_events
+                WHERE device_id = %s
+                ORDER BY created_at DESC
+                """,
+                (device_id,),
+            ).fetchall()
+            log_rows = connection.execute(
+                """
+                SELECT nivel, evento, dados
+                FROM player_log_events
+                WHERE device_id = %s
+                ORDER BY created_at DESC
+                """,
+                (device_id,),
+            ).fetchall()
+            sync_rows = connection.execute(
+                """
+                SELECT playlist_id, versao, arquivos_baixados, status
+                FROM player_sync_confirmations
+                WHERE device_id = %s
+                ORDER BY created_at DESC
+                """,
+                (device_id,),
+            ).fetchall()
+        return {
+            "status": [
+                {
+                    "status": row[0],
+                    "playlist_atual": row[1],
+                    "versao_player": row[2],
+                    "espaco_livre": row[3],
+                }
+                for row in status_rows
+            ],
+            "logs": [
+                {"nivel": row[0], "evento": row[1], "dados": row[2]}
+                for row in log_rows
+            ],
+            "sync": [
+                {
+                    "playlist_id": row[0],
+                    "versao": row[1],
+                    "arquivos_baixados": row[2],
+                    "status": row[3],
+                }
+                for row in sync_rows
+            ],
+        }

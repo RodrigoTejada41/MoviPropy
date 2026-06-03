@@ -19,6 +19,9 @@ Definir criterios para aprovar uma versao.
 - Player ativa por codigo real.
 - Player recebe manifesto real.
 - Player baixa midia por endpoint controlado.
+- Player envia status.
+- Player envia logs.
+- Player confirma sincronizacao.
 
 ## Banco
 

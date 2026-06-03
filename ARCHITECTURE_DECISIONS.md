@@ -556,3 +556,33 @@ Consequencias:
 - Upload local inicial nao substitui storage externo futuro.
 - Videos grandes ainda exigirao testes de performance e espaco em disco.
 - RBAC granular por cliente continua pendente antes de producao.
+
+---
+
+### ADR-020 - Telemetria e confirmacao de sincronizacao do player
+
+Status: Aprovada
+
+Data: 2026-06-03
+
+Contexto:
+- O player precisa operar offline e sincronizar em segundo plano.
+- O backend precisa receber status, logs e confirmacao de sincronizacao.
+- Homologacao exige testes de sincronizacao e observabilidade do dispositivo.
+
+Decisao:
+- Criar `POST /api/player/status`.
+- Criar `POST /api/player/logs`.
+- Criar `POST /api/player/sincronizacao/confirmar`.
+- Exigir token Bearer do dispositivo.
+- Persistir eventos em tabelas PostgreSQL dedicadas.
+
+Motivo:
+- Permite monitorar dispositivos.
+- Permite auditar falhas de download/sincronizacao.
+- Prepara o painel administrativo para exibir saude e eventos do player.
+
+Consequencias:
+- Volume de logs pode crescer e exigira politica de retencao.
+- Ainda faltam listagens administrativas para consulta desses eventos.
+- Ainda falta `GET /api/player/atualizacao`.

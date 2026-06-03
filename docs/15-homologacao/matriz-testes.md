@@ -18,8 +18,9 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Manifesto player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Upload midia | Sim | Pendente | Sim | Sim | Pendente | Implementado parcial |
 | Download player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
-| Status player | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
-| Logs player | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
+| Status player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
+| Logs player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
+| Confirmacao sincronizacao | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Google Drive | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
 | Frontend login | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
 | Frontend playlists | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |

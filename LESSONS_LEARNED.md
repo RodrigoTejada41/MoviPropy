@@ -27,6 +27,37 @@ Status:
 
 ## Licoes registradas
 
+### ERR-012
+
+Data: 2026-06-03
+
+Descricao do Problema:
+- Em ambiente com PostgreSQL, o codigo demo `MOVI-DEMO-001` ativava dispositivo que nao existia na tabela `dispositivos`.
+- Ao enviar status do player, a persistencia quebrava FK e retornava erro 500.
+
+Causa Raiz:
+- A rota de ativacao caia no fallback demo mesmo quando `core_repository` estava disponivel.
+- O fallback demo nao representa um dispositivo persistido no banco.
+
+Solucao Aplicada:
+- Quando `core_repository` existe, ativacao aceita somente `codigo_ativacao` real do banco.
+- O fallback demo fica restrito a execucao local sem repository.
+- Adicionado teste de regressao para bloquear demo com repository.
+
+Como Evitar no Futuro:
+- Fallbacks demo nao devem ser misturados com fluxo persistido em banco.
+- Fluxos que geram FK devem usar entidades persistidas.
+- Validar endpoints novos no Docker com dados reais do banco.
+
+Arquivos Afetados:
+- `backend/moviprogy_api/routes/player.py`
+- `tests/test_player_contracts.py`
+- `LESSONS_LEARNED.md`
+
+Status: Resolvido
+
+---
+
 ### ERR-011
 
 Data: 2026-06-03

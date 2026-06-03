@@ -4,6 +4,11 @@ import uuid
 import pytest
 
 from moviprogy_api.domain.core import Cliente, Dispositivo, Midia, Playlist
+from moviprogy_api.domain.player_events import (
+    PlayerLogEvent,
+    PlayerStatusEvent,
+    SyncConfirmation,
+)
 from moviprogy_api.repositories.postgres_core import PostgresCoreRepository
 from moviprogy_api.repositories.postgres_devices import run_migrations
 
@@ -76,3 +81,51 @@ def test_postgres_core_repository_persists_core_entities():
         dispositivo.id,
         f"midia-invalida-{suffix}",
     ) is None
+
+
+def test_postgres_core_repository_persists_player_events():
+    assert DATABASE_URL is not None
+    run_migrations(DATABASE_URL)
+    repository = PostgresCoreRepository(DATABASE_URL)
+    suffix = uuid.uuid4().hex
+    cliente = Cliente(id=f"cliente-events-{suffix}", nome="Cliente Eventos")
+    dispositivo = Dispositivo(
+        id=f"device-events-{suffix}",
+        cliente_id=cliente.id,
+        nome="TV Eventos",
+        codigo_ativacao=f"CODE-EVENTS-{suffix}",
+    )
+    repository.save_cliente(cliente)
+    repository.save_dispositivo(dispositivo)
+
+    repository.save_player_status(
+        PlayerStatusEvent(
+            device_id=dispositivo.id,
+            status="online",
+            playlist_atual="playlist-001",
+            versao_player="0.1.0",
+            espaco_livre=2048,
+        )
+    )
+    repository.save_player_log(
+        PlayerLogEvent(
+            device_id=dispositivo.id,
+            nivel="info",
+            evento="download_concluido",
+            dados={"midia_id": "midia-001"},
+        )
+    )
+    repository.save_sync_confirmation(
+        SyncConfirmation(
+            device_id=dispositivo.id,
+            playlist_id="playlist-001",
+            versao=3,
+            arquivos_baixados=["midia-001"],
+            status="concluida",
+        )
+    )
+
+    events = repository.get_player_events_for_device(dispositivo.id)
+    assert events["status"][0]["status"] == "online"
+    assert events["logs"][0]["evento"] == "download_concluido"
+    assert events["sync"][0]["status"] == "concluida"
