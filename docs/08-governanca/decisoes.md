@@ -145,4 +145,24 @@ Motivo:
 
 Impacto:
 - Rotas ficam protegidas por sessao admin.
-- Paginacao, filtros e isolamento granular por cliente seguem pendentes.
+- Paginacao e filtros foram definidos depois na D-010.
+- Isolamento granular por cliente segue pendente.
+
+## D-010 - Paginacao e filtros administrativos
+
+Status: aprovado.
+
+Decisao:
+- Listagens administrativas devem aceitar `limit`, `offset` e filtros basicos.
+- O formato de resposta permanece lista simples nesta etapa.
+
+Motivo:
+- Reduzir risco de consultas grandes antes do frontend.
+- Manter compatibilidade com contratos iniciais.
+
+Impacto:
+- Clientes filtram por `ativo`.
+- Dispositivos filtram por `cliente_id` e `bloqueado`.
+- Midias filtram por `cliente_id` e `ativo`.
+- Playlists filtram por `cliente_id` e `ativa`.
+- `total` para paginacao completa segue pendente.

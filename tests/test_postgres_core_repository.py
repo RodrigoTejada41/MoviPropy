@@ -87,6 +87,82 @@ def test_postgres_core_repository_persists_core_entities():
     assert playlist in repository.list_playlists()
 
 
+def test_postgres_core_repository_filters_and_paginates_admin_lists():
+    assert DATABASE_URL is not None
+    run_migrations(DATABASE_URL)
+    repository = PostgresCoreRepository(DATABASE_URL)
+    suffix = uuid.uuid4().hex
+    cliente_a = Cliente(id=f"cliente-list-a-{suffix}", nome=f"A {suffix}")
+    cliente_b = Cliente(id=f"cliente-list-b-{suffix}", nome=f"B {suffix}", ativo=False)
+    playlist_a = Playlist(
+        id=f"playlist-list-a-{suffix}",
+        cliente_id=cliente_a.id,
+        nome=f"A {suffix}",
+        ativa=True,
+    )
+    playlist_b = Playlist(
+        id=f"playlist-list-b-{suffix}",
+        cliente_id=cliente_b.id,
+        nome=f"B {suffix}",
+        ativa=False,
+    )
+    dispositivo_a = Dispositivo(
+        id=f"device-list-a-{suffix}",
+        cliente_id=cliente_a.id,
+        nome=f"A {suffix}",
+        codigo_ativacao=f"LIST-A-{suffix}",
+        bloqueado=False,
+    )
+    dispositivo_b = Dispositivo(
+        id=f"device-list-b-{suffix}",
+        cliente_id=cliente_b.id,
+        nome=f"B {suffix}",
+        codigo_ativacao=f"LIST-B-{suffix}",
+        bloqueado=True,
+    )
+    midia_a = Midia(
+        id=f"midia-list-a-{suffix}",
+        cliente_id=cliente_a.id,
+        nome=f"A {suffix}",
+        tipo="video",
+        caminho=f"media/a-{suffix}.mp4",
+        tamanho=10,
+        sha256="a" * 64,
+        ativo=True,
+    )
+    midia_b = Midia(
+        id=f"midia-list-b-{suffix}",
+        cliente_id=cliente_b.id,
+        nome=f"B {suffix}",
+        tipo="video",
+        caminho=f"media/b-{suffix}.mp4",
+        tamanho=10,
+        sha256="b" * 64,
+        ativo=False,
+    )
+
+    repository.save_cliente(cliente_a)
+    repository.save_cliente(cliente_b)
+    repository.save_playlist(playlist_a)
+    repository.save_playlist(playlist_b)
+    repository.save_dispositivo(dispositivo_a)
+    repository.save_dispositivo(dispositivo_b)
+    repository.save_midia(midia_a)
+    repository.save_midia(midia_b)
+
+    inactive_clientes = repository.list_clientes(limit=1, offset=0, ativo=False)
+    assert len(inactive_clientes) == 1
+    assert inactive_clientes[0].ativo is False
+    assert repository.list_dispositivos(
+        cliente_id=cliente_b.id,
+        bloqueado=True,
+    ) == [dispositivo_b]
+    assert repository.list_midias(cliente_id=cliente_b.id, ativo=False) == [midia_b]
+    assert repository.list_playlists(cliente_id=cliente_b.id, ativa=False) == [
+        playlist_b
+    ]
+
+
 def test_player_update_check_uses_postgres_playlist_version():
     assert DATABASE_URL is not None
     run_migrations(DATABASE_URL)

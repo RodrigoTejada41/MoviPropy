@@ -9,6 +9,7 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Query,
     Request,
     UploadFile,
     status,
@@ -56,9 +57,14 @@ def create_cliente(cliente: Cliente, request: Request) -> Cliente:
 
 
 @router.get("/clientes", response_model=list[Cliente])
-def list_clientes(request: Request) -> list[Cliente]:
+def list_clientes(
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    ativo: bool | None = None,
+) -> list[Cliente]:
     repository = _core_repository(request)
-    return repository.list_clientes()
+    return repository.list_clientes(limit=limit, offset=offset, ativo=ativo)
 
 
 @router.get("/clientes/{cliente_id}", response_model=Cliente)
@@ -90,9 +96,20 @@ def create_dispositivo(dispositivo: Dispositivo, request: Request) -> Dispositiv
 
 
 @router.get("/dispositivos", response_model=list[Dispositivo])
-def list_dispositivos(request: Request) -> list[Dispositivo]:
+def list_dispositivos(
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    cliente_id: str | None = None,
+    bloqueado: bool | None = None,
+) -> list[Dispositivo]:
     repository = _core_repository(request)
-    return repository.list_dispositivos()
+    return repository.list_dispositivos(
+        limit=limit,
+        offset=offset,
+        cliente_id=cliente_id,
+        bloqueado=bloqueado,
+    )
 
 
 @router.get("/dispositivos/{dispositivo_id}/eventos")
@@ -135,9 +152,20 @@ def create_midia(midia: Midia, request: Request) -> Midia:
 
 
 @router.get("/midias", response_model=list[Midia])
-def list_midias(request: Request) -> list[Midia]:
+def list_midias(
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    cliente_id: str | None = None,
+    ativo: bool | None = None,
+) -> list[Midia]:
     repository = _core_repository(request)
-    return repository.list_midias()
+    return repository.list_midias(
+        limit=limit,
+        offset=offset,
+        cliente_id=cliente_id,
+        ativo=ativo,
+    )
 
 
 @router.post(
@@ -234,9 +262,20 @@ def create_playlist(playlist: Playlist, request: Request) -> Playlist:
 
 
 @router.get("/playlists", response_model=list[Playlist])
-def list_playlists(request: Request) -> list[Playlist]:
+def list_playlists(
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    cliente_id: str | None = None,
+    ativa: bool | None = None,
+) -> list[Playlist]:
     repository = _core_repository(request)
-    return repository.list_playlists()
+    return repository.list_playlists(
+        limit=limit,
+        offset=offset,
+        cliente_id=cliente_id,
+        ativa=ativa,
+    )
 
 
 @router.get("/playlists/{playlist_id}", response_model=Playlist)

@@ -14,7 +14,7 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Dispositivos | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Midias metadados | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Playlists | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
-| Listagens admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
+| Listagens admin | Sim | Sim | Sim | Sim | Parcial | Implementado parcial |
 | Eventos player admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Vinculo playlist/midia | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Manifesto player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |

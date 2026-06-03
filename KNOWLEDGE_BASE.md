@@ -183,7 +183,12 @@ Regras de negocio atuais:
 - Midia so pode ser criada para cliente existente.
 - Playlist so pode ser criada para cliente existente.
 - Midia so pode ser vinculada a playlist do mesmo cliente.
-- Listagens administrativas atuais ainda nao possuem paginacao/filtros.
+- Listagens administrativas aceitam `limit`, `offset` e filtros iniciais.
+- Clientes filtram por `ativo`.
+- Dispositivos filtram por `cliente_id` e `bloqueado`.
+- Midias filtram por `cliente_id` e `ativo`.
+- Playlists filtram por `cliente_id` e `ativa`.
+- Resposta atual das listagens permanece lista simples, sem `total`.
 
 ## Autenticacao administrativa
 

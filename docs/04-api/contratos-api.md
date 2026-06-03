@@ -59,9 +59,10 @@ Limite: RBAC granular ainda pendente.
 
 Finalidade: listar clientes.
 Quem usa: painel administrativo.
+Query: `limit`, `offset`, `ativo`.
 Resposta: lista de clientes.
 Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular e paginacao ainda pendentes.
+Limite: RBAC granular e retorno de `total` ainda pendentes.
 
 ## Dispositivos
 
@@ -86,9 +87,10 @@ Limite: RBAC granular ainda pendente.
 
 Finalidade: listar dispositivos.
 Quem usa: painel administrativo.
+Query: `limit`, `offset`, `cliente_id`, `bloqueado`.
 Resposta: lista de dispositivos.
 Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular e paginacao ainda pendentes.
+Limite: RBAC granular e retorno de `total` ainda pendentes.
 
 ### GET /api/admin/dispositivos/{dispositivo_id}/eventos
 
@@ -154,9 +156,10 @@ Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`
 
 Finalidade: listar midias.
 Quem usa: painel administrativo.
+Query: `limit`, `offset`, `cliente_id`, `ativo`.
 Resposta: lista de midias.
 Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular e paginacao ainda pendentes.
+Limite: RBAC granular e retorno de `total` ainda pendentes.
 
 ## Playlists
 
@@ -180,9 +183,10 @@ Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`
 
 Finalidade: listar playlists.
 Quem usa: painel administrativo.
+Query: `limit`, `offset`, `cliente_id`, `ativa`.
 Resposta: lista de playlists.
 Seguranca atual: exige `Authorization: Bearer <access_token>` de usuario `admin`.
-Limite: RBAC granular e paginacao ainda pendentes.
+Limite: RBAC granular e retorno de `total` ainda pendentes.
 
 ### POST /api/admin/playlists/{playlist_id}/midias
 

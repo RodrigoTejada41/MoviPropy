@@ -643,5 +643,35 @@ Motivo:
 - Mantem as rotas dentro do namespace administrativo protegido.
 
 Consequencias:
-- Listagens iniciais ainda nao possuem paginacao, filtros ou isolamento granular por cliente.
+- Listagens possuem paginacao e filtros iniciais definidos na ADR-023.
+- Isolamento granular por cliente ainda depende de RBAC por permissao.
 - Performance deve ser revisada antes de producao com muitos registros.
+
+---
+
+### ADR-023 - Paginacao e filtros nas listagens administrativas
+
+Status: Aprovada
+
+Data: 2026-06-03
+
+Contexto:
+- O painel administrativo precisa consultar colecoes sem carregar todos os registros.
+- Clientes, dispositivos, midias e playlists podem crescer por cliente.
+- A ADR-022 identificou paginacao e filtros como lacuna de performance.
+
+Decisao:
+- Adicionar `limit` e `offset` nas listagens administrativas.
+- Limitar `limit` entre 1 e 200.
+- Adicionar filtros iniciais por status e cliente quando aplicavel.
+- Manter resposta como lista simples nesta etapa.
+
+Motivo:
+- Reduz risco de consultas grandes.
+- Mantem compatibilidade com as telas iniciais.
+- Evita criar envelope de paginacao antes do frontend consumir a API.
+
+Consequencias:
+- Ainda falta retorno de `total` para paginacao completa no painel.
+- RBAC granular por cliente/acao continua pendente.
+- Indices devem ser revisitados quando houver carga real.

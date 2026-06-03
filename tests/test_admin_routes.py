@@ -28,8 +28,18 @@ class FakeCoreRepository:
     def get_cliente(self, cliente_id: str) -> Cliente | None:
         return self.clientes.get(cliente_id)
 
-    def list_clientes(self) -> list[Cliente]:
-        return list(self.clientes.values())
+    def list_clientes(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        ativo: bool | None = None,
+    ) -> list[Cliente]:
+        clientes = [
+            cliente
+            for cliente in self.clientes.values()
+            if ativo is None or cliente.ativo is ativo
+        ]
+        return clientes[offset : offset + limit]
 
     def save_dispositivo(self, dispositivo: Dispositivo) -> None:
         self.dispositivos[dispositivo.id] = dispositivo
@@ -37,8 +47,20 @@ class FakeCoreRepository:
     def get_dispositivo(self, dispositivo_id: str) -> Dispositivo | None:
         return self.dispositivos.get(dispositivo_id)
 
-    def list_dispositivos(self) -> list[Dispositivo]:
-        return list(self.dispositivos.values())
+    def list_dispositivos(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        cliente_id: str | None = None,
+        bloqueado: bool | None = None,
+    ) -> list[Dispositivo]:
+        dispositivos = [
+            dispositivo
+            for dispositivo in self.dispositivos.values()
+            if (cliente_id is None or dispositivo.cliente_id == cliente_id)
+            and (bloqueado is None or dispositivo.bloqueado is bloqueado)
+        ]
+        return dispositivos[offset : offset + limit]
 
     def save_midia(self, midia: Midia) -> None:
         self.midias[midia.id] = midia
@@ -46,8 +68,20 @@ class FakeCoreRepository:
     def get_midia(self, midia_id: str) -> Midia | None:
         return self.midias.get(midia_id)
 
-    def list_midias(self) -> list[Midia]:
-        return list(self.midias.values())
+    def list_midias(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        cliente_id: str | None = None,
+        ativo: bool | None = None,
+    ) -> list[Midia]:
+        midias = [
+            midia
+            for midia in self.midias.values()
+            if (cliente_id is None or midia.cliente_id == cliente_id)
+            and (ativo is None or midia.ativo is ativo)
+        ]
+        return midias[offset : offset + limit]
 
     def save_playlist(self, playlist: Playlist) -> None:
         self.playlists[playlist.id] = playlist
@@ -55,8 +89,20 @@ class FakeCoreRepository:
     def get_playlist(self, playlist_id: str) -> Playlist | None:
         return self.playlists.get(playlist_id)
 
-    def list_playlists(self) -> list[Playlist]:
-        return list(self.playlists.values())
+    def list_playlists(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        cliente_id: str | None = None,
+        ativa: bool | None = None,
+    ) -> list[Playlist]:
+        playlists = [
+            playlist
+            for playlist in self.playlists.values()
+            if (cliente_id is None or playlist.cliente_id == cliente_id)
+            and (ativa is None or playlist.ativa is ativa)
+        ]
+        return playlists[offset : offset + limit]
 
     def add_midia_to_playlist(
         self,
@@ -189,6 +235,29 @@ def test_admin_lists_clientes():
     ]
 
 
+def test_admin_lists_clientes_with_pagination_and_active_filter():
+    app = _create_test_app()
+    client = TestClient(app)
+    for cliente_id, ativo in (
+        ("cliente-001", True),
+        ("cliente-002", False),
+        ("cliente-003", True),
+    ):
+        client.post(
+            "/api/admin/clientes",
+            headers=ADMIN_HEADERS,
+            json={"id": cliente_id, "nome": cliente_id, "ativo": ativo},
+        )
+
+    response = client.get(
+        "/api/admin/clientes?ativo=true&limit=1&offset=1",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert response.status_code == 200
+    assert [cliente["id"] for cliente in response.json()] == ["cliente-003"]
+
+
 def test_admin_returns_404_for_missing_cliente():
     app = _create_test_app()
     client = TestClient(app)
@@ -255,6 +324,58 @@ def test_admin_lists_dispositivos():
 
     assert response.status_code == 200
     assert response.json()[0]["id"] == "device-001"
+
+
+def test_admin_lists_dispositivos_with_cliente_and_blocked_filters():
+    app = _create_test_app()
+    client = TestClient(app)
+    for cliente_id in ("cliente-001", "cliente-002"):
+        client.post(
+            "/api/admin/clientes",
+            headers=ADMIN_HEADERS,
+            json={"id": cliente_id, "nome": cliente_id},
+        )
+    client.post(
+        "/api/admin/dispositivos",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "device-001",
+            "cliente_id": "cliente-001",
+            "nome": "TV 1",
+            "codigo_ativacao": "CODE-001",
+            "bloqueado": False,
+        },
+    )
+    client.post(
+        "/api/admin/dispositivos",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "device-002",
+            "cliente_id": "cliente-001",
+            "nome": "TV 2",
+            "codigo_ativacao": "CODE-002",
+            "bloqueado": True,
+        },
+    )
+    client.post(
+        "/api/admin/dispositivos",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "device-003",
+            "cliente_id": "cliente-002",
+            "nome": "TV 3",
+            "codigo_ativacao": "CODE-003",
+            "bloqueado": True,
+        },
+    )
+
+    response = client.get(
+        "/api/admin/dispositivos?cliente_id=cliente-001&bloqueado=true",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert response.status_code == 200
+    assert [dispositivo["id"] for dispositivo in response.json()] == ["device-002"]
 
 
 def test_admin_gets_dispositivo_events():
@@ -364,6 +485,44 @@ def test_admin_lists_midias():
 
     assert response.status_code == 200
     assert response.json()[0]["id"] == "midia-001"
+
+
+def test_admin_lists_midias_with_cliente_and_active_filters():
+    app = _create_test_app()
+    client = TestClient(app)
+    for cliente_id in ("cliente-001", "cliente-002"):
+        client.post(
+            "/api/admin/clientes",
+            headers=ADMIN_HEADERS,
+            json={"id": cliente_id, "nome": cliente_id},
+        )
+    for midia_id, cliente_id, ativo in (
+        ("midia-001", "cliente-001", True),
+        ("midia-002", "cliente-001", False),
+        ("midia-003", "cliente-002", False),
+    ):
+        client.post(
+            "/api/admin/midias",
+            headers=ADMIN_HEADERS,
+            json={
+                "id": midia_id,
+                "cliente_id": cliente_id,
+                "nome": midia_id,
+                "tipo": "video",
+                "caminho": f"media/{midia_id}.mp4",
+                "tamanho": 1024,
+                "sha256": "a" * 64,
+                "ativo": ativo,
+            },
+        )
+
+    response = client.get(
+        "/api/admin/midias?cliente_id=cliente-001&ativo=false",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert response.status_code == 200
+    assert [midia["id"] for midia in response.json()] == ["midia-002"]
 
 
 def test_admin_rejects_midia_for_missing_cliente():
@@ -552,6 +711,40 @@ def test_admin_lists_playlists():
 
     assert response.status_code == 200
     assert response.json()[0]["id"] == "playlist-001"
+
+
+def test_admin_lists_playlists_with_cliente_and_active_filters():
+    app = _create_test_app()
+    client = TestClient(app)
+    for cliente_id in ("cliente-001", "cliente-002"):
+        client.post(
+            "/api/admin/clientes",
+            headers=ADMIN_HEADERS,
+            json={"id": cliente_id, "nome": cliente_id},
+        )
+    for playlist_id, cliente_id, ativa in (
+        ("playlist-001", "cliente-001", True),
+        ("playlist-002", "cliente-001", False),
+        ("playlist-003", "cliente-002", False),
+    ):
+        client.post(
+            "/api/admin/playlists",
+            headers=ADMIN_HEADERS,
+            json={
+                "id": playlist_id,
+                "cliente_id": cliente_id,
+                "nome": playlist_id,
+                "ativa": ativa,
+            },
+        )
+
+    response = client.get(
+        "/api/admin/playlists?cliente_id=cliente-001&ativa=false",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert response.status_code == 200
+    assert [playlist["id"] for playlist in response.json()] == ["playlist-002"]
 
 
 def test_admin_links_midia_to_playlist():

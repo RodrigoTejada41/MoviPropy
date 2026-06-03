@@ -31,6 +31,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Rotas administrativas iniciais criadas para clientes e dispositivos.
 - Rotas administrativas criadas para midias e playlists.
 - Listagens administrativas criadas para clientes, dispositivos, midias e playlists.
+- Listagens administrativas possuem `limit`, `offset` e filtros iniciais por status/cliente.
 - Consulta administrativa de eventos do player criada por dispositivo.
 - Vinculo administrativo de midia em playlist criado.
 - Upload fisico local de midias criado em `POST /api/admin/midias/upload`.
@@ -103,6 +104,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Docker Desktop ainda pode usar armazenamento global fora do projeto para imagens/cache.
 - Simulacao atual cobre ativacao e consulta de manifesto.
 - Rotas administrativas atuais exigem sessao de usuario admin quando `auth_repository` esta disponivel.
+- Listagens administrativas retornam lista simples paginada, sem envelope com total.
 - `ADMIN_API_TOKEN` permanece apenas como fallback legado sem banco.
 - RBAC atual diferencia apenas perfil `admin`; ainda falta permissao granular por cliente/acao.
 - Rotas de midias/playlists ainda sao CRUD inicial com upload fisico local para midias.
@@ -112,4 +114,4 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 
 ## Proximo passo recomendado
 
-Focar no backend: adicionar paginacao/filtros nas listagens administrativas ou iniciar frontend.
+Focar no backend: implementar RBAC granular por cliente/acao ou iniciar frontend administrativo.

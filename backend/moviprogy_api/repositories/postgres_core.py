@@ -46,14 +46,29 @@ class PostgresCoreRepository:
             return None
         return Cliente(id=row[0], nome=row[1], documento=row[2], ativo=row[3])
 
-    def list_clientes(self) -> list[Cliente]:
+    def list_clientes(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        ativo: bool | None = None,
+    ) -> list[Cliente]:
+        clauses = []
+        params: list[object] = []
+        if ativo is not None:
+            clauses.append("ativo = %s")
+            params.append(ativo)
+        where = _where_clause(clauses)
+        params.extend([limit, offset])
         with psycopg.connect(self._database_url) as connection:
             rows = connection.execute(
-                """
+                f"""
                 SELECT id, nome, documento, ativo
                 FROM clientes
+                {where}
                 ORDER BY nome ASC, id ASC
-                """
+                LIMIT %s OFFSET %s
+                """,
+                params,
             ).fetchall()
         return [
             Cliente(id=row[0], nome=row[1], documento=row[2], ativo=row[3])
@@ -120,10 +135,26 @@ class PostgresCoreRepository:
             playlist_atual_id=row[5],
         )
 
-    def list_dispositivos(self) -> list[Dispositivo]:
+    def list_dispositivos(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        cliente_id: str | None = None,
+        bloqueado: bool | None = None,
+    ) -> list[Dispositivo]:
+        clauses = []
+        params: list[object] = []
+        if cliente_id is not None:
+            clauses.append("cliente_id = %s")
+            params.append(cliente_id)
+        if bloqueado is not None:
+            clauses.append("bloqueado = %s")
+            params.append(bloqueado)
+        where = _where_clause(clauses)
+        params.extend([limit, offset])
         with psycopg.connect(self._database_url) as connection:
             rows = connection.execute(
-                """
+                f"""
                 SELECT
                     id,
                     cliente_id,
@@ -132,8 +163,11 @@ class PostgresCoreRepository:
                     bloqueado,
                     playlist_atual_id
                 FROM dispositivos
+                {where}
                 ORDER BY nome ASC, id ASC
-                """
+                LIMIT %s OFFSET %s
+                """,
+                params,
             ).fetchall()
         return [
             Dispositivo(
@@ -253,10 +287,26 @@ class PostgresCoreRepository:
             ativo=row[8],
         )
 
-    def list_midias(self) -> list[Midia]:
+    def list_midias(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        cliente_id: str | None = None,
+        ativo: bool | None = None,
+    ) -> list[Midia]:
+        clauses = []
+        params: list[object] = []
+        if cliente_id is not None:
+            clauses.append("cliente_id = %s")
+            params.append(cliente_id)
+        if ativo is not None:
+            clauses.append("ativo = %s")
+            params.append(ativo)
+        where = _where_clause(clauses)
+        params.extend([limit, offset])
         with psycopg.connect(self._database_url) as connection:
             rows = connection.execute(
-                """
+                f"""
                 SELECT
                     id,
                     cliente_id,
@@ -268,8 +318,11 @@ class PostgresCoreRepository:
                     duracao_segundos,
                     ativo
                 FROM midias
+                {where}
                 ORDER BY nome ASC, id ASC
-                """
+                LIMIT %s OFFSET %s
+                """,
+                params,
             ).fetchall()
         return [
             Midia(
@@ -330,14 +383,33 @@ class PostgresCoreRepository:
             ativa=row[4],
         )
 
-    def list_playlists(self) -> list[Playlist]:
+    def list_playlists(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        cliente_id: str | None = None,
+        ativa: bool | None = None,
+    ) -> list[Playlist]:
+        clauses = []
+        params: list[object] = []
+        if cliente_id is not None:
+            clauses.append("cliente_id = %s")
+            params.append(cliente_id)
+        if ativa is not None:
+            clauses.append("ativa = %s")
+            params.append(ativa)
+        where = _where_clause(clauses)
+        params.extend([limit, offset])
         with psycopg.connect(self._database_url) as connection:
             rows = connection.execute(
-                """
+                f"""
                 SELECT id, cliente_id, nome, versao, ativa
                 FROM playlists
+                {where}
                 ORDER BY nome ASC, id ASC
-                """
+                LIMIT %s OFFSET %s
+                """,
+                params,
             ).fetchall()
         return [
             Playlist(
@@ -581,3 +653,9 @@ class PostgresCoreRepository:
                 for row in sync_rows
             ],
         }
+
+
+def _where_clause(clauses: list[str]) -> str:
+    if not clauses:
+        return ""
+    return "WHERE " + " AND ".join(clauses)
