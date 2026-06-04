@@ -23,6 +23,7 @@ from moviprogy_api.domain.core import (
     PlaylistMidia,
     PlaylistMidiaRequest,
 )
+from moviprogy_api.domain.auth import AdminAccessAudit
 from moviprogy_api.security import (
     record_admin_access,
     require_admin_permission,
@@ -47,6 +48,30 @@ _ALLOWED_UPLOADS = {
         ".webp": "image/webp",
     },
 }
+
+
+@router.get("/auditoria/acessos", response_model=list[AdminAccessAudit])
+def list_admin_access_audits(
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    user_id: str | None = None,
+    cliente_id: str | None = None,
+    recurso: str | None = None,
+    acao: str | None = None,
+    status: str | None = None,
+) -> list[AdminAccessAudit]:
+    repository = _auth_repository(request)
+    _require_scoped_list_permission(request, "auditoria", "ler", cliente_id)
+    return repository.list_admin_access_audits(
+        limit=limit,
+        offset=offset,
+        user_id=user_id,
+        cliente_id=cliente_id,
+        recurso=recurso,
+        acao=acao,
+        status=status,
+    )
 
 
 @router.post(
@@ -371,6 +396,16 @@ def _is_allowed_upload(
 
 def _core_repository(request: Request):
     repository = getattr(request.app.state, "core_repository", None)
+    if repository is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="repository indisponivel",
+        )
+    return repository
+
+
+def _auth_repository(request: Request):
+    repository = getattr(request.app.state, "auth_repository", None)
     if repository is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

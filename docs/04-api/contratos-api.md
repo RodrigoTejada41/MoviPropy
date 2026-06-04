@@ -100,6 +100,18 @@ Resposta: status, logs e sync.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 Limite: filtro por periodo e paginacao de eventos ainda pendentes.
 
+## Auditoria
+
+### GET /api/admin/auditoria/acessos
+
+Finalidade: consultar auditoria de acessos administrativos.
+Quem usa: painel administrativo.
+Query: `limit`, `offset`, `user_id`, `cliente_id`, `recurso`, `acao`, `status`.
+Resposta: lista de registros de auditoria.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `auditoria:ler`.
+Regra: usuario escopado precisa informar `cliente_id`.
+Limite: resposta ainda nao retorna `total`.
+
 ### POST /api/dispositivos
 
 Finalidade: cadastrar dispositivo e gerar codigo de ativacao.

@@ -733,4 +733,31 @@ Motivo:
 Consequencias:
 - A auditoria aumenta volume de escrita no banco.
 - Sera necessaria politica de retencao.
-- Endpoint administrativo de consulta de auditoria ainda precisa ser criado.
+- Endpoint administrativo de consulta de auditoria foi criado posteriormente.
+
+---
+
+### ADR-026 - Backend 100% antes do frontend
+
+Status: Aprovada
+
+Data: 2026-06-04
+
+Contexto:
+- O backend ainda possui pendencias de seguranca, paginacao completa, gestao de usuarios e homologacao.
+- O frontend depende de contratos estaveis.
+- Iniciar interface antes de fechar contratos gera retrabalho.
+
+Decisao:
+- Priorizar fechamento do backend antes de iniciar frontend.
+- Nao iniciar telas administrativas enquanto houver pendencias backend criticas.
+- Manter `PROJECT_RESUME.md` como fonte da fila backend.
+
+Motivo:
+- Evita telas acopladas a contratos instaveis.
+- Reduz retrabalho.
+- Aumenta confianca para homologacao.
+
+Consequencias:
+- Frontend fica bloqueado ate fechamento backend.
+- Mudancas de API devem ser resolvidas antes da interface.

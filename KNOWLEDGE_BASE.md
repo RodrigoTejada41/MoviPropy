@@ -86,6 +86,7 @@ Limite:
 - Tabelas `usuarios` e `admin_sessions` implementam login administrativo inicial.
 - Tabelas `usuarios_clientes` e `permissoes` implementam RBAC granular inicial.
 - Tabela `auditoria_acessos` registra tentativas administrativas permitidas e negadas.
+- Backend deve chegar a 100% antes de iniciar frontend.
 
 ## Integracao Google Drive planejada
 
@@ -170,6 +171,7 @@ Persistencia atual:
 - `GET /api/admin/playlists`
 - `GET /api/admin/playlists/{playlist_id}`
 - `POST /api/admin/playlists/{playlist_id}/midias`
+- `GET /api/admin/auditoria/acessos`
 
 Seguranca:
 - Exigem `Authorization: Bearer <access_token>` retornado por `POST /api/auth/login`.
@@ -178,7 +180,9 @@ Seguranca:
 - `ADMIN_API_TOKEN` existe apenas como fallback local quando `auth_repository` nao esta disponivel.
 
 Limite:
-- Consulta administrativa de auditoria ainda nao possui endpoint.
+- Listagens ainda retornam lista simples, sem `total`.
+- Gestao administrativa de usuarios, vinculos e permissoes ainda nao possui endpoints.
+- Auditoria ainda nao possui politica de retencao.
 - Sessao admin usa hash SHA-256 do token no banco.
 - Senha usa PBKDF2-HMAC-SHA256 com salt individual.
 

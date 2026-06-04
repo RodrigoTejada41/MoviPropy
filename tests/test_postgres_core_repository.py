@@ -81,10 +81,10 @@ def test_postgres_core_repository_persists_core_entities():
         dispositivo.id,
         f"midia-invalida-{suffix}",
     ) is None
-    assert cliente in repository.list_clientes()
-    assert dispositivo in repository.list_dispositivos()
-    assert midia in repository.list_midias()
-    assert playlist in repository.list_playlists()
+    assert cliente in repository.list_clientes(limit=10_000)
+    assert dispositivo in repository.list_dispositivos(limit=10_000)
+    assert midia in repository.list_midias(limit=10_000)
+    assert playlist in repository.list_playlists(limit=10_000)
 
 
 def test_postgres_core_repository_filters_and_paginates_admin_lists():

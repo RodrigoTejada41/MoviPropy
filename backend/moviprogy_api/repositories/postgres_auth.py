@@ -227,12 +227,36 @@ class PostgresAuthRepository:
 
     def list_admin_access_audits(
         self,
-        user_id: str,
         limit: int = 50,
+        offset: int = 0,
+        user_id: str | None = None,
+        cliente_id: str | None = None,
+        recurso: str | None = None,
+        acao: str | None = None,
+        status: str | None = None,
     ) -> list[AdminAccessAudit]:
+        clauses = []
+        params: list[object] = []
+        if user_id is not None:
+            clauses.append("user_id = %s")
+            params.append(user_id)
+        if cliente_id is not None:
+            clauses.append("cliente_id = %s")
+            params.append(cliente_id)
+        if recurso is not None:
+            clauses.append("recurso = %s")
+            params.append(recurso)
+        if acao is not None:
+            clauses.append("acao = %s")
+            params.append(acao)
+        if status is not None:
+            clauses.append("status = %s")
+            params.append(status)
+        where = _where_clause(clauses)
+        params.extend([limit, offset])
         with psycopg.connect(self._database_url) as connection:
             rows = connection.execute(
-                """
+                f"""
                 SELECT
                     user_id,
                     cliente_id,
@@ -243,11 +267,11 @@ class PostgresAuthRepository:
                     user_agent,
                     criado_em
                 FROM auditoria_acessos
-                WHERE user_id = %s
+                {where}
                 ORDER BY criado_em DESC
-                LIMIT %s
+                LIMIT %s OFFSET %s
                 """,
-                (user_id, limit),
+                params,
             ).fetchall()
         return [
             AdminAccessAudit(
@@ -276,3 +300,9 @@ class PostgresAuthRepository:
                 ativo=True,
             )
         )
+
+
+def _where_clause(clauses: list[str]) -> str:
+    if not clauses:
+        return ""
+    return "WHERE " + " AND ".join(clauses)

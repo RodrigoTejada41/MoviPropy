@@ -42,6 +42,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Migration de auth criada para `usuarios` e `admin_sessions`.
 - Migration RBAC criada para `usuarios_clientes` e `permissoes`.
 - Auditoria de acessos administrativos criada para permissoes permitidas e negadas.
+- Consulta administrativa de auditoria criada em `GET /api/admin/auditoria/acessos`.
 - Simulacao do player persiste sessoes no PostgreSQL quando executada via Docker.
 - Ativacao do player usa `codigo_ativacao` real do banco quando disponivel.
 - Manifesto do player usa `playlist_atual_id` do dispositivo e midias vinculadas quando disponivel.
@@ -90,6 +91,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Sincronizacao deve preservar a ultima playlist valida.
 - Nova playlist so substitui a antiga apos validacao completa.
 - Toda decisao critica deve ficar no projeto, nao em memoria externa.
+- Frontend so deve iniciar apos fechamento do backend.
 
 ## Pendencias de aprovacao
 
@@ -119,4 +121,12 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 
 ## Proximo passo recomendado
 
-Focar no backend: criar consulta administrativa de auditoria ou iniciar frontend administrativo.
+Focar no backend ate 100% antes do frontend.
+
+Pendencias backend prioritarias:
+- Retorno de `total` nas listagens paginadas.
+- Endpoint de gestao de usuarios, vinculos e permissoes.
+- Refresh/logout de sessao administrativa.
+- Politica de retencao de auditoria.
+- Integracao Google Drive ou decisao formal de adiar para pos-MVP.
+- Testes de performance e seguranca finais.

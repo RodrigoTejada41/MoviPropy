@@ -20,7 +20,7 @@ Impacto:
 - Frontend.
 - Storage externo.
 - Deploy.
-- Consulta administrativa de auditoria.
+- Fechamento backend 100%.
 
 ## D-002 - Login administrativo antes de Google Drive
 
@@ -203,4 +203,20 @@ Motivo:
 Impacto:
 - Criada tabela `auditoria_acessos`.
 - Fluxo central de permissao administrativa registra auditoria.
-- Endpoint de consulta de auditoria segue pendente.
+- Endpoint de consulta de auditoria foi definido depois na D-013.
+
+## D-013 - Backend 100% antes do frontend
+
+Status: aprovado.
+
+Decisao:
+- Nao iniciar frontend antes do fechamento backend.
+- Priorizar contratos, seguranca, auditoria, paginacao completa, usuarios/permissoes e homologacao backend.
+
+Motivo:
+- Evitar retrabalho de telas com API instavel.
+- Fechar base tecnica antes da interface.
+
+Impacto:
+- Frontend fica bloqueado ate nova decisao.
+- Backlog backend passa a ter prioridade total.

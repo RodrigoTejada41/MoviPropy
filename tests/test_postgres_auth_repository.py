@@ -116,7 +116,15 @@ def test_postgres_auth_repository_persists_admin_access_audit():
         user_agent=audit.user_agent,
     )
 
-    audits = repository.list_admin_access_audits(user.id)
+    audits = repository.list_admin_access_audits(
+        user_id=user.id,
+        cliente_id=audit.cliente_id,
+        recurso=audit.recurso,
+        acao=audit.acao,
+        status=audit.status,
+        limit=1,
+        offset=0,
+    )
 
     assert audits[0].user_id == audit.user_id
     assert audits[0].cliente_id == audit.cliente_id

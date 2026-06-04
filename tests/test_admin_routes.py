@@ -188,6 +188,27 @@ class FakeAuthRepository:
             }
         )
 
+    def list_admin_access_audits(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        user_id: str | None = None,
+        cliente_id: str | None = None,
+        recurso: str | None = None,
+        acao: str | None = None,
+        status: str | None = None,
+    ) -> list[dict]:
+        audits = [
+            audit
+            for audit in self.access_audits
+            if (user_id is None or audit["user_id"] == user_id)
+            and (cliente_id is None or audit["cliente_id"] == cliente_id)
+            and (recurso is None or audit["recurso"] == recurso)
+            and (acao is None or audit["acao"] == acao)
+            and (status is None or audit["status"] == status)
+        ]
+        return audits[offset : offset + limit]
+
 
 def _create_test_app(
     perfil: str = "admin",
@@ -343,6 +364,89 @@ def test_admin_blocks_scoped_user_without_action_permission():
     assert response.json() == {"detail": "permissao insuficiente"}
     assert app.state.auth_repository.access_audits[-1]["status"] == "negado"
     assert app.state.auth_repository.access_audits[-1]["acao"] == "criar"
+
+
+def test_admin_lists_access_audits_with_filters():
+    app = _create_test_app()
+    client = TestClient(app)
+    app.state.auth_repository.record_admin_access(
+        user_id="user-001",
+        recurso="clientes",
+        acao="ler",
+        status="permitido",
+        cliente_id="cliente-001",
+        ip="127.0.0.1",
+        user_agent="pytest",
+    )
+    app.state.auth_repository.record_admin_access(
+        user_id="user-002",
+        recurso="midias",
+        acao="criar",
+        status="negado",
+        cliente_id="cliente-002",
+        ip="127.0.0.1",
+        user_agent="pytest",
+    )
+
+    response = client.get(
+        "/api/admin/auditoria/acessos?cliente_id=cliente-002&status=negado",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "user_id": "user-002",
+            "recurso": "midias",
+            "acao": "criar",
+            "status": "negado",
+            "cliente_id": "cliente-002",
+            "ip": "127.0.0.1",
+            "user_agent": "pytest",
+            "created_at": None,
+        }
+    ]
+
+
+def test_admin_requires_cliente_for_scoped_audit_list():
+    app = _create_test_app(
+        perfil="admin_cliente",
+        clientes={"cliente-001"},
+        permissions={("auditoria", "ler", "cliente-001")},
+    )
+    client = TestClient(app)
+
+    response = client.get(
+        "/api/admin/auditoria/acessos",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {"detail": "cliente_id obrigatorio"}
+
+
+def test_admin_allows_scoped_audit_list_for_linked_cliente():
+    app = _create_test_app(
+        perfil="admin_cliente",
+        clientes={"cliente-001"},
+        permissions={("auditoria", "ler", "cliente-001")},
+    )
+    client = TestClient(app)
+    app.state.auth_repository.record_admin_access(
+        user_id="user-001",
+        recurso="midias",
+        acao="criar",
+        status="permitido",
+        cliente_id="cliente-001",
+    )
+
+    response = client.get(
+        "/api/admin/auditoria/acessos?cliente_id=cliente-001",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert response.status_code == 200
+    assert response.json()[0]["cliente_id"] == "cliente-001"
 
 
 def test_admin_creates_and_gets_cliente():

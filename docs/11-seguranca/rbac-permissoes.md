@@ -19,7 +19,6 @@ Definir o controle de acesso definitivo do painel e da API administrativa.
 
 - Ainda nao existe tela administrativa para manter usuarios, vinculos e permissoes.
 - Ainda nao existe seed automatico de perfis operacionais.
-- Ainda nao existe endpoint administrativo para consultar auditoria.
 - Ainda nao existe politica de retencao de auditoria.
 
 ## Perfis planejados
@@ -157,6 +156,7 @@ Regra:
 - Usuario sem permissao recebe 403. Implementado.
 - Usuario sem cliente vinculado nao enxerga dados do cliente. Implementado nas rotas administrativas com `cliente_id`.
 - Permissoes permitidas e negadas geram auditoria. Implementado.
+- Auditoria pode ser consultada por endpoint administrativo. Implementado.
 - Super Admin enxerga todos os clientes.
 - Admin Cliente nao altera configuracao global.
 - Operador nao gerencia usuarios.

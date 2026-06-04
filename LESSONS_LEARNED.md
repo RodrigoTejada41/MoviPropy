@@ -27,6 +27,33 @@ Status:
 
 ## Licoes registradas
 
+### ERR-014
+
+Data: 2026-06-04
+
+Descricao do Problema:
+- Teste de integracao PostgreSQL falhou ao verificar que entidade criada aparecia em listagem sem filtro.
+- O banco local de testes ja possuia muitos registros e a entidade nova ficou fora da primeira pagina.
+
+Causa Raiz:
+- O teste assumia banco vazio.
+- A listagem passou a ter `limit` padrao.
+
+Solucao Aplicada:
+- Ajustado teste para usar limite explicito amplo ao validar presenca de entidade criada.
+
+Como Evitar no Futuro:
+- Testes de integracao com banco reaproveitado nao devem assumir banco vazio.
+- Testes de listagem paginada devem usar filtros unicos ou `limit` explicito adequado.
+- Quando validar criacao, preferir consulta por ID ou filtro unico.
+
+Arquivos Afetados:
+- `tests/test_postgres_core_repository.py`
+
+Status: Resolvido
+
+---
+
 ### ERR-013
 
 Data: 2026-06-03
