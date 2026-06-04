@@ -12,13 +12,15 @@ Definir o controle de acesso definitivo do painel e da API administrativa.
 - Perfil legado `admin` possui acesso total.
 - Perfis escopados validam vinculo por cliente e permissao `recurso:acao`.
 - Tabelas `usuarios_clientes` e `permissoes` existem.
+- Tabela `auditoria_acessos` registra permissoes permitidas e negadas.
 - `ADMIN_API_TOKEN` e fallback local sem repository de auth.
 
 ## Limite atual
 
-- Ainda nao existe auditoria completa.
 - Ainda nao existe tela administrativa para manter usuarios, vinculos e permissoes.
 - Ainda nao existe seed automatico de perfis operacionais.
+- Ainda nao existe endpoint administrativo para consultar auditoria.
+- Ainda nao existe politica de retencao de auditoria.
 
 ## Perfis planejados
 
@@ -132,7 +134,7 @@ Campos:
 
 ### auditoria_acessos
 
-Status: pendente.
+Status: implementado.
 
 Campos:
 - id.
@@ -145,10 +147,16 @@ Campos:
 - user_agent.
 - criado_em.
 
+Regra:
+- Nao registrar token Bearer.
+- Nao registrar senha.
+- Registrar status `permitido` ou `negado`.
+
 ## Criterios de aceite
 
 - Usuario sem permissao recebe 403. Implementado.
 - Usuario sem cliente vinculado nao enxerga dados do cliente. Implementado nas rotas administrativas com `cliente_id`.
+- Permissoes permitidas e negadas geram auditoria. Implementado.
 - Super Admin enxerga todos os clientes.
 - Admin Cliente nao altera configuracao global.
 - Operador nao gerencia usuarios.

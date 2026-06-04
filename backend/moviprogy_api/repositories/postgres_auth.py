@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import psycopg
 
-from moviprogy_api.domain.auth import AdminSession, UserAccount
+from moviprogy_api.domain.auth import AdminAccessAudit, AdminSession, UserAccount
 from moviprogy_api.security import hash_password
 
 
@@ -184,6 +184,84 @@ class PostgresAuthRepository:
                 params,
             ).fetchone()
         return row is not None
+
+    def record_admin_access(
+        self,
+        user_id: str,
+        recurso: str,
+        acao: str,
+        status: str,
+        cliente_id: str | None = None,
+        ip: str | None = None,
+        user_agent: str | None = None,
+    ) -> str:
+        audit_id = f"audit-{uuid4().hex}"
+        with psycopg.connect(self._database_url) as connection:
+            connection.execute(
+                """
+                INSERT INTO auditoria_acessos (
+                    id,
+                    user_id,
+                    cliente_id,
+                    recurso,
+                    acao,
+                    status,
+                    ip,
+                    user_agent
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    audit_id,
+                    user_id,
+                    cliente_id,
+                    recurso,
+                    acao,
+                    status,
+                    ip,
+                    user_agent,
+                ),
+            )
+            connection.commit()
+        return audit_id
+
+    def list_admin_access_audits(
+        self,
+        user_id: str,
+        limit: int = 50,
+    ) -> list[AdminAccessAudit]:
+        with psycopg.connect(self._database_url) as connection:
+            rows = connection.execute(
+                """
+                SELECT
+                    user_id,
+                    cliente_id,
+                    recurso,
+                    acao,
+                    status,
+                    ip,
+                    user_agent,
+                    criado_em
+                FROM auditoria_acessos
+                WHERE user_id = %s
+                ORDER BY criado_em DESC
+                LIMIT %s
+                """,
+                (user_id, limit),
+            ).fetchall()
+        return [
+            AdminAccessAudit(
+                user_id=row[0],
+                cliente_id=row[1],
+                recurso=row[2],
+                acao=row[3],
+                status=row[4],
+                ip=row[5],
+                user_agent=row[6],
+                created_at=row[7],
+            )
+            for row in rows
+        ]
 
     def ensure_default_admin(self, email: str, password: str) -> None:
         if self.get_user_by_email(email) is not None:

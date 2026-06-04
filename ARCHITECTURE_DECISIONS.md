@@ -702,6 +702,35 @@ Motivo:
 - Mantem compatibilidade com o admin seed atual.
 
 Consequencias:
-- Auditoria de acessos ainda precisa ser implementada.
+- Auditoria de acessos foi definida posteriormente na ADR-025.
 - Tela de gestao de usuarios/permissoes ainda nao existe.
 - Retorno de listagens para usuario escopado exige filtro por cliente.
+
+---
+
+### ADR-025 - Auditoria de acessos administrativos
+
+Status: Aprovada
+
+Data: 2026-06-04
+
+Contexto:
+- O RBAC granular controla acesso por usuario, cliente, recurso e acao.
+- Permissoes negadas precisam ficar rastreaveis.
+- Tokens e senhas nao podem ser gravados em logs ou auditoria.
+
+Decisao:
+- Criar tabela `auditoria_acessos`.
+- Registrar `user_id`, `cliente_id`, `recurso`, `acao`, `status`, IP e user-agent.
+- Registrar acessos permitidos e negados no fluxo central de permissao administrativa.
+- Nao registrar token Bearer nem senha.
+
+Motivo:
+- Facilita investigacao de tentativa indevida de acesso.
+- Ajuda homologacao de seguranca e rastreabilidade LGPD.
+- Centraliza auditoria sem duplicar codigo em cada rota.
+
+Consequencias:
+- A auditoria aumenta volume de escrita no banco.
+- Sera necessaria politica de retencao.
+- Endpoint administrativo de consulta de auditoria ainda precisa ser criado.

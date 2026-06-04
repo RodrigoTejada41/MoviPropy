@@ -23,7 +23,11 @@ from moviprogy_api.domain.core import (
     PlaylistMidia,
     PlaylistMidiaRequest,
 )
-from moviprogy_api.security import require_admin_permission, require_admin_user
+from moviprogy_api.security import (
+    record_admin_access,
+    require_admin_permission,
+    require_admin_user,
+)
 
 
 router = APIRouter(
@@ -384,6 +388,7 @@ def _require_scoped_list_permission(
     session = getattr(request.state, "admin_session", None)
     if session is not None and session.perfil not in {"admin", "super_admin"}:
         if cliente_id is None:
+            record_admin_access(request, session, recurso, acao, "negado", cliente_id)
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="cliente_id obrigatorio",

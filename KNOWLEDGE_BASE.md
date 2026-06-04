@@ -85,6 +85,7 @@ Limite:
 - Vinculo de midia em playlist existe via rota administrativa.
 - Tabelas `usuarios` e `admin_sessions` implementam login administrativo inicial.
 - Tabelas `usuarios_clientes` e `permissoes` implementam RBAC granular inicial.
+- Tabela `auditoria_acessos` registra tentativas administrativas permitidas e negadas.
 
 ## Integracao Google Drive planejada
 
@@ -177,7 +178,7 @@ Seguranca:
 - `ADMIN_API_TOKEN` existe apenas como fallback local quando `auth_repository` nao esta disponivel.
 
 Limite:
-- Auditoria de acessos administrativos ainda nao foi implementada.
+- Consulta administrativa de auditoria ainda nao possui endpoint.
 - Sessao admin usa hash SHA-256 do token no banco.
 - Senha usa PBKDF2-HMAC-SHA256 com salt individual.
 
@@ -206,6 +207,8 @@ Regras de negocio atuais:
 - Senha nunca deve ser salva em texto puro.
 - Permissoes usam formato `recurso:acao`, com escopo opcional por `cliente_id`.
 - Usuario escopado sem `cliente_id` em listagens de dados por cliente recebe 403.
+- Auditoria administrativa registra `user_id`, `cliente_id`, `recurso`, `acao`, `status`, IP e user-agent.
+- Auditoria administrativa nao registra token Bearer nem senha.
 
 ## Simulacao local
 

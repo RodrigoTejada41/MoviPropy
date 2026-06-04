@@ -41,6 +41,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - RBAC granular inicial criado com vinculo usuario/cliente e permissoes `recurso:acao`.
 - Migration de auth criada para `usuarios` e `admin_sessions`.
 - Migration RBAC criada para `usuarios_clientes` e `permissoes`.
+- Auditoria de acessos administrativos criada para permissoes permitidas e negadas.
 - Simulacao do player persiste sessoes no PostgreSQL quando executada via Docker.
 - Ativacao do player usa `codigo_ativacao` real do banco quando disponivel.
 - Manifesto do player usa `playlist_atual_id` do dispositivo e midias vinculadas quando disponivel.
@@ -110,7 +111,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - `ADMIN_API_TOKEN` permanece apenas como fallback legado sem banco.
 - Perfil legado `admin` possui acesso total.
 - Perfis escopados dependem de vinculo com cliente e permissao por recurso/acao.
-- Auditoria de acessos RBAC ainda esta pendente.
+- Auditoria de acessos RBAC registra permissoes permitidas e negadas, sem gravar tokens.
 - Rotas de midias/playlists ainda sao CRUD inicial com upload fisico local para midias.
 - Manifesto real depende de `dispositivos.playlist_atual_id`, playlist ativa e midias vinculadas.
 - Download controlado atual serve arquivo local de `MOVIPROGY_MEDIA_DIR`.
@@ -118,4 +119,4 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 
 ## Proximo passo recomendado
 
-Focar no backend: adicionar auditoria de acessos administrativos ou iniciar frontend administrativo.
+Focar no backend: criar consulta administrativa de auditoria ou iniciar frontend administrativo.

@@ -26,6 +26,17 @@ class AdminSession(BaseModel):
     expires_at: datetime | None = None
 
 
+class AdminAccessAudit(BaseModel):
+    user_id: str
+    recurso: str
+    acao: str
+    status: str
+    cliente_id: str | None = None
+    ip: str | None = None
+    user_agent: str | None = None
+    created_at: datetime | None = None
+
+
 class LoginRequest(BaseModel):
     email: str = Field(min_length=3)
     senha: str = Field(min_length=1)

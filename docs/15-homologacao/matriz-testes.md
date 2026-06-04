@@ -11,6 +11,7 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Login admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | RBAC admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | RBAC granular cliente/acao | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
+| Auditoria admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Clientes | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Dispositivos | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Midias metadados | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |

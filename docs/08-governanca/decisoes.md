@@ -20,7 +20,7 @@ Impacto:
 - Frontend.
 - Storage externo.
 - Deploy.
-- Auditoria de acessos administrativos.
+- Consulta administrativa de auditoria.
 
 ## D-002 - Login administrativo antes de Google Drive
 
@@ -185,4 +185,22 @@ Impacto:
 - Usuario escopado sem permissao recebe 403.
 - Usuario escopado sem vinculo com cliente recebe 403.
 - Listagens por dados de cliente exigem `cliente_id` para usuario escopado.
-- Auditoria de acessos segue pendente.
+- Auditoria de acessos foi definida depois na D-012.
+
+## D-012 - Auditoria de acessos administrativos
+
+Status: aprovado.
+
+Decisao:
+- Registrar acessos administrativos permitidos e negados.
+- Persistir `user_id`, `cliente_id`, `recurso`, `acao`, `status`, IP e user-agent.
+- Nao persistir token Bearer nem senha.
+
+Motivo:
+- Rastrear decisoes de autorizacao.
+- Apoiar investigacao de acesso indevido.
+
+Impacto:
+- Criada tabela `auditoria_acessos`.
+- Fluxo central de permissao administrativa registra auditoria.
+- Endpoint de consulta de auditoria segue pendente.

@@ -136,6 +136,7 @@ class FakeAuthRepository:
         self.user_id = user_id
         self.clientes = clientes or set()
         self.permissions = permissions or set()
+        self.access_audits: list[dict] = []
         self.sessions = {
             hash_token(ADMIN_TOKEN): AdminSession(
                 user_id=user_id,
@@ -164,6 +165,28 @@ class FakeAuthRepository:
             acao,
             None,
         ) in self.permissions
+
+    def record_admin_access(
+        self,
+        user_id: str,
+        recurso: str,
+        acao: str,
+        status: str,
+        cliente_id: str | None = None,
+        ip: str | None = None,
+        user_agent: str | None = None,
+    ) -> None:
+        self.access_audits.append(
+            {
+                "user_id": user_id,
+                "recurso": recurso,
+                "acao": acao,
+                "status": status,
+                "cliente_id": cliente_id,
+                "ip": ip,
+                "user_agent": user_agent,
+            }
+        )
 
 
 def _create_test_app(
@@ -249,6 +272,15 @@ def test_admin_allows_scoped_user_with_cliente_and_permission():
 
     assert response.status_code == 201
     assert response.json()["id"] == "midia-001"
+    assert app.state.auth_repository.access_audits[-1] == {
+        "user_id": "user-001",
+        "recurso": "midias",
+        "acao": "criar",
+        "status": "permitido",
+        "cliente_id": "cliente-001",
+        "ip": "testclient",
+        "user_agent": "testclient",
+    }
 
 
 def test_admin_blocks_scoped_user_for_unlinked_cliente():
@@ -278,6 +310,8 @@ def test_admin_blocks_scoped_user_for_unlinked_cliente():
 
     assert response.status_code == 403
     assert response.json() == {"detail": "permissao insuficiente"}
+    assert app.state.auth_repository.access_audits[-1]["status"] == "negado"
+    assert app.state.auth_repository.access_audits[-1]["cliente_id"] == "cliente-002"
 
 
 def test_admin_blocks_scoped_user_without_action_permission():
@@ -307,6 +341,8 @@ def test_admin_blocks_scoped_user_without_action_permission():
 
     assert response.status_code == 403
     assert response.json() == {"detail": "permissao insuficiente"}
+    assert app.state.auth_repository.access_audits[-1]["status"] == "negado"
+    assert app.state.auth_repository.access_audits[-1]["acao"] == "criar"
 
 
 def test_admin_creates_and_gets_cliente():

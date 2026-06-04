@@ -75,6 +75,7 @@ def require_admin_permission(
             detail="permissao insuficiente",
         )
     if session.perfil in _FULL_ACCESS_PROFILES:
+        record_admin_access(request, session, recurso, acao, "permitido", cliente_id)
         return
 
     repository = getattr(request.app.state, "auth_repository", None)
@@ -87,15 +88,41 @@ def require_admin_permission(
         session.user_id,
         cliente_id,
     ):
+        record_admin_access(request, session, recurso, acao, "negado", cliente_id)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="permissao insuficiente",
         )
     if not repository.has_permission(session.user_id, recurso, acao, cliente_id):
+        record_admin_access(request, session, recurso, acao, "negado", cliente_id)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="permissao insuficiente",
         )
+    record_admin_access(request, session, recurso, acao, "permitido", cliente_id)
+
+
+def record_admin_access(
+    request: Request,
+    session: AdminSession,
+    recurso: str,
+    acao: str,
+    status_value: str,
+    cliente_id: str | None = None,
+) -> None:
+    repository = getattr(request.app.state, "auth_repository", None)
+    if repository is None or not hasattr(repository, "record_admin_access"):
+        return
+    client_host = request.client.host if request.client else None
+    repository.record_admin_access(
+        user_id=session.user_id,
+        recurso=recurso,
+        acao=acao,
+        status=status_value,
+        cliente_id=cliente_id,
+        ip=client_host,
+        user_agent=request.headers.get("user-agent"),
+    )
 
 
 def create_access_token() -> str:
