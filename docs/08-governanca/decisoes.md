@@ -155,7 +155,7 @@ Status: aprovado.
 
 Decisao:
 - Listagens administrativas devem aceitar `limit`, `offset` e filtros basicos.
-- O formato de resposta permanece lista simples nesta etapa.
+- O formato de resposta permaneceu lista simples na etapa inicial.
 
 Motivo:
 - Reduzir risco de consultas grandes antes do frontend.
@@ -166,7 +166,7 @@ Impacto:
 - Dispositivos filtram por `cliente_id` e `bloqueado`.
 - Midias filtram por `cliente_id` e `ativo`.
 - Playlists filtram por `cliente_id` e `ativa`.
-- `total` para paginacao completa segue pendente.
+- `total` para paginacao completa foi definido depois na D-014.
 
 ## D-011 - RBAC granular por cliente e acao
 
@@ -220,3 +220,20 @@ Motivo:
 Impacto:
 - Frontend fica bloqueado ate nova decisao.
 - Backlog backend passa a ter prioridade total.
+
+## D-014 - Envelope paginado administrativo
+
+Status: aprovado.
+
+Decisao:
+- Listagens administrativas retornam `items`, `limit`, `offset` e `total`.
+- O `total` usa os mesmos filtros da consulta.
+
+Motivo:
+- Fechar contrato de paginacao antes do frontend.
+- Evitar que o painel precise carregar todos os registros.
+
+Impacto:
+- Contrato antigo de lista simples foi substituido.
+- Frontend deve ler dados em `items`.
+- Testes de performance devem considerar consulta de contagem.

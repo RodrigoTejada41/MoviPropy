@@ -133,3 +133,13 @@ def test_postgres_auth_repository_persists_admin_access_audit():
     assert audits[0].status == audit.status
     assert audits[0].ip == audit.ip
     assert audits[0].user_agent == audit.user_agent
+    assert (
+        repository.count_admin_access_audits(
+            user_id=user.id,
+            cliente_id=audit.cliente_id,
+            recurso=audit.recurso,
+            acao=audit.acao,
+            status=audit.status,
+        )
+        == 1
+    )

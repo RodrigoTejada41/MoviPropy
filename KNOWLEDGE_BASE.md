@@ -83,6 +83,7 @@ Limite:
 - Repository core persiste entidades iniciais do dominio.
 - Rotas administrativas existem para clientes, dispositivos, midias e playlists.
 - Vinculo de midia em playlist existe via rota administrativa.
+- Listagens administrativas retornam envelope paginado com `items`, `limit`, `offset` e `total`.
 - Tabelas `usuarios` e `admin_sessions` implementam login administrativo inicial.
 - Tabelas `usuarios_clientes` e `permissoes` implementam RBAC granular inicial.
 - Tabela `auditoria_acessos` registra tentativas administrativas permitidas e negadas.
@@ -180,7 +181,6 @@ Seguranca:
 - `ADMIN_API_TOKEN` existe apenas como fallback local quando `auth_repository` nao esta disponivel.
 
 Limite:
-- Listagens ainda retornam lista simples, sem `total`.
 - Gestao administrativa de usuarios, vinculos e permissoes ainda nao possui endpoints.
 - Auditoria ainda nao possui politica de retencao.
 - Sessao admin usa hash SHA-256 do token no banco.
@@ -195,7 +195,7 @@ Regras de negocio atuais:
 - Dispositivos filtram por `cliente_id` e `bloqueado`.
 - Midias filtram por `cliente_id` e `ativo`.
 - Playlists filtram por `cliente_id` e `ativa`.
-- Resposta atual das listagens permanece lista simples, sem `total`.
+- Resposta das listagens usa envelope paginado com `items`, `limit`, `offset` e `total`.
 
 ## Autenticacao administrativa
 

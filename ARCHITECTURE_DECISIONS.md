@@ -676,6 +676,9 @@ Consequencias:
 - RBAC granular por cliente/acao continua pendente.
 - Indices devem ser revisitados quando houver carga real.
 
+Atualizacao:
+- O envelope paginado com `total` foi aprovado posteriormente na ADR-027.
+
 ---
 
 ### ADR-024 - RBAC granular inicial por cliente e acao
@@ -761,3 +764,31 @@ Motivo:
 Consequencias:
 - Frontend fica bloqueado ate fechamento backend.
 - Mudancas de API devem ser resolvidas antes da interface.
+
+---
+
+### ADR-027 - Envelope paginado nas listagens administrativas
+
+Status: Aprovada
+
+Data: 2026-06-04
+
+Contexto:
+- O frontend precisa saber o total de registros para paginacao.
+- Listagens administrativas ja tinham `limit`, `offset` e filtros.
+- O contrato ainda retornava lista simples, insuficiente para paginacao completa.
+
+Decisao:
+- Listagens administrativas passam a retornar `items`, `limit`, `offset` e `total`.
+- O `total` deve respeitar os mesmos filtros da listagem.
+- Metodos de listagem dos repositories continuam retornando listas; contadores ficam em metodos dedicados.
+
+Motivo:
+- Estabiliza contrato antes do frontend.
+- Evita carregar todos os registros apenas para calcular paginacao.
+- Mantem baixo acoplamento entre rota e repository.
+
+Consequencias:
+- Ha quebra controlada do contrato antigo de lista simples.
+- Frontend deve consumir `items` para dados e `total` para paginacao.
+- Consultas de contagem precisam ser consideradas nos testes de performance.

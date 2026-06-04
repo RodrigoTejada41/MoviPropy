@@ -8,6 +8,13 @@ class Cliente(BaseModel):
     ativo: bool = True
 
 
+class ClienteListResponse(BaseModel):
+    items: list[Cliente]
+    limit: int = Field(ge=1)
+    offset: int = Field(ge=0)
+    total: int = Field(ge=0)
+
+
 class Dispositivo(BaseModel):
     id: str = Field(min_length=1)
     cliente_id: str = Field(min_length=1)
@@ -15,6 +22,13 @@ class Dispositivo(BaseModel):
     codigo_ativacao: str = Field(min_length=1)
     bloqueado: bool = False
     playlist_atual_id: str | None = None
+
+
+class DispositivoListResponse(BaseModel):
+    items: list[Dispositivo]
+    limit: int = Field(ge=1)
+    offset: int = Field(ge=0)
+    total: int = Field(ge=0)
 
 
 class Midia(BaseModel):
@@ -29,12 +43,26 @@ class Midia(BaseModel):
     ativo: bool = True
 
 
+class MidiaListResponse(BaseModel):
+    items: list[Midia]
+    limit: int = Field(ge=1)
+    offset: int = Field(ge=0)
+    total: int = Field(ge=0)
+
+
 class Playlist(BaseModel):
     id: str = Field(min_length=1)
     cliente_id: str = Field(min_length=1)
     nome: str = Field(min_length=1)
     versao: int = Field(default=1, ge=1)
     ativa: bool = False
+
+
+class PlaylistListResponse(BaseModel):
+    items: list[Playlist]
+    limit: int = Field(ge=1)
+    offset: int = Field(ge=0)
+    total: int = Field(ge=0)
 
 
 class PlaylistMidia(BaseModel):

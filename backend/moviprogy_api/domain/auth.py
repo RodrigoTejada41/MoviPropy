@@ -37,6 +37,13 @@ class AdminAccessAudit(BaseModel):
     created_at: datetime | None = None
 
 
+class AdminAccessAuditListResponse(BaseModel):
+    items: list[AdminAccessAudit]
+    limit: int = Field(ge=1)
+    offset: int = Field(ge=0)
+    total: int = Field(ge=0)
+
+
 class LoginRequest(BaseModel):
     email: str = Field(min_length=3)
     senha: str = Field(min_length=1)

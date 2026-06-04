@@ -75,6 +75,19 @@ class PostgresCoreRepository:
             for row in rows
         ]
 
+    def count_clientes(self, ativo: bool | None = None) -> int:
+        clauses = []
+        params: list[object] = []
+        if ativo is not None:
+            clauses.append("ativo = %s")
+            params.append(ativo)
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                f"SELECT COUNT(*) FROM clientes {_where_clause(clauses)}",
+                params,
+            ).fetchone()
+        return int(row[0])
+
     def save_dispositivo(self, dispositivo: Dispositivo) -> None:
         with psycopg.connect(self._database_url) as connection:
             connection.execute(
@@ -180,6 +193,26 @@ class PostgresCoreRepository:
             )
             for row in rows
         ]
+
+    def count_dispositivos(
+        self,
+        cliente_id: str | None = None,
+        bloqueado: bool | None = None,
+    ) -> int:
+        clauses = []
+        params: list[object] = []
+        if cliente_id is not None:
+            clauses.append("cliente_id = %s")
+            params.append(cliente_id)
+        if bloqueado is not None:
+            clauses.append("bloqueado = %s")
+            params.append(bloqueado)
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                f"SELECT COUNT(*) FROM dispositivos {_where_clause(clauses)}",
+                params,
+            ).fetchone()
+        return int(row[0])
 
     def get_dispositivo_by_activation_code(
         self,
@@ -339,6 +372,26 @@ class PostgresCoreRepository:
             for row in rows
         ]
 
+    def count_midias(
+        self,
+        cliente_id: str | None = None,
+        ativo: bool | None = None,
+    ) -> int:
+        clauses = []
+        params: list[object] = []
+        if cliente_id is not None:
+            clauses.append("cliente_id = %s")
+            params.append(cliente_id)
+        if ativo is not None:
+            clauses.append("ativo = %s")
+            params.append(ativo)
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                f"SELECT COUNT(*) FROM midias {_where_clause(clauses)}",
+                params,
+            ).fetchone()
+        return int(row[0])
+
     def save_playlist(self, playlist: Playlist) -> None:
         with psycopg.connect(self._database_url) as connection:
             connection.execute(
@@ -421,6 +474,26 @@ class PostgresCoreRepository:
             )
             for row in rows
         ]
+
+    def count_playlists(
+        self,
+        cliente_id: str | None = None,
+        ativa: bool | None = None,
+    ) -> int:
+        clauses = []
+        params: list[object] = []
+        if cliente_id is not None:
+            clauses.append("cliente_id = %s")
+            params.append(cliente_id)
+        if ativa is not None:
+            clauses.append("ativa = %s")
+            params.append(ativa)
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                f"SELECT COUNT(*) FROM playlists {_where_clause(clauses)}",
+                params,
+            ).fetchone()
+        return int(row[0])
 
     def add_midia_to_playlist(
         self,

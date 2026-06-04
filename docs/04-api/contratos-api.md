@@ -60,9 +60,8 @@ Limite: gestao de usuarios/permissoes via painel ainda pendente.
 Finalidade: listar clientes.
 Quem usa: painel administrativo.
 Query: `limit`, `offset`, `ativo`.
-Resposta: lista de clientes.
+Resposta: envelope paginado com `items`, `limit`, `offset` e `total`.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: retorno de `total` ainda pendente.
 
 ## Dispositivos
 
@@ -88,9 +87,8 @@ Limite: gestao de usuarios/permissoes via painel ainda pendente.
 Finalidade: listar dispositivos.
 Quem usa: painel administrativo.
 Query: `limit`, `offset`, `cliente_id`, `bloqueado`.
-Resposta: lista de dispositivos.
+Resposta: envelope paginado com `items`, `limit`, `offset` e `total`.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: retorno de `total` ainda pendente.
 
 ### GET /api/admin/dispositivos/{dispositivo_id}/eventos
 
@@ -107,10 +105,9 @@ Limite: filtro por periodo e paginacao de eventos ainda pendentes.
 Finalidade: consultar auditoria de acessos administrativos.
 Quem usa: painel administrativo.
 Query: `limit`, `offset`, `user_id`, `cliente_id`, `recurso`, `acao`, `status`.
-Resposta: lista de registros de auditoria.
+Resposta: envelope paginado com `items`, `limit`, `offset` e `total`.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `auditoria:ler`.
 Regra: usuario escopado precisa informar `cliente_id`.
-Limite: resposta ainda nao retorna `total`.
 
 ### POST /api/dispositivos
 
@@ -169,9 +166,8 @@ Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 Finalidade: listar midias.
 Quem usa: painel administrativo.
 Query: `limit`, `offset`, `cliente_id`, `ativo`.
-Resposta: lista de midias.
+Resposta: envelope paginado com `items`, `limit`, `offset` e `total`.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: retorno de `total` ainda pendente.
 
 ## Playlists
 
@@ -196,9 +192,8 @@ Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 Finalidade: listar playlists.
 Quem usa: painel administrativo.
 Query: `limit`, `offset`, `cliente_id`, `ativa`.
-Resposta: lista de playlists.
+Resposta: envelope paginado com `items`, `limit`, `offset` e `total`.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: retorno de `total` ainda pendente.
 
 ### POST /api/admin/playlists/{playlist_id}/midias
 

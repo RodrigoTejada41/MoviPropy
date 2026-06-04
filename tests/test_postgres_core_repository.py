@@ -157,10 +157,16 @@ def test_postgres_core_repository_filters_and_paginates_admin_lists():
         cliente_id=cliente_b.id,
         bloqueado=True,
     ) == [dispositivo_b]
+    assert repository.count_dispositivos(
+        cliente_id=cliente_b.id,
+        bloqueado=True,
+    ) == 1
     assert repository.list_midias(cliente_id=cliente_b.id, ativo=False) == [midia_b]
+    assert repository.count_midias(cliente_id=cliente_b.id, ativo=False) == 1
     assert repository.list_playlists(cliente_id=cliente_b.id, ativa=False) == [
         playlist_b
     ]
+    assert repository.count_playlists(cliente_id=cliente_b.id, ativa=False) == 1
 
 
 def test_player_update_check_uses_postgres_playlist_version():

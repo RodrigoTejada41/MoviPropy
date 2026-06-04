@@ -287,6 +287,38 @@ class PostgresAuthRepository:
             for row in rows
         ]
 
+    def count_admin_access_audits(
+        self,
+        user_id: str | None = None,
+        cliente_id: str | None = None,
+        recurso: str | None = None,
+        acao: str | None = None,
+        status: str | None = None,
+    ) -> int:
+        clauses = []
+        params: list[object] = []
+        if user_id is not None:
+            clauses.append("user_id = %s")
+            params.append(user_id)
+        if cliente_id is not None:
+            clauses.append("cliente_id = %s")
+            params.append(cliente_id)
+        if recurso is not None:
+            clauses.append("recurso = %s")
+            params.append(recurso)
+        if acao is not None:
+            clauses.append("acao = %s")
+            params.append(acao)
+        if status is not None:
+            clauses.append("status = %s")
+            params.append(status)
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                f"SELECT COUNT(*) FROM auditoria_acessos {_where_clause(clauses)}",
+                params,
+            ).fetchone()
+        return int(row[0])
+
     def ensure_default_admin(self, email: str, password: str) -> None:
         if self.get_user_by_email(email) is not None:
             return

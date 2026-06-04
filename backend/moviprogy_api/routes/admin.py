@@ -17,13 +17,17 @@ from fastapi import (
 
 from moviprogy_api.domain.core import (
     Cliente,
+    ClienteListResponse,
     Dispositivo,
+    DispositivoListResponse,
     Midia,
+    MidiaListResponse,
     Playlist,
+    PlaylistListResponse,
     PlaylistMidia,
     PlaylistMidiaRequest,
 )
-from moviprogy_api.domain.auth import AdminAccessAudit
+from moviprogy_api.domain.auth import AdminAccessAuditListResponse
 from moviprogy_api.security import (
     record_admin_access,
     require_admin_permission,
@@ -50,7 +54,7 @@ _ALLOWED_UPLOADS = {
 }
 
 
-@router.get("/auditoria/acessos", response_model=list[AdminAccessAudit])
+@router.get("/auditoria/acessos", response_model=AdminAccessAuditListResponse)
 def list_admin_access_audits(
     request: Request,
     limit: int = Query(default=50, ge=1, le=200),
@@ -60,17 +64,25 @@ def list_admin_access_audits(
     recurso: str | None = None,
     acao: str | None = None,
     status: str | None = None,
-) -> list[AdminAccessAudit]:
+) -> AdminAccessAuditListResponse:
     repository = _auth_repository(request)
     _require_scoped_list_permission(request, "auditoria", "ler", cliente_id)
-    return repository.list_admin_access_audits(
+    filters = {
+        "user_id": user_id,
+        "cliente_id": cliente_id,
+        "recurso": recurso,
+        "acao": acao,
+        "status": status,
+    }
+    return AdminAccessAuditListResponse(
+        items=repository.list_admin_access_audits(
+            limit=limit,
+            offset=offset,
+            **filters,
+        ),
         limit=limit,
         offset=offset,
-        user_id=user_id,
-        cliente_id=cliente_id,
-        recurso=recurso,
-        acao=acao,
-        status=status,
+        total=repository.count_admin_access_audits(**filters),
     )
 
 
@@ -86,16 +98,21 @@ def create_cliente(cliente: Cliente, request: Request) -> Cliente:
     return cliente
 
 
-@router.get("/clientes", response_model=list[Cliente])
+@router.get("/clientes", response_model=ClienteListResponse)
 def list_clientes(
     request: Request,
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     ativo: bool | None = None,
-) -> list[Cliente]:
+) -> ClienteListResponse:
     repository = _core_repository(request)
     require_admin_permission(request, "clientes", "ler")
-    return repository.list_clientes(limit=limit, offset=offset, ativo=ativo)
+    return ClienteListResponse(
+        items=repository.list_clientes(limit=limit, offset=offset, ativo=ativo),
+        limit=limit,
+        offset=offset,
+        total=repository.count_clientes(ativo=ativo),
+    )
 
 
 @router.get("/clientes/{cliente_id}", response_model=Cliente)
@@ -133,21 +150,29 @@ def create_dispositivo(dispositivo: Dispositivo, request: Request) -> Dispositiv
     return dispositivo
 
 
-@router.get("/dispositivos", response_model=list[Dispositivo])
+@router.get("/dispositivos", response_model=DispositivoListResponse)
 def list_dispositivos(
     request: Request,
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     cliente_id: str | None = None,
     bloqueado: bool | None = None,
-) -> list[Dispositivo]:
+) -> DispositivoListResponse:
     repository = _core_repository(request)
     _require_scoped_list_permission(request, "dispositivos", "ler", cliente_id)
-    return repository.list_dispositivos(
+    return DispositivoListResponse(
+        items=repository.list_dispositivos(
+            limit=limit,
+            offset=offset,
+            cliente_id=cliente_id,
+            bloqueado=bloqueado,
+        ),
         limit=limit,
         offset=offset,
-        cliente_id=cliente_id,
-        bloqueado=bloqueado,
+        total=repository.count_dispositivos(
+            cliente_id=cliente_id,
+            bloqueado=bloqueado,
+        ),
     )
 
 
@@ -194,21 +219,26 @@ def create_midia(midia: Midia, request: Request) -> Midia:
     return midia
 
 
-@router.get("/midias", response_model=list[Midia])
+@router.get("/midias", response_model=MidiaListResponse)
 def list_midias(
     request: Request,
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     cliente_id: str | None = None,
     ativo: bool | None = None,
-) -> list[Midia]:
+) -> MidiaListResponse:
     repository = _core_repository(request)
     _require_scoped_list_permission(request, "midias", "ler", cliente_id)
-    return repository.list_midias(
+    return MidiaListResponse(
+        items=repository.list_midias(
+            limit=limit,
+            offset=offset,
+            cliente_id=cliente_id,
+            ativo=ativo,
+        ),
         limit=limit,
         offset=offset,
-        cliente_id=cliente_id,
-        ativo=ativo,
+        total=repository.count_midias(cliente_id=cliente_id, ativo=ativo),
     )
 
 
@@ -308,21 +338,26 @@ def create_playlist(playlist: Playlist, request: Request) -> Playlist:
     return playlist
 
 
-@router.get("/playlists", response_model=list[Playlist])
+@router.get("/playlists", response_model=PlaylistListResponse)
 def list_playlists(
     request: Request,
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     cliente_id: str | None = None,
     ativa: bool | None = None,
-) -> list[Playlist]:
+) -> PlaylistListResponse:
     repository = _core_repository(request)
     _require_scoped_list_permission(request, "playlists", "ler", cliente_id)
-    return repository.list_playlists(
+    return PlaylistListResponse(
+        items=repository.list_playlists(
+            limit=limit,
+            offset=offset,
+            cliente_id=cliente_id,
+            ativa=ativa,
+        ),
         limit=limit,
         offset=offset,
-        cliente_id=cliente_id,
-        ativa=ativa,
+        total=repository.count_playlists(cliente_id=cliente_id, ativa=ativa),
     )
 
 

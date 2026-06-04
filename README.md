@@ -97,11 +97,13 @@ Endpoints iniciais:
 - `GET /api/admin/playlists`
 - `GET /api/admin/playlists/{playlist_id}`
 - `POST /api/admin/playlists/{playlist_id}/midias`
+- `GET /api/admin/auditoria/acessos`
 
 Limite:
 - `/api/admin/*` exige `Authorization: Bearer <access_token>` de usuario com perfil `admin`.
 - `ADMIN_API_TOKEN` permanece apenas como fallback local sem repository de auth.
-- RBAC granular por cliente/acao ainda esta pendente.
+- Listagens administrativas retornam `items`, `limit`, `offset` e `total`.
+- Gestao de usuarios, vinculos e permissoes ainda esta pendente.
 
 Banco local:
 - PostgreSQL roda no container `moviprogy-db`.

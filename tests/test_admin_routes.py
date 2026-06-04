@@ -41,6 +41,15 @@ class FakeCoreRepository:
         ]
         return clientes[offset : offset + limit]
 
+    def count_clientes(self, ativo: bool | None = None) -> int:
+        return len(
+            [
+                cliente
+                for cliente in self.clientes.values()
+                if ativo is None or cliente.ativo is ativo
+            ]
+        )
+
     def save_dispositivo(self, dispositivo: Dispositivo) -> None:
         self.dispositivos[dispositivo.id] = dispositivo
 
@@ -61,6 +70,20 @@ class FakeCoreRepository:
             and (bloqueado is None or dispositivo.bloqueado is bloqueado)
         ]
         return dispositivos[offset : offset + limit]
+
+    def count_dispositivos(
+        self,
+        cliente_id: str | None = None,
+        bloqueado: bool | None = None,
+    ) -> int:
+        return len(
+            [
+                dispositivo
+                for dispositivo in self.dispositivos.values()
+                if (cliente_id is None or dispositivo.cliente_id == cliente_id)
+                and (bloqueado is None or dispositivo.bloqueado is bloqueado)
+            ]
+        )
 
     def save_midia(self, midia: Midia) -> None:
         self.midias[midia.id] = midia
@@ -83,6 +106,20 @@ class FakeCoreRepository:
         ]
         return midias[offset : offset + limit]
 
+    def count_midias(
+        self,
+        cliente_id: str | None = None,
+        ativo: bool | None = None,
+    ) -> int:
+        return len(
+            [
+                midia
+                for midia in self.midias.values()
+                if (cliente_id is None or midia.cliente_id == cliente_id)
+                and (ativo is None or midia.ativo is ativo)
+            ]
+        )
+
     def save_playlist(self, playlist: Playlist) -> None:
         self.playlists[playlist.id] = playlist
 
@@ -103,6 +140,20 @@ class FakeCoreRepository:
             and (ativa is None or playlist.ativa is ativa)
         ]
         return playlists[offset : offset + limit]
+
+    def count_playlists(
+        self,
+        cliente_id: str | None = None,
+        ativa: bool | None = None,
+    ) -> int:
+        return len(
+            [
+                playlist
+                for playlist in self.playlists.values()
+                if (cliente_id is None or playlist.cliente_id == cliente_id)
+                and (ativa is None or playlist.ativa is ativa)
+            ]
+        )
 
     def add_midia_to_playlist(
         self,
@@ -208,6 +259,26 @@ class FakeAuthRepository:
             and (status is None or audit["status"] == status)
         ]
         return audits[offset : offset + limit]
+
+    def count_admin_access_audits(
+        self,
+        user_id: str | None = None,
+        cliente_id: str | None = None,
+        recurso: str | None = None,
+        acao: str | None = None,
+        status: str | None = None,
+    ) -> int:
+        return len(
+            [
+                audit
+                for audit in self.access_audits
+                if (user_id is None or audit["user_id"] == user_id)
+                and (cliente_id is None or audit["cliente_id"] == cliente_id)
+                and (recurso is None or audit["recurso"] == recurso)
+                and (acao is None or audit["acao"] == acao)
+                and (status is None or audit["status"] == status)
+            ]
+        )
 
 
 def _create_test_app(
@@ -394,7 +465,11 @@ def test_admin_lists_access_audits_with_filters():
     )
 
     assert response.status_code == 200
-    assert response.json() == [
+    payload = response.json()
+    assert payload["limit"] == 50
+    assert payload["offset"] == 0
+    assert payload["total"] == 1
+    assert payload["items"] == [
         {
             "user_id": "user-002",
             "recurso": "midias",
@@ -446,7 +521,9 @@ def test_admin_allows_scoped_audit_list_for_linked_cliente():
     )
 
     assert response.status_code == 200
-    assert response.json()[0]["cliente_id"] == "cliente-001"
+    payload = response.json()
+    assert payload["total"] == 2
+    assert {item["cliente_id"] for item in payload["items"]} == {"cliente-001"}
 
 
 def test_admin_creates_and_gets_cliente():
@@ -491,7 +568,11 @@ def test_admin_lists_clientes():
     response = client.get("/api/admin/clientes", headers=ADMIN_HEADERS)
 
     assert response.status_code == 200
-    assert [cliente["id"] for cliente in response.json()] == [
+    payload = response.json()
+    assert payload["limit"] == 50
+    assert payload["offset"] == 0
+    assert payload["total"] == 2
+    assert [cliente["id"] for cliente in payload["items"]] == [
         "cliente-001",
         "cliente-002",
     ]
@@ -517,7 +598,11 @@ def test_admin_lists_clientes_with_pagination_and_active_filter():
     )
 
     assert response.status_code == 200
-    assert [cliente["id"] for cliente in response.json()] == ["cliente-003"]
+    payload = response.json()
+    assert payload["limit"] == 1
+    assert payload["offset"] == 1
+    assert payload["total"] == 2
+    assert [cliente["id"] for cliente in payload["items"]] == ["cliente-003"]
 
 
 def test_admin_returns_404_for_missing_cliente():
@@ -585,7 +670,9 @@ def test_admin_lists_dispositivos():
     response = client.get("/api/admin/dispositivos", headers=ADMIN_HEADERS)
 
     assert response.status_code == 200
-    assert response.json()[0]["id"] == "device-001"
+    payload = response.json()
+    assert payload["total"] == 1
+    assert payload["items"][0]["id"] == "device-001"
 
 
 def test_admin_lists_dispositivos_with_cliente_and_blocked_filters():
@@ -637,7 +724,9 @@ def test_admin_lists_dispositivos_with_cliente_and_blocked_filters():
     )
 
     assert response.status_code == 200
-    assert [dispositivo["id"] for dispositivo in response.json()] == ["device-002"]
+    payload = response.json()
+    assert payload["total"] == 1
+    assert [dispositivo["id"] for dispositivo in payload["items"]] == ["device-002"]
 
 
 def test_admin_gets_dispositivo_events():
@@ -746,7 +835,9 @@ def test_admin_lists_midias():
     response = client.get("/api/admin/midias", headers=ADMIN_HEADERS)
 
     assert response.status_code == 200
-    assert response.json()[0]["id"] == "midia-001"
+    payload = response.json()
+    assert payload["total"] == 1
+    assert payload["items"][0]["id"] == "midia-001"
 
 
 def test_admin_lists_midias_with_cliente_and_active_filters():
@@ -784,7 +875,9 @@ def test_admin_lists_midias_with_cliente_and_active_filters():
     )
 
     assert response.status_code == 200
-    assert [midia["id"] for midia in response.json()] == ["midia-002"]
+    payload = response.json()
+    assert payload["total"] == 1
+    assert [midia["id"] for midia in payload["items"]] == ["midia-002"]
 
 
 def test_admin_rejects_midia_for_missing_cliente():
@@ -972,7 +1065,9 @@ def test_admin_lists_playlists():
     response = client.get("/api/admin/playlists", headers=ADMIN_HEADERS)
 
     assert response.status_code == 200
-    assert response.json()[0]["id"] == "playlist-001"
+    payload = response.json()
+    assert payload["total"] == 1
+    assert payload["items"][0]["id"] == "playlist-001"
 
 
 def test_admin_lists_playlists_with_cliente_and_active_filters():
@@ -1006,7 +1101,9 @@ def test_admin_lists_playlists_with_cliente_and_active_filters():
     )
 
     assert response.status_code == 200
-    assert [playlist["id"] for playlist in response.json()] == ["playlist-002"]
+    payload = response.json()
+    assert payload["total"] == 1
+    assert [playlist["id"] for playlist in payload["items"]] == ["playlist-002"]
 
 
 def test_admin_links_midia_to_playlist():
