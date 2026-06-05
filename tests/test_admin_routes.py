@@ -1,6 +1,7 @@
 import hashlib
 import errno
 from pathlib import Path
+from datetime import datetime, timedelta, timezone
 
 from fastapi.testclient import TestClient
 
@@ -380,6 +381,15 @@ class FakeAuthRepository:
                 and (status is None or audit["status"] == status)
             ]
         )
+
+    def delete_admin_access_audits_older_than(self, cutoff) -> int:
+        before = len(self.access_audits)
+        self.access_audits = [
+            audit
+            for audit in self.access_audits
+            if audit.get("created_at") is None or audit["created_at"] >= cutoff
+        ]
+        return before - len(self.access_audits)
 
 
 def _create_test_app(
@@ -778,6 +788,49 @@ def test_admin_allows_scoped_audit_list_for_linked_cliente():
     assert {item["cliente_id"] for item in payload["items"]} == {"cliente-001"}
 
 
+def test_admin_executes_audit_retention_policy():
+    app = _create_test_app()
+    client = TestClient(app)
+    old_date = datetime.now(timezone.utc) - timedelta(days=200)
+    recent_date = datetime.now(timezone.utc) - timedelta(days=10)
+    app.state.auth_repository.access_audits.append(
+        {
+            "user_id": "user-001",
+            "recurso": "clientes",
+            "acao": "ler",
+            "status": "permitido",
+            "cliente_id": None,
+            "ip": "127.0.0.1",
+            "user_agent": "pytest",
+            "created_at": old_date,
+        }
+    )
+    app.state.auth_repository.access_audits.append(
+        {
+            "user_id": "user-001",
+            "recurso": "clientes",
+            "acao": "ler",
+            "status": "permitido",
+            "cliente_id": None,
+            "ip": "127.0.0.1",
+            "user_agent": "pytest",
+            "created_at": recent_date,
+        }
+    )
+
+    response = client.post(
+        "/api/admin/auditoria/retencao/executar?dias=180",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["deleted_count"] == 1
+    assert len(app.state.auth_repository.access_audits) == 2
+    assert old_date not in [
+        audit.get("created_at") for audit in app.state.auth_repository.access_audits
+    ]
+
+
 def test_admin_creates_and_gets_cliente():
     app = _create_test_app()
     client = TestClient(app)
@@ -855,6 +908,18 @@ def test_admin_lists_clientes_with_pagination_and_active_filter():
     assert payload["offset"] == 1
     assert payload["total"] == 2
     assert [cliente["id"] for cliente in payload["items"]] == ["cliente-003"]
+
+
+def test_admin_rejects_list_limit_above_maximum():
+    app = _create_test_app()
+    client = TestClient(app)
+
+    response = client.get(
+        "/api/admin/clientes?limit=201",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert response.status_code == 422
 
 
 def test_admin_returns_404_for_missing_cliente():

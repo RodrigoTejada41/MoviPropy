@@ -9,11 +9,13 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Health | Sim | Sim | Sim | Nao | Sim | Implementado |
 | Readiness | Sim | Sim | Sim | Nao | Sim | Implementado |
 | Login admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
+| Refresh/logout admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Gestao usuarios/permissoes | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | RBAC admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | RBAC granular cliente/acao | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Auditoria admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Consulta auditoria admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
+| Retencao auditoria admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Clientes | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Dispositivos | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Midias metadados | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
@@ -28,7 +30,7 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Status player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Logs player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Confirmacao sincronizacao | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
-| Google Drive | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
+| Google Drive | Pos-MVP | Pos-MVP | Pos-MVP | Pos-MVP | Pos-MVP | Adiado |
 | Frontend login | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
 | Frontend playlists | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
 

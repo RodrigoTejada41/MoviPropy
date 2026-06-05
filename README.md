@@ -75,6 +75,8 @@ Endpoints iniciais:
 - `GET /health/ready`
 - `GET /api/system/info`
 - `POST /api/auth/login`
+- `POST /api/auth/refresh`
+- `POST /api/auth/logout`
 - `POST /api/player/ativar`
 - `GET /api/player/playlist`
 - `GET /api/player/atualizacao`
@@ -98,6 +100,7 @@ Endpoints iniciais:
 - `GET /api/admin/playlists/{playlist_id}`
 - `POST /api/admin/playlists/{playlist_id}/midias`
 - `GET /api/admin/auditoria/acessos`
+- `POST /api/admin/auditoria/retencao/executar`
 - `POST /api/admin/usuarios`
 - `GET /api/admin/usuarios`
 - `GET /api/admin/usuarios/{user_id}`
@@ -112,6 +115,7 @@ Limite:
 - `ADMIN_API_TOKEN` permanece apenas como fallback local sem repository de auth.
 - Listagens administrativas retornam `items`, `limit`, `offset` e `total`.
 - Gestao de usuarios, vinculos e permissoes existe no backend.
+- Google Drive ficou adiado para pos-MVP.
 
 Banco local:
 - PostgreSQL roda no container `moviprogy-db`.

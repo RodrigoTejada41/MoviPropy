@@ -41,11 +41,12 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 - Contratos iniciais do player persistem sessoes no PostgreSQL quando `DATABASE_URL` existe.
 - Contratos do player consultam dispositivo e manifesto real no PostgreSQL quando `core_repository` existe.
 - Login administrativo persiste sessoes no PostgreSQL quando `DATABASE_URL` existe.
+- Refresh/logout administrativo invalidam tokens antigos em `admin_sessions`.
 - Docker Compose executa o backend em `moviprogy-api`.
 - Docker Compose executa PostgreSQL em `moviprogy-db`.
 - Dados de runtime do container devem usar bind mounts em `runtime/` e `logs/` dentro do projeto.
 - Storage local inicial definido em `MOVIPROGY_MEDIA_DIR`.
-- Google Drive esta documentado como opcao planejada de storage externo controlado pelo backend.
+- Google Drive esta documentado como opcao pos-MVP de storage externo controlado pelo backend.
 - Player ainda nao definido.
 - Deploy ainda nao definido alem do container local.
 
@@ -88,11 +89,13 @@ Limite:
 - Tabelas `usuarios_clientes` e `permissoes` implementam RBAC granular inicial.
 - Endpoints administrativos gerenciam usuarios, vinculos com clientes e permissoes.
 - Tabela `auditoria_acessos` registra tentativas administrativas permitidas e negadas.
+- Retencao de auditoria usa endpoint administrativo com default de 180 dias.
 - Backend deve chegar a 100% antes de iniciar frontend.
 
-## Integracao Google Drive planejada
+## Integracao Google Drive pos-MVP
 
 - Documento principal: `docs/09-google-drive/integracao-google-drive.md`.
+- Decisao atual: adiar implementacao para pos-MVP.
 - Player nao deve fazer streaming direto do Google Drive.
 - Player nao deve receber credenciais Google.
 - Backend deve gerar link controlado ou temporario de download.
@@ -174,6 +177,7 @@ Persistencia atual:
 - `GET /api/admin/playlists/{playlist_id}`
 - `POST /api/admin/playlists/{playlist_id}/midias`
 - `GET /api/admin/auditoria/acessos`
+- `POST /api/admin/auditoria/retencao/executar`
 - `POST /api/admin/usuarios`
 - `GET /api/admin/usuarios`
 - `GET /api/admin/usuarios/{user_id}`
@@ -190,7 +194,6 @@ Seguranca:
 - `ADMIN_API_TOKEN` existe apenas como fallback local quando `auth_repository` nao esta disponivel.
 
 Limite:
-- Auditoria ainda nao possui politica de retencao.
 - Sessao admin usa hash SHA-256 do token no banco.
 - Senha usa PBKDF2-HMAC-SHA256 com salt individual.
 
@@ -208,13 +211,17 @@ Regras de negocio atuais:
 ## Autenticacao administrativa
 
 - Endpoint: `POST /api/auth/login`.
+- Endpoint: `POST /api/auth/refresh`.
+- Endpoint: `POST /api/auth/logout`.
 - Variaveis Docker para seed local:
   - `MOVIPROGY_ADMIN_EMAIL`
   - `MOVIPROGY_ADMIN_PASSWORD`
 - Tabelas:
   - `usuarios`
   - `admin_sessions`
-- Token real e retornado apenas no login.
+- Token real e retornado apenas no login ou refresh.
+- Refresh retorna novo token e remove token anterior.
+- Logout remove a sessao atual.
 - Banco armazena somente hash do token.
 - Senha nunca deve ser salva em texto puro.
 - Permissoes usam formato `recurso:acao`, com escopo opcional por `cliente_id`.

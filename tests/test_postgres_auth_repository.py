@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
+import psycopg
 
 from moviprogy_api.domain.auth import AdminAccessAudit, AdminSession, UserAccount
 from moviprogy_api.repositories.postgres_auth import PostgresAuthRepository
@@ -55,6 +56,10 @@ def test_postgres_auth_repository_persists_user_and_session():
     assert persisted_session is not None
     assert persisted_session.user_id == user.id
     assert persisted_session.perfil == "admin"
+
+    repository.delete_session(hash_token(token))
+
+    assert repository.get_session(hash_token(token)) is None
 
 
 def test_postgres_auth_repository_checks_cliente_permissions():
@@ -178,3 +183,42 @@ def test_postgres_auth_repository_persists_admin_access_audit():
         )
         == 1
     )
+
+    old_audit_id = f"audit-old-{suffix}"
+    with psycopg.connect(DATABASE_URL) as connection:
+        connection.execute(
+            """
+            INSERT INTO auditoria_acessos (
+                id,
+                user_id,
+                cliente_id,
+                recurso,
+                acao,
+                status,
+                criado_em
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """,
+            (
+                old_audit_id,
+                user.id,
+                audit.cliente_id,
+                "clientes",
+                "ler",
+                "permitido",
+                datetime.now(timezone.utc) - timedelta(days=200),
+            ),
+        )
+        connection.commit()
+
+    deleted = repository.delete_admin_access_audits_older_than(
+        datetime.now(timezone.utc) - timedelta(days=180)
+    )
+
+    assert deleted >= 1
+    with psycopg.connect(DATABASE_URL) as connection:
+        old_row = connection.execute(
+            "SELECT 1 FROM auditoria_acessos WHERE id = %s",
+            (old_audit_id,),
+        ).fetchone()
+    assert old_row is None

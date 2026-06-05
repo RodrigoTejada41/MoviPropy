@@ -382,7 +382,7 @@ Atualizacao:
 
 ### ADR-014 - Google Drive como storage externo controlado pelo backend
 
-Status: Planejada
+Status: Adiada para pos-MVP
 
 Data: 2026-06-01
 
@@ -393,7 +393,7 @@ Contexto:
 - O cliente solicitou escopo tecnico para Google Drive sem gerar codigo neste momento.
 
 Decisao:
-- Documentar Google Drive como opcao planejada de storage externo.
+- Documentar Google Drive como opcao pos-MVP de storage externo.
 - O backend sera o unico responsavel por OAuth, credenciais, metadados e links de download.
 - O player nao acessara Google Drive diretamente.
 
@@ -409,6 +409,9 @@ Consequencias:
 - Rotas administrativas exigem RBAC real antes de producao.
 - Links de download devem ser controlados pelo backend.
 - Testes offline continuam obrigatorios.
+
+Atualizacao:
+- Implementacao foi adiada formalmente para pos-MVP na ADR-031.
 
 ---
 
@@ -822,3 +825,86 @@ Consequencias:
 - Frontend deve consumir os endpoints administrativos para tela de usuarios.
 - Perfis escopados precisam de permissao explicita para administrar usuarios.
 - Ainda falta refresh/logout de sessao administrativa.
+
+---
+
+### ADR-029 - Refresh e logout de sessoes administrativas
+
+Status: Aprovada
+
+Data: 2026-06-05
+
+Contexto:
+- Login administrativo ja emitia token Bearer persistido por hash.
+- Faltava renovar sessao sem reutilizar token antigo.
+- Faltava encerrar sessao no banco.
+
+Decisao:
+- Criar `POST /api/auth/refresh`.
+- Criar `POST /api/auth/logout`.
+- Refresh invalida o token antigo e cria nova sessao.
+- Logout remove a sessao atual.
+
+Motivo:
+- Reduz risco de token reutilizado.
+- Permite frontend controlar ciclo de sessao.
+- Mantem token real fora do banco.
+
+Consequencias:
+- Cliente deve trocar o token local apos refresh.
+- Token antigo deixa de autenticar imediatamente.
+
+---
+
+### ADR-030 - Retencao de auditoria administrativa
+
+Status: Aprovada
+
+Data: 2026-06-05
+
+Contexto:
+- Auditoria administrativa registra acessos permitidos e negados.
+- Volume de auditoria cresce continuamente.
+- Era necessario definir limpeza operacional.
+
+Decisao:
+- Criar `POST /api/admin/auditoria/retencao/executar`.
+- Usar retencao padrao de 180 dias.
+- Exigir permissao `auditoria:administrar`.
+
+Motivo:
+- Controla crescimento da tabela.
+- Mantem rastreabilidade recente.
+- Evita limpeza manual direta no banco.
+
+Consequencias:
+- Deploy deve agendar execucao periodica se necessario.
+- Auditorias antigas podem ser removidas conforme politica.
+
+---
+
+### ADR-031 - Google Drive adiado para pos-MVP
+
+Status: Aprovada
+
+Data: 2026-06-05
+
+Contexto:
+- Storage local com upload e download controlado ja cobre o MVP backend.
+- Integracao Google Drive exige OAuth, criptografia de refresh token, rotas e operacao externa.
+- Incluir Google Drive agora aumentaria risco antes do frontend.
+
+Decisao:
+- Adiar implementacao Google Drive para pos-MVP.
+- Manter documentacao tecnica existente como escopo futuro.
+- MVP backend usa storage local em `MOVIPROGY_MEDIA_DIR`.
+
+Motivo:
+- Fecha backend com menor risco.
+- Preserva arquitetura para storage externo futuro.
+- Evita bloquear frontend por dependencia externa.
+
+Consequencias:
+- Nao existem endpoints reais Google Drive no MVP.
+- Player continua baixando pelo backend, sem credenciais externas.
+- Implementacao futura deve seguir `docs/09-google-drive/integracao-google-drive.md`.

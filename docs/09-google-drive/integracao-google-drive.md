@@ -1,5 +1,12 @@
 # Integracao Google Drive
 
+Status: pos-MVP.
+
+Decisao atual:
+- A implementacao Google Drive foi adiada para depois do MVP.
+- O MVP usa storage local em `MOVIPROGY_MEDIA_DIR` e download controlado pelo backend.
+- Este documento permanece como especificacao futura.
+
 ## Status
 
 Planejado.

@@ -99,6 +99,11 @@ class AdminAccessAuditListResponse(BaseModel):
     total: int = Field(ge=0)
 
 
+class AuditRetentionResponse(BaseModel):
+    retention_days: int = Field(ge=1)
+    deleted_count: int = Field(ge=0)
+
+
 class LoginRequest(BaseModel):
     email: str = Field(min_length=3)
     senha: str = Field(min_length=1)

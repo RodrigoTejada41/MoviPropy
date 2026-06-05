@@ -123,6 +123,17 @@ class PostgresAuthRepository:
             expires_at=row[3],
         )
 
+    def delete_session(self, token_hash: str) -> None:
+        with psycopg.connect(self._database_url) as connection:
+            connection.execute(
+                """
+                DELETE FROM admin_sessions
+                WHERE token_hash = %s
+                """,
+                (token_hash,),
+            )
+            connection.commit()
+
     def link_user_cliente(
         self,
         user_id: str,
@@ -443,6 +454,18 @@ class PostgresAuthRepository:
                 params,
             ).fetchone()
         return int(row[0])
+
+    def delete_admin_access_audits_older_than(self, cutoff: datetime) -> int:
+        with psycopg.connect(self._database_url) as connection:
+            result = connection.execute(
+                """
+                DELETE FROM auditoria_acessos
+                WHERE criado_em < %s
+                """,
+                (cutoff,),
+            )
+            connection.commit()
+        return result.rowcount if result.rowcount is not None else 0
 
     def ensure_default_admin(self, email: str, password: str) -> None:
         if self.get_user_by_email(email) is not None:

@@ -271,6 +271,35 @@ def test_player_media_download_returns_404_when_file_is_missing(tmp_path):
     assert response.json() == {"detail": "arquivo da midia nao encontrado"}
 
 
+def test_player_media_download_blocks_path_traversal(tmp_path):
+    outside_file = tmp_path / "secret.mp4"
+    outside_file.write_bytes(b"secret")
+    app = create_app()
+    repository = FakeCoreRepository()
+    repository.midias["midia-real-001"] = repository.midias[
+        "midia-real-001"
+    ].model_copy(update={"caminho": "../secret.mp4"})
+    app.state.core_repository = repository
+    app.state.media_dir = tmp_path / "media"
+    client = TestClient(app)
+    activation = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "REAL-CODE-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    ).json()
+
+    response = client.get(
+        "/api/player/midias/midia-real-001/download",
+        headers={"Authorization": f"Bearer {activation['token']}"},
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "arquivo da midia nao encontrado"}
+
+
 def test_player_media_download_returns_file_for_current_playlist(tmp_path):
     media_file = tmp_path / "media" / "video-real.mp4"
     media_file.parent.mkdir(parents=True)

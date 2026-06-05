@@ -61,7 +61,7 @@
 - Atualizacao de status em lote.
 - Download de midias externas com arquivos grandes.
 
-## Testes Google Drive planejados
+## Testes Google Drive pos-MVP
 
 - Conectar conta Google.
 - Selecionar pasta raiz.

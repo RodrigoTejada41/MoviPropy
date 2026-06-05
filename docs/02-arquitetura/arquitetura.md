@@ -19,7 +19,7 @@ Armazena usuarios, clientes, dispositivos, midias, playlists, campanhas, sincron
 Armazena arquivos enviados.
 Pode ser local no servidor no MVP.
 Deve permitir evolucao para storage externo ou CDN.
-Google Drive esta documentado como storage externo planejado, controlado pelo backend.
+Google Drive esta documentado como storage externo pos-MVP, controlado pelo backend.
 
 ### Player Cliente
 

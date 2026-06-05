@@ -9,7 +9,7 @@ Definir como arquivos de midia serao recebidos, armazenados, validados e entregu
 - Metadados de midia existem no banco.
 - Upload fisico local existe para admin.
 - Download controlado local existe para o player.
-- Google Drive esta documentado como storage planejado.
+- Google Drive esta documentado como storage pos-MVP.
 
 ## Principios
 

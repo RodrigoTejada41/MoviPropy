@@ -32,9 +32,24 @@ Implementacao atual:
 - Usuario: tabela `usuarios`
 
 Limite:
-- Ainda nao possui refresh token.
 - Ainda nao possui rate limit.
 - Permissoes granulares por cliente/acao existem para rotas administrativas.
+
+### POST /api/auth/refresh
+
+Finalidade: renovar sessao administrativa.
+Quem usa: painel web.
+Autenticacao: `Authorization: Bearer <access_token>`.
+Resposta: novo `access_token`, `token_type`, usuario.
+Regra: token antigo e invalidado no banco.
+
+### POST /api/auth/logout
+
+Finalidade: encerrar sessao administrativa.
+Quem usa: painel web.
+Autenticacao: `Authorization: Bearer <access_token>`.
+Resposta: status do logout.
+Regra: token atual e removido de `admin_sessions`.
 
 ## Usuarios administrativos
 
@@ -170,6 +185,14 @@ Query: `limit`, `offset`, `user_id`, `cliente_id`, `recurso`, `acao`, `status`.
 Resposta: envelope paginado com `items`, `limit`, `offset` e `total`.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `auditoria:ler`.
 Regra: usuario escopado precisa informar `cliente_id`.
+
+### POST /api/admin/auditoria/retencao/executar
+
+Finalidade: aplicar politica de retencao da auditoria.
+Quem usa: administracao operacional.
+Query: `dias`, default 180.
+Resposta: `retention_days`, `deleted_count`.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `auditoria:administrar`.
 
 ### POST /api/dispositivos
 
@@ -345,7 +368,7 @@ Implementacao atual:
 
 ## Google Drive
 
-Status: planejado. Sem implementacao atual.
+Status: adiado para pos-MVP por decisao arquitetural. Sem implementacao atual.
 
 ### POST /api/admin/google-drive/conectar
 

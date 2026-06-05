@@ -38,6 +38,8 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Upload fisico local de midias criado em `POST /api/admin/midias/upload`.
 - Autenticacao minima por `ADMIN_API_TOKEN` criada como fallback local legado.
 - Login administrativo criado em `POST /api/auth/login`.
+- Refresh de sessao administrativa criado em `POST /api/auth/refresh`.
+- Logout administrativo criado em `POST /api/auth/logout`.
 - RBAC minimo criado para `/api/admin/*` com perfil `admin`.
 - RBAC granular inicial criado com vinculo usuario/cliente e permissoes `recurso:acao`.
 - Endpoints administrativos de usuarios, vinculos e permissoes criados.
@@ -45,6 +47,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Migration RBAC criada para `usuarios_clientes` e `permissoes`.
 - Auditoria de acessos administrativos criada para permissoes permitidas e negadas.
 - Consulta administrativa de auditoria criada em `GET /api/admin/auditoria/acessos`.
+- Politica de retencao de auditoria criada em `POST /api/admin/auditoria/retencao/executar`.
 - Simulacao do player persiste sessoes no PostgreSQL quando executada via Docker.
 - Ativacao do player usa `codigo_ativacao` real do banco quando disponivel.
 - Manifesto do player usa `playlist_atual_id` do dispositivo e midias vinculadas quando disponivel.
@@ -99,7 +102,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 
 - Stack frontend.
 - Tecnologia do player.
-- Implementacao da integracao Google Drive.
+- Implementacao da integracao Google Drive em fase pos-MVP.
 
 ## Limitacoes atuais
 
@@ -118,14 +121,12 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Rotas de midias/playlists ainda sao CRUD inicial com upload fisico local para midias.
 - Manifesto real depende de `dispositivos.playlist_atual_id`, playlist ativa e midias vinculadas.
 - Download controlado atual serve arquivo local de `MOVIPROGY_MEDIA_DIR`.
-- Google Drive esta documentado como plano, mas ainda nao possui codigo, migration, OAuth ou endpoints reais.
+- Google Drive foi formalmente adiado para pos-MVP, preservando storage local e download controlado no MVP.
 
 ## Proximo passo recomendado
 
-Focar no backend ate 100% antes do frontend.
+Backend MVP fechado para iniciar validacao final e frontend.
 
 Pendencias backend prioritarias:
-- Refresh/logout de sessao administrativa.
-- Politica de retencao de auditoria.
-- Integracao Google Drive ou decisao formal de adiar para pos-MVP.
-- Testes de performance e seguranca finais.
+- Testes de carga reais em volume de producao continuam recomendados antes de deploy publico.
+- Google Drive fica fora do MVP e entra como fase pos-MVP.

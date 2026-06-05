@@ -1,5 +1,6 @@
 import hashlib
 import shutil
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from uuid import uuid4
 
@@ -33,6 +34,7 @@ from moviprogy_api.domain.auth import (
     AdminUserListResponse,
     AdminUserPublic,
     AdminUserUpdateRequest,
+    AuditRetentionResponse,
     PermissionGrantRequest,
     PermissionPublic,
     UserAccount,
@@ -280,6 +282,24 @@ def list_admin_access_audits(
         limit=limit,
         offset=offset,
         total=repository.count_admin_access_audits(**filters),
+    )
+
+
+@router.post(
+    "/auditoria/retencao/executar",
+    response_model=AuditRetentionResponse,
+)
+def execute_audit_retention(
+    request: Request,
+    dias: int = Query(default=180, ge=1, le=3650),
+) -> AuditRetentionResponse:
+    repository = _auth_repository(request)
+    require_admin_permission(request, "auditoria", "administrar")
+    cutoff = datetime.now(timezone.utc) - timedelta(days=dias)
+    deleted_count = repository.delete_admin_access_audits_older_than(cutoff)
+    return AuditRetentionResponse(
+        retention_days=dias,
+        deleted_count=deleted_count,
     )
 
 

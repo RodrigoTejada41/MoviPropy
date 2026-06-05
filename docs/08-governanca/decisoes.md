@@ -254,4 +254,51 @@ Motivo:
 Impacto:
 - Backend passa a expor contratos para tela de usuarios.
 - Frontend deve usar `/api/admin/usuarios`.
-- Refresh/logout de sessao continua pendente.
+- Refresh/logout de sessao foi definido depois na D-016.
+
+## D-016 - Refresh e logout administrativo
+
+Status: aprovado.
+
+Decisao:
+- Criar refresh e logout de sessao administrativa.
+- Refresh invalida token antigo.
+- Logout remove a sessao atual.
+
+Motivo:
+- Fechar ciclo seguro de sessao antes do frontend.
+
+Impacto:
+- Frontend deve trocar token apos refresh.
+- Token apos logout deixa de autenticar.
+
+## D-017 - Retencao de auditoria
+
+Status: aprovado.
+
+Decisao:
+- Criar endpoint de execucao da retencao de auditoria.
+- Usar retencao default de 180 dias.
+
+Motivo:
+- Controlar crescimento da tabela `auditoria_acessos`.
+
+Impacto:
+- Auditorias antigas podem ser removidas operacionalmente.
+- Requer permissao `auditoria:administrar`.
+
+## D-018 - Google Drive pos-MVP
+
+Status: aprovado.
+
+Decisao:
+- Adiar Google Drive para pos-MVP.
+- Manter storage local no MVP.
+
+Motivo:
+- Evitar dependencia externa antes do frontend.
+- Fechar backend com menor risco.
+
+Impacto:
+- MVP nao possui endpoints reais Google Drive.
+- Arquitetura documentada fica preservada para fase futura.
