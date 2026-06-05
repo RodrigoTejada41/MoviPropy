@@ -19,6 +19,127 @@ Integrar o painel administrativo ao Google Drive para armazenar e importar midia
 O backend deve controlar acesso, metadados, sincronizacao e links de download.
 O player nao deve acessar o Google Drive diretamente.
 
+## Limite desta especificacao
+
+- Nao gerar codigo nesta fase.
+- Nao alterar o MVP atual de storage local.
+- A integracao Google Drive permanece pos-MVP.
+- Este documento define UX/UI, fluxo funcional, endpoints necessarios, regras de seguranca e especificacao tecnica para implementacao futura.
+
+## Tela Google Drive / Armazenamento
+
+Local no painel:
+- Menu: Google Drive.
+- Titulo: Google Drive / Armazenamento.
+- Objetivo: conectar, configurar e gerenciar o Google Drive como storage opcional de midias.
+
+### Card de status da integracao
+
+Campos exibidos:
+- Status: `desconectado`, `conectando`, `conectado`, `erro`, `token_expirado`.
+- Conta Google conectada.
+- Email da conta.
+- Data da conexao.
+- Ultima validacao.
+- Espaco usado, se a API Google retornar.
+- Pasta raiz selecionada.
+
+Acoes:
+- Conectar Google Drive.
+- Desconectar.
+- Validar conexao.
+- Trocar conta.
+
+Regras de UI:
+- Se estiver desconectado, exibir CTA principal de conexao.
+- Se estiver conectado sem pasta raiz, bloquear importacao e solicitar selecao da pasta.
+- Se houver erro de autorizacao, mostrar mensagem tecnica curta sem tokens.
+- Se o token expirar, oferecer validacao ou reconexao.
+
+### Fluxo visual de autenticacao OAuth
+
+1. Admin acessa `Google Drive / Armazenamento`.
+2. Clica em `Conectar Google Drive`.
+3. Painel chama o backend para gerar URL OAuth.
+4. Backend registra `state` temporario e retorna `authorization_url`.
+5. Painel redireciona o admin para o Google.
+6. Admin escolhe a conta Google.
+7. Admin autoriza permissoes minimas necessarias.
+8. Google retorna para o callback do backend.
+9. Backend valida `state`, troca `code` por tokens e salva credenciais protegidas.
+10. Backend redireciona o admin para a tela Google Drive.
+11. Painel exibe status conectado ou erro.
+
+### Selecao da pasta raiz
+
+Apos conexao:
+- Listar pastas disponiveis no Drive.
+- Permitir selecionar uma pasta raiz existente.
+- Permitir criar pasta raiz padrao `MoviProgy_Midias`.
+- Salvar `root_folder_id` e `root_folder_name`.
+- Validar acesso de leitura e escrita antes de liberar importacao.
+
+### Estrutura por cliente
+
+Estrutura sugerida:
+
+```text
+MoviProgy_Midias/
+  Cliente_001/
+    Videos/
+    Imagens/
+    Campanhas/
+  Cliente_002/
+    Videos/
+    Imagens/
+    Campanhas/
+```
+
+Funcionalidades:
+- Criar pasta para cada cliente.
+- Listar pastas de clientes.
+- Vincular pasta a cliente.
+- Validar se a pasta ainda existe.
+- Mostrar status de acesso.
+
+### Listagem de arquivos
+
+Campos:
+- Nome.
+- Tipo.
+- Tamanho.
+- Data de modificacao.
+- ID do arquivo Google Drive.
+- Status de importacao.
+- Cliente vinculado.
+
+Acoes:
+- Importar midia.
+- Atualizar lista.
+- Abrir no Google Drive.
+- Validar acesso.
+- Remover vinculo.
+
+### Importacao de midia
+
+Ao importar um arquivo do Google Drive, registrar:
+- `cliente_id`.
+- `nome`.
+- `tipo`.
+- `tamanho`.
+- `google_drive_file_id`.
+- `google_drive_folder_id`.
+- `google_drive_mime_type`.
+- `google_drive_web_view_link`.
+- `origem_armazenamento = google_drive`.
+- `status`.
+- Data de importacao.
+
+Regra:
+- A midia importada deve aparecer na tela de Midias.
+- A midia importada deve poder ser usada em playlists.
+- O player continua baixando pelo backend, nunca diretamente pelo Google Drive.
+
 ## Arquitetura proposta
 
 Componentes:
@@ -83,37 +204,67 @@ Regras:
 ## Modelo de dados proposto
 
 Extensao planejada para `midias`:
-- origem_armazenamento: `local`, `google_drive`.
-- google_drive_file_id.
-- google_drive_folder_id.
-- google_drive_mime_type.
-- google_drive_web_view_link.
-- tamanho.
-- hash_arquivo.
-- status: `pendente`, `processando`, `disponivel`, `erro`, `removido`.
-- criado_em.
-- atualizado_em.
-- sincronizado_em.
+- `origem_armazenamento`: `local`, `google_drive`.
+- `google_drive_file_id`.
+- `google_drive_folder_id`.
+- `google_drive_mime_type`.
+- `google_drive_web_view_link`.
+- `tamanho`.
+- `hash_arquivo`.
+- `status`: `pendente`, `processando`, `disponivel`, `erro`, `removido`.
+- `criado_em`.
+- `atualizado_em`.
+- `sincronizado_em`.
 
 Novas tabelas planejadas:
 
-### google_drive_integracoes
+### integrations
 
-Finalidade: armazenar configuracao da integracao por cliente ou tenant.
+Finalidade: armazenar credenciais e estado da integracao.
 
 Campos principais:
-- id.
-- cliente_id.
-- conta_google_email.
-- root_folder_id.
-- access_token_criptografado.
-- refresh_token_criptografado.
-- token_expira_em.
-- status.
-- criado_em.
-- atualizado_em.
+- `id`.
+- `type`.
+- `provider`.
+- `connected_email`.
+- `access_token_encrypted`.
+- `refresh_token_encrypted`.
+- `expires_at`.
+- `status`.
+- `created_at`.
+- `updated_at`.
+
+### google_drive_settings
+
+Finalidade: armazenar configuracao operacional do Drive.
+
+Campos principais:
+- `id`.
+- `integration_id`.
+- `root_folder_id`.
+- `root_folder_name`.
+- `last_validation_at`.
+- `status`.
+
+### client_storage_folders
+
+Finalidade: vincular clientes a pastas do provider.
+
+Campos principais:
+- `id`.
+- `cliente_id`.
+- `provider`.
+- `folder_id`.
+- `folder_name`.
+- `status`.
+
+### google_drive_integracoes
+
+Status: nome alternativo legado do rascunho. A implementacao futura deve preferir `integrations` + `google_drive_settings`.
 
 ### google_drive_operacoes
+
+Status: tabela de auditoria operacional especifica do provider.
 
 Finalidade: auditar importacoes, uploads, sincronizacoes e erros.
 
@@ -129,15 +280,86 @@ Campos principais:
 
 ## Endpoints planejados
 
+Contrato futuro canonico:
+- Namespace administrativo: `/api/integrations/google-drive`.
+- As rotas antigas do rascunho em `/api/admin/google-drive` ficam substituidas por este namespace quando a integracao for implementada.
+
+### POST /api/integrations/google-drive/connect
+
+Finalidade: iniciar fluxo OAuth.
+Resposta esperada: `authorization_url`.
+Seguranca: sessao admin, RBAC e registro de `state`.
+
+### GET /api/integrations/google-drive/callback
+
+Finalidade: receber retorno do Google OAuth.
+Parametros: `code`, `state`.
+Resposta: sucesso, erro ou redirecionamento para o painel.
+Seguranca: validar `state`, origem e usuario solicitante.
+
+### GET /api/integrations/google-drive/status
+
+Finalidade: consultar status da integracao.
+Resposta: conectado, email, pasta raiz, ultima validacao e status operacional.
+
+### POST /api/integrations/google-drive/disconnect
+
+Finalidade: desconectar conta Google Drive.
+Regra: revogar tokens quando possivel e registrar auditoria.
+
+### GET /api/integrations/google-drive/folders
+
+Finalidade: listar pastas do Drive.
+Query: `parent_folder_id` opcional.
+
+### POST /api/integrations/google-drive/root-folder
+
+Finalidade: definir pasta raiz.
+Payload: `folder_id` ou solicitacao para criar `MoviProgy_Midias`.
+
+### POST /api/integrations/google-drive/client-folder
+
+Finalidade: criar ou vincular pasta do cliente.
+Payload: `cliente_id`, `folder_id` opcional, `folder_name` opcional.
+
+### GET /api/integrations/google-drive/files
+
+Finalidade: listar arquivos de uma pasta.
+Query: `cliente_id`, `folder_id`, `mime_type` opcional.
+
+### POST /api/integrations/google-drive/import-media
+
+Finalidade: importar arquivo do Drive para o cadastro de midias.
+Payload: `cliente_id`, `file_id`, `tipo`.
+
+### POST /api/integrations/google-drive/validate-access
+
+Finalidade: validar se tokens, pastas e arquivos continuam acessiveis.
+
+### GET /api/player/media-download-url
+
+Finalidade: fornecer ao player uma URL controlada para baixar midia.
+Regra: nao expor credenciais Google nem `refresh_token`.
+
+### Compatibilidade com endpoint atual de download
+
+- O MVP ja possui `GET /api/player/midias/{midia_id}/download` para storage local.
+- Na implementacao Google Drive, preferir manter esse endpoint como fachada unica do player.
+- `GET /api/player/media-download-url` pode ser criado apenas se houver necessidade de contrato separado.
+
+### Historico do rascunho anterior
+
 ### POST /api/admin/google-drive/conectar
 
-Finalidade: iniciar OAuth 2.0.
+Status: substituido por `POST /api/integrations/google-drive/connect`.
+Finalidade original: iniciar OAuth 2.0.
 Retorno: URL de autorizacao.
 Seguranca: admin autenticado e permissao de configurar storage.
 
 ### GET /api/admin/google-drive/callback
 
-Finalidade: receber retorno OAuth e gravar credenciais.
+Status: substituido por `GET /api/integrations/google-drive/callback`.
+Finalidade original: receber retorno OAuth e gravar credenciais.
 Retorno: status da conexao.
 Seguranca: validar `state` e tenant.
 
@@ -212,10 +434,18 @@ Retorno: status, email da conta e pasta raiz.
 
 Estados de UI:
 - Nao conectado.
+- Conectando.
 - Conectado sem pasta raiz.
 - Conectado e pronto.
+- Erro de autorizacao.
 - Token expirado.
+- Pasta nao encontrada.
 - Sem permissao na pasta.
+- Arquivo removido do Drive.
+- Sem arquivos na pasta.
+- Importacao concluida.
+- Falha na importacao.
+- Validacao em andamento.
 - Erro de sincronizacao.
 
 ## Fluxo do player
@@ -248,6 +478,28 @@ Regras:
 - Arquivos devem ter hash calculado pelo backend.
 - Toda operacao critica deve gerar auditoria.
 - Rotas administrativas devem usar RBAC real antes de producao.
+
+## Logs e auditoria
+
+Registrar:
+- Quem conectou Google Drive.
+- Quando conectou.
+- Qual conta foi conectada.
+- Quem alterou a pasta raiz.
+- Quem criou ou vinculou pasta de cliente.
+- Quem importou arquivo.
+- Qual arquivo foi importado.
+- Qual cliente recebeu a midia.
+- Erros de acesso ao Drive.
+- Falhas de importacao.
+- Desconexao da conta.
+
+Regras:
+- Nao registrar access token.
+- Nao registrar refresh token.
+- Nao registrar authorization code.
+- Nao registrar links temporarios sensiveis.
+- Registrar `user_id`, `cliente_id`, acao, status, IP e user-agent quando disponivel.
 
 ## Casos de erro
 

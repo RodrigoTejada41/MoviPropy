@@ -48,6 +48,7 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 - Dados de runtime do container devem usar bind mounts em `runtime/` e `logs/` dentro do projeto.
 - Storage local inicial definido em `MOVIPROGY_MEDIA_DIR`.
 - Google Drive esta documentado como opcao pos-MVP de storage externo controlado pelo backend.
+- Google Drive / Armazenamento possui especificacao futura de UX/UI, OAuth, endpoints, dados, seguranca e testes.
 - Player ainda nao definido.
 - Deploy ainda nao definido alem do container local.
 
@@ -97,6 +98,7 @@ Limite:
 
 - Documento principal: `docs/09-google-drive/integracao-google-drive.md`.
 - Decisao atual: adiar implementacao para pos-MVP.
+- Namespace futuro canonico: `/api/integrations/google-drive`.
 - Player nao deve fazer streaming direto do Google Drive.
 - Player nao deve receber credenciais Google.
 - Backend deve gerar link controlado ou temporario de download.

@@ -59,6 +59,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
   - `POST /api/player/sincronizacao/confirmar`
 - Script de simulacao do player criado.
 - Escopo tecnico da integracao Google Drive documentado.
+- Especificacao Google Drive / Armazenamento consolidada com UX/UI, OAuth, endpoints futuros e checklist.
 - Especificacao completa do frontend documentada.
 - RBAC granular planejado e documentado.
 - Storage, upload e download controlado documentados.
@@ -133,6 +134,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Manifesto real depende de `dispositivos.playlist_atual_id`, playlist ativa e midias vinculadas.
 - Download controlado atual serve arquivo local de `MOVIPROGY_MEDIA_DIR`.
 - Google Drive foi formalmente adiado para pos-MVP, preservando storage local e download controlado no MVP.
+- Namespace futuro da integracao Google Drive definido como `/api/integrations/google-drive`.
 
 ## Proximo passo recomendado
 

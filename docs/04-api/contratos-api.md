@@ -370,8 +370,82 @@ Implementacao atual:
 
 Status: adiado para pos-MVP por decisao arquitetural. Sem implementacao atual.
 
+Contrato futuro canonico:
+- Namespace: `/api/integrations/google-drive`.
+- Documento principal: `docs/09-google-drive/integracao-google-drive.md`.
+- Rotas antigas em `/api/admin/google-drive` permanecem apenas como historico de rascunho.
+
+### POST /api/integrations/google-drive/connect
+
+Finalidade: iniciar OAuth 2.0 com Google Drive.
+Quem usa: painel administrativo.
+Resposta: `authorization_url`.
+Seguranca: admin autenticado, RBAC e `state` anti-CSRF.
+
+### GET /api/integrations/google-drive/callback
+
+Finalidade: receber retorno OAuth.
+Quem usa: Google OAuth.
+Query: `code`, `state`.
+Resposta: redirecionamento para o painel com sucesso ou erro.
+Seguranca: validar `state`; nunca expor tokens ao frontend.
+
+### GET /api/integrations/google-drive/status
+
+Finalidade: consultar status da integracao.
+Quem usa: painel administrativo.
+Resposta: status, email conectado, pasta raiz e ultima validacao.
+
+### POST /api/integrations/google-drive/disconnect
+
+Finalidade: desconectar Google Drive.
+Quem usa: painel administrativo.
+Regra: revogar tokens quando possivel e auditar a acao.
+
+### GET /api/integrations/google-drive/folders
+
+Finalidade: listar pastas do Drive.
+Quem usa: painel administrativo.
+Query: `parent_folder_id` opcional.
+
+### POST /api/integrations/google-drive/root-folder
+
+Finalidade: definir ou criar pasta raiz.
+Quem usa: painel administrativo.
+Payload: `folder_id` ou solicitacao de criacao da pasta padrao.
+
+### POST /api/integrations/google-drive/client-folder
+
+Finalidade: criar ou vincular pasta de cliente.
+Quem usa: painel administrativo.
+Payload: `cliente_id`, `folder_id` opcional, `folder_name` opcional.
+
+### GET /api/integrations/google-drive/files
+
+Finalidade: listar arquivos do Drive por cliente/pasta.
+Quem usa: painel administrativo.
+Query: `cliente_id`, `folder_id`, `mime_type` opcional.
+
+### POST /api/integrations/google-drive/import-media
+
+Finalidade: importar arquivo do Drive como midia do sistema.
+Quem usa: painel administrativo.
+Payload: `cliente_id`, `file_id`, `tipo`.
+
+### POST /api/integrations/google-drive/validate-access
+
+Finalidade: validar token, pasta raiz, pasta do cliente ou arquivo.
+Quem usa: painel administrativo e monitoramento operacional.
+
+### GET /api/player/media-download-url
+
+Finalidade: fornecer URL controlada de download ao player quando houver necessidade de contrato separado.
+Quem usa: player.
+Regra: preferir manter `GET /api/player/midias/{midia_id}/download` como fachada unica; nunca expor tokens Google.
+
 ### POST /api/admin/google-drive/conectar
 
+Status: rascunho legado substituido por `/api/integrations/google-drive/connect`.
 Finalidade: iniciar OAuth 2.0 com Google Drive.
 Quem usa: painel administrativo.
 Resposta: URL de autorizacao.

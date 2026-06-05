@@ -939,3 +939,32 @@ Consequencias:
 - O frontend passa a ter `package.json` e `package-lock.json` proprios.
 - Deploy futuro precisa publicar artefato estatico ou container separado.
 - Telas que dependem de endpoints ausentes devem exibir placeholder explicito.
+
+---
+
+### ADR-033 - Namespace futuro para integracoes externas
+
+Status: Aprovada
+
+Data: 2026-06-05
+
+Contexto:
+- A integracao Google Drive foi adiada para pos-MVP.
+- O rascunho inicial usava rotas em `/api/admin/google-drive`.
+- O escopo funcional define a integracao como modulo externo de storage, nao apenas uma tela administrativa.
+
+Decisao:
+- Usar `/api/integrations/google-drive` como namespace canonico futuro da integracao.
+- Manter o player sem acesso direto ao Google Drive.
+- Manter `GET /api/player/midias/{midia_id}/download` como fachada preferencial para download pelo player.
+- Criar `GET /api/player/media-download-url` apenas se houver necessidade de contrato separado.
+
+Motivo:
+- Separa integracoes externas das rotas CRUD administrativas.
+- Facilita adicionar novos providers de storage no futuro.
+- Mantem o backend como unico ponto de controle de tokens e downloads.
+
+Consequencias:
+- Documentos de API e frontend devem referenciar `/api/integrations/google-drive`.
+- Rotas antigas `/api/admin/google-drive` ficam apenas como historico de rascunho.
+- Implementacao futura deve validar OAuth `state`, RBAC, auditoria e criptografia de tokens antes de producao.

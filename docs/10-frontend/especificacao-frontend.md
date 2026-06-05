@@ -332,6 +332,7 @@ Criterios de aceite:
 
 Objetivo:
 - Gerenciar integracao de storage externo.
+- Tela: Google Drive / Armazenamento.
 
 Funcionalidades:
 - Conectar conta.
@@ -341,6 +342,40 @@ Funcionalidades:
 - Listar arquivos.
 - Importar midia.
 - Fazer upload.
+
+Layout:
+- Card de status da integracao.
+- Fluxo de conexao OAuth 2.0.
+- Seletor de pasta raiz.
+- Gestao de pastas por cliente.
+- Tabela de arquivos do Drive.
+- Historico resumido de importacoes e erros.
+
+Estados:
+- Desconectado.
+- Conectando.
+- Conectado.
+- Erro de autorizacao.
+- Token expirado.
+- Pasta nao encontrada.
+- Permissao negada.
+- Arquivo removido do Drive.
+- Sem arquivos na pasta.
+- Importacao concluida.
+- Falha na importacao.
+- Validacao em andamento.
+
+APIs futuras:
+- `POST /api/integrations/google-drive/connect`.
+- `GET /api/integrations/google-drive/callback`.
+- `GET /api/integrations/google-drive/status`.
+- `POST /api/integrations/google-drive/disconnect`.
+- `GET /api/integrations/google-drive/folders`.
+- `POST /api/integrations/google-drive/root-folder`.
+- `POST /api/integrations/google-drive/client-folder`.
+- `GET /api/integrations/google-drive/files`.
+- `POST /api/integrations/google-drive/import-media`.
+- `POST /api/integrations/google-drive/validate-access`.
 
 Documento principal:
 - `docs/09-google-drive/integracao-google-drive.md`.
