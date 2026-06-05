@@ -48,6 +48,41 @@ Limites:
 - Importacao exige `nome`, `tamanho` e `sha256` informados pelo painel.
 - Homologacao real exige credenciais Google Cloud.
 
+## Configuracao OAuth local
+
+Arquivo local:
+- `.env` na raiz do projeto.
+- Nao versionar `.env`.
+- Usar `.env.example` como modelo.
+
+Variaveis obrigatorias para OAuth real:
+- `MOVIPROGY_GOOGLE_CLIENT_ID`.
+- `MOVIPROGY_GOOGLE_CLIENT_SECRET`.
+- `MOVIPROGY_GOOGLE_REDIRECT_URI`.
+- `MOVIPROGY_GOOGLE_TOKEN_KEY`.
+
+Redirect URI local:
+- `http://127.0.0.1:8000/api/integrations/google-drive/callback`.
+
+Script de configuracao:
+
+```powershell
+.\scripts\configure_google_oauth.ps1 -ClientId "CLIENT_ID" -ClientSecret "CLIENT_SECRET"
+docker compose up --build -d
+```
+
+Simulacao local sem conta Google:
+
+```powershell
+.\scripts\configure_google_oauth.ps1 -Simulated
+docker compose up --build -d
+```
+
+Regras:
+- `MOVIPROGY_GOOGLE_TOKEN_KEY` deve ter 32 ou mais caracteres.
+- Client secret real nunca deve ser salvo em arquivos versionados.
+- Em producao, usar HTTPS no redirect URI.
+
 ## Tela Google Drive / Armazenamento
 
 Local no painel:

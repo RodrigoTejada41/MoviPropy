@@ -19,16 +19,33 @@ class GoogleDriveConfigError(RuntimeError):
 
 
 def google_oauth_configured() -> bool:
-    return bool(
-        os.getenv("MOVIPROGY_GOOGLE_CLIENT_ID")
-        and os.getenv("MOVIPROGY_GOOGLE_CLIENT_SECRET")
-        and os.getenv("MOVIPROGY_GOOGLE_REDIRECT_URI")
-    )
+    return not missing_google_oauth_config()
+
+
+def google_oauth_simulated() -> bool:
+    return os.getenv("MOVIPROGY_GOOGLE_OAUTH_SIMULATED", "").lower() == "true"
+
+
+def missing_google_oauth_config() -> list[str]:
+    required = [
+        "MOVIPROGY_GOOGLE_CLIENT_ID",
+        "MOVIPROGY_GOOGLE_CLIENT_SECRET",
+        "MOVIPROGY_GOOGLE_REDIRECT_URI",
+        "MOVIPROGY_GOOGLE_TOKEN_KEY",
+    ]
+    if google_oauth_simulated():
+        required = ["MOVIPROGY_GOOGLE_REDIRECT_URI", "MOVIPROGY_GOOGLE_TOKEN_KEY"]
+    return [name for name in required if not os.getenv(name)]
 
 
 def build_authorization_url(state: str) -> str:
-    client_id = os.getenv("MOVIPROGY_GOOGLE_CLIENT_ID")
     redirect_uri = os.getenv("MOVIPROGY_GOOGLE_REDIRECT_URI")
+    if google_oauth_simulated():
+        if not redirect_uri:
+            raise GoogleDriveConfigError("google oauth simulado sem redirect uri")
+        query = urlencode({"code": "simulated-code", "state": state})
+        return f"{redirect_uri}?{query}"
+    client_id = os.getenv("MOVIPROGY_GOOGLE_CLIENT_ID")
     if not client_id or not redirect_uri:
         raise GoogleDriveConfigError("google oauth nao configurado")
     query = urlencode(
@@ -46,7 +63,7 @@ def build_authorization_url(state: str) -> str:
 
 
 def exchange_code_for_tokens(code: str) -> dict:
-    if os.getenv("MOVIPROGY_GOOGLE_OAUTH_SIMULATED", "").lower() == "true":
+    if google_oauth_simulated():
         return {
             "access_token": "simulated-access-token",
             "refresh_token": "simulated-refresh-token",
@@ -107,4 +124,3 @@ def _fernet() -> Fernet:
         raise GoogleDriveConfigError("chave de criptografia google drive ausente")
     key = base64.urlsafe_b64encode(secret.encode("utf-8").ljust(32, b"0")[:32])
     return Fernet(key)
-

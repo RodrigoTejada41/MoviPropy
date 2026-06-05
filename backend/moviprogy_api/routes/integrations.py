@@ -22,6 +22,9 @@ from moviprogy_api.google_drive import (
     connected_email,
     encrypt_secret,
     exchange_code_for_tokens,
+    google_oauth_configured,
+    google_oauth_simulated,
+    missing_google_oauth_config,
     new_oauth_state,
     token_expiration,
 )
@@ -41,7 +44,7 @@ def get_google_drive_status(
     _admin=Depends(require_admin_user),
 ) -> GoogleDriveStatus:
     require_admin_permission(request, "integrations", "ler")
-    return _google_repository(request).get_status()
+    return _with_oauth_config(_google_repository(request).get_status())
 
 
 @router.post("/connect", response_model=GoogleDriveAuthorizationUrl)
@@ -270,7 +273,7 @@ def validate_google_drive_access(
     _admin=Depends(require_admin_user),
 ) -> GoogleDriveStatus:
     require_admin_permission(request, "integrations", "ler", payload.cliente_id)
-    return _google_repository(request).validate_access()
+    return _with_oauth_config(_google_repository(request).validate_access())
 
 
 def _google_repository(request: Request):
@@ -296,3 +299,10 @@ def _core_repository(request: Request):
 def _user_id(request: Request) -> str | None:
     session = getattr(request.state, "admin_session", None)
     return session.user_id if session is not None else None
+
+
+def _with_oauth_config(payload: GoogleDriveStatus) -> GoogleDriveStatus:
+    payload.oauth_configured = google_oauth_configured()
+    payload.oauth_simulated = google_oauth_simulated()
+    payload.missing_config = missing_google_oauth_config()
+    return payload

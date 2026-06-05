@@ -144,6 +144,25 @@ def test_google_drive_connect_returns_authorization_url(monkeypatch):
     assert payload["state"] in app.state.google_drive_repository.states
 
 
+def test_google_drive_connect_simulated_without_google_credentials(monkeypatch):
+    app = _create_test_app()
+    client = TestClient(app)
+    monkeypatch.setenv("MOVIPROGY_GOOGLE_OAUTH_SIMULATED", "true")
+    monkeypatch.setenv(
+        "MOVIPROGY_GOOGLE_REDIRECT_URI",
+        "http://127.0.0.1:8000/api/integrations/google-drive/callback",
+    )
+
+    response = client.post("/api/integrations/google-drive/connect", headers=ADMIN_HEADERS)
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["authorization_url"].startswith(
+        "http://127.0.0.1:8000/api/integrations/google-drive/callback?code=simulated-code"
+    )
+    assert payload["state"] in app.state.google_drive_repository.states
+
+
 def test_google_drive_callback_encrypts_tokens(monkeypatch):
     app = _create_test_app()
     client = TestClient(app)

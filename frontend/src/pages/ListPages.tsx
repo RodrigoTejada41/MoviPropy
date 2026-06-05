@@ -668,6 +668,16 @@ export function GoogleDrivePage() {
           <strong>{statusData?.status ?? "desconectado"}</strong>
           <p>{statusData?.email ?? "Nenhuma conta conectada."}</p>
         </div>
+        <div className={statusData?.oauth_configured ? "driveStatusCard connected" : "driveStatusCard"}>
+          <div className="driveStatusIcon"><ShieldCheck size={28} /></div>
+          <span>OAuth</span>
+          <strong>{statusData?.oauth_simulated ? "Simulado" : statusData?.oauth_configured ? "Configurado" : "Incompleto"}</strong>
+          <p>
+            {statusData?.missing_config?.length
+              ? `Falta: ${statusData.missing_config.join(", ")}`
+              : "Config do Google pronta no backend."}
+          </p>
+        </div>
         <div className="driveStatusCard">
           <div className="driveStatusIcon"><Folder size={28} /></div>
           <span>Pasta raiz</span>

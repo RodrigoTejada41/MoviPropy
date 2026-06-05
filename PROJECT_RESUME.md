@@ -137,6 +137,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Google Drive possui implementacao inicial em `/api/integrations/google-drive`.
 - Fluxo real depende de `MOVIPROGY_GOOGLE_CLIENT_ID`, `MOVIPROGY_GOOGLE_CLIENT_SECRET`, `MOVIPROGY_GOOGLE_REDIRECT_URI` e `MOVIPROGY_GOOGLE_TOKEN_KEY`.
 - Sem credenciais Google, a tela opera com status e simulacao local controlada, mas nao autentica conta real.
+- Script `scripts/configure_google_oauth.ps1` cria `.env` local para OAuth real ou simulacao.
 
 ## Proximo passo recomendado
 

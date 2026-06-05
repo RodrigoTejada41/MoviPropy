@@ -11,6 +11,9 @@ class GoogleDriveStatus(BaseModel):
     root_folder_name: str | None = None
     last_validation_at: datetime | None = None
     connected_at: datetime | None = None
+    oauth_configured: bool = False
+    oauth_simulated: bool = False
+    missing_config: list[str] = []
 
 
 class GoogleDriveAuthorizationUrl(BaseModel):
@@ -77,4 +80,3 @@ class GoogleDriveValidationRequest(BaseModel):
 class GoogleDriveOperationResult(BaseModel):
     status: str
     message: str
-

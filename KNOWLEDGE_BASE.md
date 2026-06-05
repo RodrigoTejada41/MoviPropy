@@ -102,6 +102,7 @@ Limite:
 - OAuth real depende de variaveis Google Cloud.
 - `MOVIPROGY_GOOGLE_TOKEN_KEY` e obrigatoria para criptografar tokens no callback.
 - `MOVIPROGY_GOOGLE_OAUTH_SIMULATED=true` permite simulacao local de callback sem chamar Google.
+- Script local: `scripts/configure_google_oauth.ps1`.
 - Player nao deve fazer streaming direto do Google Drive.
 - Player nao deve receber credenciais Google.
 - Backend deve gerar link controlado ou temporario de download.

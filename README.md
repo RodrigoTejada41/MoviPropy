@@ -136,6 +136,7 @@ Limite:
 - Listagens administrativas retornam `items`, `limit`, `offset` e `total`.
 - Gestao de usuarios, vinculos e permissoes existe no backend.
 - Google Drive possui implementacao inicial em `/api/integrations/google-drive`; OAuth real depende de credenciais Google Cloud.
+- Configuracao local: `.\scripts\configure_google_oauth.ps1 -Simulated` para teste sem conta Google ou `-ClientId ... -ClientSecret ...` para OAuth real.
 
 Banco local:
 - PostgreSQL roda no container `moviprogy-db`.

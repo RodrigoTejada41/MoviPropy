@@ -74,6 +74,9 @@ export type GoogleDriveStatus = {
   root_folder_name?: string | null;
   last_validation_at?: string | null;
   connected_at?: string | null;
+  oauth_configured: boolean;
+  oauth_simulated: boolean;
+  missing_config: string[];
 };
 
 export type GoogleDriveFolder = {
