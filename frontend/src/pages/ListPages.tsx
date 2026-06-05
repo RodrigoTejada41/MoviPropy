@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { Download, Filter, Monitor, PlayCircle, Plus, QrCode, RotateCcw, ShieldCheck, Tv } from "lucide-react";
 import { api, ApiError } from "../lib/api";
 import { DataTable } from "../components/DataTable";
 import { Status } from "../components/Status";
@@ -83,6 +83,7 @@ export function DispositivosPage() {
   const list = useList(api.dispositivos);
   const [form, setForm] = useState({ id: "", cliente_id: "", nome: "", codigo_ativacao: "" });
   const [message, setMessage] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -100,30 +101,151 @@ export function DispositivosPage() {
     }
   }
 
+  const filteredRows = list.rows.filter((item) => {
+    const term = search.trim().toLowerCase();
+    if (!term) return true;
+    return [item.id, item.nome, item.cliente_id, item.codigo_ativacao, item.playlist_atual_id ?? ""]
+      .some((value) => value.toLowerCase().includes(term));
+  });
+  const blocked = list.rows.filter((item) => item.bloqueado).length;
+  const active = list.rows.length - blocked;
+  const withPlaylist = list.rows.filter((item) => item.playlist_atual_id).length;
+  const withoutPlaylist = list.rows.length - withPlaylist;
+
   return (
-    <section className="page">
-      <PageTitle title="Dispositivos" subtitle={`${list.total} registros encontrados.`} />
-      <form className="inlineForm" onSubmit={submit}>
+    <section className="page fleetPage">
+      <div className="fleetHeader">
+        <div>
+          <div className="breadcrumb">
+            <span>Inventario</span>
+            <span>/</span>
+            <strong>Dispositivos</strong>
+          </div>
+          <h1>Gestao da frota de dispositivos</h1>
+          <p>Monitore, cadastre e acompanhe players do sistema de midia indoor.</p>
+        </div>
+        <div className="fleetActions">
+          <button className="secondaryButton" type="button" disabled><Filter size={17} />Filtros</button>
+          <button className="secondaryButton" type="button" disabled><Download size={17} />Exportar</button>
+          <a className="primaryButton" href="#novo-dispositivo"><Plus size={17} />Cadastrar</a>
+        </div>
+      </div>
+
+      <div className="fleetStats">
+        <FleetStat label="Total cadastrado" value={list.total} tone="primary" />
+        <FleetStat label="Ativos" value={active} tone="success" />
+        <FleetStat label="Bloqueados" value={blocked} tone="danger" />
+        <FleetStat label="Sem playlist" value={withoutPlaylist} tone="neutral" />
+      </div>
+
+      <form className="fleetForm" id="novo-dispositivo" onSubmit={submit}>
+        <div>
+          <h2>Novo dispositivo</h2>
+          <p>Use codigo unico de ativacao gerado para o player.</p>
+        </div>
         <input placeholder="id" value={form.id} onChange={(event) => setForm({ ...form, id: event.target.value })} />
         <input placeholder="cliente_id" value={form.cliente_id} onChange={(event) => setForm({ ...form, cliente_id: event.target.value })} />
         <input placeholder="nome" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} />
-        <input placeholder="codigo" value={form.codigo_ativacao} onChange={(event) => setForm({ ...form, codigo_ativacao: event.target.value })} />
+        <input placeholder="codigo_ativacao" value={form.codigo_ativacao} onChange={(event) => setForm({ ...form, codigo_ativacao: event.target.value })} />
         <button className="primaryButton"><Plus size={16} />Criar</button>
       </form>
       {message && <Status error={message} />}
-      <DataTable<Dispositivo>
-        rows={list.rows}
-        loading={list.loading}
-        error={list.error}
-        columns={[
-          { key: "id", label: "Id", render: (item) => item.id },
-          { key: "cliente", label: "Cliente", render: (item) => item.cliente_id },
-          { key: "nome", label: "Nome", render: (item) => item.nome },
-          { key: "codigo", label: "Codigo", render: (item) => item.codigo_ativacao },
-          { key: "bloqueado", label: "Bloqueado", render: (item) => item.bloqueado }
-        ]}
-      />
+
+      <div className="fleetTableCard">
+        <div className="fleetTableHeader">
+          <div>
+            <strong>Frota ativa</strong>
+            <span>{filteredRows.length} exibidos de {list.total}</span>
+          </div>
+          <input
+            className="fleetSearch"
+            placeholder="Buscar por nome, id, cliente ou codigo"
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </div>
+        <Status loading={list.loading} error={list.error} empty={!list.loading && !list.error && filteredRows.length === 0} />
+        {!list.loading && !list.error && filteredRows.length > 0 && (
+          <div className="fleetTableWrap">
+            <table className="fleetTable">
+              <thead>
+                <tr>
+                  <th>Nome e ID</th>
+                  <th>Cliente</th>
+                  <th>Codigo</th>
+                  <th>Playlist atual</th>
+                  <th>Ultimo acesso</th>
+                  <th>Status</th>
+                  <th>Acoes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRows.map((item) => (
+                  <tr key={item.id} className={item.bloqueado ? "blockedRow" : ""}>
+                    <td>
+                      <div className="deviceName">
+                        <div className={item.bloqueado ? "deviceIcon danger" : "deviceIcon"}>
+                          {item.bloqueado ? <RotateCcw size={20} /> : <Tv size={20} />}
+                        </div>
+                        <div>
+                          <strong>{item.nome}</strong>
+                          <span>ID: {item.id}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{item.cliente_id}</td>
+                    <td><code>{item.codigo_ativacao}</code></td>
+                    <td>
+                      {item.playlist_atual_id ? (
+                        <span className="playlistPill"><PlayCircle size={17} />{item.playlist_atual_id}</span>
+                      ) : (
+                        <span className="mutedCell">Sem playlist</span>
+                      )}
+                    </td>
+                    <td><span className="mutedCell">Nao informado</span></td>
+                    <td>
+                      <span className={item.bloqueado ? "statusPill danger" : "statusPill success"}>
+                        <i></i>{item.bloqueado ? "Bloqueado" : "Ativo"}
+                      </span>
+                    </td>
+                    <td>
+                      <button className="tableIconButton" type="button" disabled title="Configuracoes pendentes">
+                        <Monitor size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="fleetHelpGrid">
+        <div className="fleetHelp">
+          <QrCode size={28} />
+          <h2>Provisionamento em lote</h2>
+          <p>Importacao CSV e app de provisionamento ainda dependem de contrato backend.</p>
+          <button type="button" disabled>Planejado</button>
+        </div>
+        <div className="fleetHelp">
+          <ShieldCheck size={28} />
+          <h2>Politica de seguranca</h2>
+          <p>Dispositivos bloqueados nao ativam pelo fluxo real do backend.</p>
+          <button type="button" disabled>Somente leitura</button>
+        </div>
+      </div>
     </section>
+  );
+}
+
+function FleetStat({ label, value, tone }: { label: string; value: number; tone: "primary" | "success" | "danger" | "neutral" }) {
+  return (
+    <div className={`fleetStat ${tone}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }
 

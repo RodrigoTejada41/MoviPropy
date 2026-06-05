@@ -135,7 +135,7 @@ Limite:
 - Telas implementadas inicialmente:
   - Dashboard.
   - Clientes.
-  - Dispositivos.
+  - Dispositivos com layout de frota, KPIs, busca local e cadastro.
   - Midias.
   - Playlists.
   - Logs/Auditoria.
@@ -143,6 +143,7 @@ Limite:
   - Sincronizacoes com placeholder por falta de endpoint especifico.
   - Google Drive com placeholder pos-MVP.
   - Configuracoes com placeholder por falta de endpoints.
+- A tela de dispositivos nao deve inventar ultima comunicacao; enquanto a API nao retorna esse campo, mostrar `Nao informado`.
 
 ## Contratos atuais do player
 

@@ -146,10 +146,13 @@ Criterios de aceite:
 
 Objetivo:
 - Gerenciar players instalados.
+- Exibir visao operacional de frota com indicadores, busca e tabela detalhada.
 
 Funcionalidades:
 - Listar dispositivos.
 - Criar dispositivo.
+- Buscar localmente por id, nome, cliente, codigo ou playlist.
+- Exibir indicadores de total, ativos, bloqueados e sem playlist.
 - Ver codigo de ativacao.
 - Vincular playlist atual.
 - Bloquear/desbloquear.
@@ -177,6 +180,8 @@ Criterios de aceite:
 - Nao permitir dispositivo sem cliente.
 - Exibir codigo de ativacao apos cadastro.
 - Avisar se nao houver playlist vinculada.
+- Nao inventar ultima comunicacao se a API nao retornar esse dado.
+- Acoes sem contrato backend devem aparecer desabilitadas.
 
 ### Midias
 

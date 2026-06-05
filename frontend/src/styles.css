@@ -366,23 +366,25 @@ input:focus {
 
 .appShell {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  background: #f7f9fb;
+  grid-template-columns: 280px 1fr;
   min-height: 100vh;
 }
 
 .sidebar {
-  background: #101722;
+  background: #2d3133;
+  box-shadow: 16px 0 44px rgba(16, 23, 34, 0.12);
   color: #f8fafc;
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding: 22px 16px;
+  padding: 28px 0 20px;
 }
 
 .brand {
   display: grid;
   gap: 4px;
-  padding: 0 8px;
+  padding: 0 24px;
 }
 
 .brand strong {
@@ -409,19 +411,63 @@ nav {
   align-items: center;
   background: transparent;
   border: 0;
-  border-radius: 6px;
-  color: #c9d3df;
+  border-left: 4px solid transparent;
+  border-radius: 0;
+  color: #bec6e0;
   display: flex;
   gap: 10px;
-  min-height: 40px;
-  padding: 0 10px;
+  min-height: 44px;
+  padding: 0 24px 0 20px;
   text-align: left;
 }
 
 .navItem.active,
 .navItem:hover {
-  background: #243247;
+  background: rgba(70, 72, 212, 0.14);
+  border-left-color: #c0c1ff;
+  color: #e1e0ff;
+}
+
+.sideProfile {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 40px 1fr;
+  margin: auto 24px 0;
+  min-width: 0;
+  padding: 12px;
+}
+
+.avatar {
+  align-items: center;
+  background: rgba(70, 72, 212, 0.32);
+  border-radius: 10px;
   color: #fff;
+  display: flex;
+  font-weight: 800;
+  height: 40px;
+  justify-content: center;
+  width: 40px;
+}
+
+.sideProfile div:last-child {
+  display: grid;
+  min-width: 0;
+}
+
+.sideProfile strong,
+.sideProfile span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sideProfile span {
+  color: #bec6e0;
+  font-size: 12px;
 }
 
 .workspace {
@@ -430,23 +476,99 @@ nav {
 
 .topbar {
   align-items: center;
-  background: #ffffff;
-  border-bottom: 1px solid #dde4ec;
+  background: rgba(247, 249, 251, 0.86);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid #c7c4d7;
   display: flex;
+  gap: 20px;
   justify-content: space-between;
   min-height: 64px;
   padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
-.topbar div {
+.topSearch {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #c7c4d7;
+  border-radius: 12px;
+  color: #767586;
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  max-width: 460px;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.topSearch input {
+  border: 0;
+  min-height: 38px;
+  min-width: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.topSearch input:focus {
+  outline: 0;
+}
+
+.topActions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.topGhost:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.roundButton {
+  align-items: center;
+  background: #e9eef3;
+  border: 0;
+  border-radius: 999px;
+  color: #464554;
+  display: flex;
+  height: 40px;
+  justify-content: center;
+  position: relative;
+  width: 40px;
+}
+
+.roundButton span {
+  background: #ba1a1a;
+  border-radius: 999px;
+  height: 8px;
+  position: absolute;
+  right: 10px;
+  top: 9px;
+  width: 8px;
+}
+
+.roundButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.topUser {
   display: grid;
   gap: 2px;
+  min-width: 160px;
+}
+
+.topUser span {
+  color: #6b7786;
+  font-size: 12px;
 }
 
 .page {
   display: grid;
   gap: 22px;
-  padding: 28px;
+  padding: 32px;
 }
 
 .pageTitle {
@@ -558,6 +680,371 @@ th {
   color: #9f1d1d;
 }
 
+.secondaryButton {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #c7c4d7;
+  border-radius: 12px;
+  color: #464554;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 8px;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+.secondaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.fleetPage {
+  gap: 28px;
+  margin: 0 auto;
+  max-width: 1280px;
+  width: 100%;
+}
+
+.fleetHeader {
+  align-items: end;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+}
+
+.breadcrumb {
+  align-items: center;
+  color: #767586;
+  display: flex;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.breadcrumb strong {
+  color: #4648d4;
+}
+
+.fleetHeader h1 {
+  color: #191c1e;
+  font-size: 32px;
+  letter-spacing: 0;
+  line-height: 40px;
+  margin: 0;
+}
+
+.fleetHeader p,
+.fleetForm p,
+.fleetHelp p {
+  color: #6b7786;
+  margin: 6px 0 0;
+}
+
+.fleetActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.fleetActions a {
+  text-decoration: none;
+}
+
+.fleetStats {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.fleetStat {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #dce3ea;
+  border-radius: 16px;
+  box-shadow: 0 16px 36px rgba(16, 23, 34, 0.06);
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+}
+
+.fleetStat span {
+  color: #5d6978;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.fleetStat strong {
+  font-size: 44px;
+  letter-spacing: 0;
+  line-height: 48px;
+}
+
+.fleetStat.primary strong {
+  color: #4648d4;
+}
+
+.fleetStat.success strong {
+  color: #087f5b;
+}
+
+.fleetStat.danger strong {
+  color: #ba1a1a;
+}
+
+.fleetStat.neutral strong {
+  color: #565e74;
+}
+
+.fleetForm {
+  align-items: end;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #dce3ea;
+  border-radius: 16px;
+  box-shadow: 0 16px 36px rgba(16, 23, 34, 0.06);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(120px, 1fr)) auto;
+  padding: 18px;
+}
+
+.fleetForm h2,
+.fleetHelp h2 {
+  font-size: 18px;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.fleetTableCard {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid #dce3ea;
+  border-radius: 18px;
+  box-shadow: 0 22px 54px rgba(16, 23, 34, 0.10);
+  overflow: hidden;
+}
+
+.fleetTableHeader {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.62);
+  border-bottom: 1px solid #edf1f5;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 18px 20px;
+}
+
+.fleetTableHeader > div {
+  display: grid;
+  gap: 3px;
+}
+
+.fleetTableHeader strong {
+  font-size: 18px;
+}
+
+.fleetTableHeader span {
+  color: #6b7786;
+  font-size: 13px;
+}
+
+.fleetSearch {
+  border-radius: 12px;
+  max-width: 360px;
+  width: 100%;
+}
+
+.fleetTableWrap {
+  overflow-x: auto;
+}
+
+.fleetTable {
+  min-width: 1080px;
+}
+
+.fleetTable th {
+  background: rgba(242, 244, 246, 0.68);
+}
+
+.fleetTable tr {
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.fleetTable tbody tr:hover {
+  background: rgba(70, 72, 212, 0.05);
+}
+
+.fleetTable .blockedRow:hover {
+  background: rgba(186, 26, 26, 0.05);
+}
+
+.deviceName {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 42px 1fr;
+}
+
+.deviceName strong,
+.deviceName span {
+  display: block;
+}
+
+.deviceName span {
+  color: #6b7786;
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.deviceIcon {
+  align-items: center;
+  background: rgba(70, 72, 212, 0.10);
+  border-radius: 12px;
+  color: #4648d4;
+  display: flex;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.deviceIcon.danger {
+  background: rgba(186, 26, 26, 0.10);
+  color: #ba1a1a;
+}
+
+.fleetTable code {
+  background: #eceef0;
+  border-radius: 6px;
+  color: #565e74;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 7px;
+}
+
+.playlistPill,
+.statusPill {
+  align-items: center;
+  display: inline-flex;
+  gap: 7px;
+}
+
+.playlistPill {
+  color: #4648d4;
+  font-weight: 700;
+}
+
+.mutedCell {
+  color: #8a94a3;
+}
+
+.statusPill {
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 6px 10px;
+  text-transform: uppercase;
+}
+
+.statusPill i {
+  border-radius: 999px;
+  display: block;
+  height: 8px;
+  position: relative;
+  width: 8px;
+}
+
+.statusPill.success {
+  background: #e9fbf3;
+  color: #087f5b;
+}
+
+.statusPill.success i {
+  background: #10b981;
+}
+
+.statusPill.success i::after {
+  animation: pulseStatus 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background: rgba(16, 185, 129, 0.35);
+  border-radius: 999px;
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.statusPill.danger {
+  background: #fff0ed;
+  color: #ba1a1a;
+}
+
+.statusPill.danger i {
+  background: #ba1a1a;
+}
+
+@keyframes pulseStatus {
+  50% {
+    opacity: 0.3;
+    transform: scale(1.8);
+  }
+}
+
+.tableIconButton {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: #767586;
+  display: inline-flex;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.tableIconButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.fleetHelpGrid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fleetHelp {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid #dce3ea;
+  border-radius: 20px;
+  box-shadow: 0 16px 36px rgba(16, 23, 34, 0.06);
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+  padding: 26px;
+  position: relative;
+}
+
+.fleetHelp svg {
+  background: #e1e0ff;
+  border-radius: 14px;
+  color: #4648d4;
+  height: 48px;
+  padding: 10px;
+  width: 48px;
+}
+
+.fleetHelp button {
+  background: transparent;
+  border: 0;
+  color: #4648d4;
+  cursor: not-allowed;
+  font-weight: 800;
+  justify-self: start;
+  opacity: 0.62;
+  padding: 0;
+}
+
 @media (max-width: 980px) {
   .loginPage {
     overflow: auto;
@@ -584,9 +1071,37 @@ th {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .sideProfile {
+    margin-top: 8px;
+  }
+
+  .topbar,
+  .topActions,
+  .fleetHeader,
+  .fleetTableHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .topSearch,
+  .fleetSearch {
+    max-width: none;
+  }
+
+  .topActions {
+    width: 100%;
+  }
+
+  .topUser {
+    min-width: 0;
+  }
+
   .metricGrid,
   .split,
-  .inlineForm {
+  .inlineForm,
+  .fleetStats,
+  .fleetForm,
+  .fleetHelpGrid {
     grid-template-columns: 1fr;
   }
 }
