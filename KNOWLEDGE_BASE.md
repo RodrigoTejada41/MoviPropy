@@ -128,6 +128,8 @@ Limite:
 - Build: `npm run build`.
 - Login usa `POST /api/auth/login`.
 - Logout usa `POST /api/auth/logout`.
+- Tela de login possui layout visual proprio, sem Tailwind CDN e sem scripts inline.
+- Recuperacao de senha e SSO aparecem desabilitados enquanto nao houver contrato backend.
 - Token admin fica no `localStorage` como solucao MVP local.
 - API local usa proxy do Vite para `http://127.0.0.1:8000`.
 - Telas implementadas inicialmente:

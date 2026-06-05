@@ -28,32 +28,82 @@ button {
 
 .loginPage {
   align-items: center;
-  background:
-    linear-gradient(rgba(18, 26, 38, 0.72), rgba(18, 26, 38, 0.72)),
-    url("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1800&q=80");
-  background-position: center;
-  background-size: cover;
+  background: #f7f9fb;
   display: flex;
+  justify-content: center;
   min-height: 100vh;
-  padding: 32px;
+  overflow: hidden;
+  padding: 24px;
+  position: relative;
+}
+
+.loginPage::before {
+  background:
+    radial-gradient(circle at 10% 12%, rgba(70, 72, 212, 0.12), transparent 28%),
+    radial-gradient(circle at 86% 10%, rgba(70, 72, 212, 0.10), transparent 24%),
+    radial-gradient(circle at 50% 100%, rgba(192, 193, 255, 0.24), transparent 34%);
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.loginStage {
+  align-items: center;
+  display: grid;
+  gap: 56px;
+  grid-template-columns: minmax(340px, 440px) minmax(420px, 1fr);
+  max-width: 1180px;
+  position: relative;
+  width: 100%;
+  z-index: 1;
+}
+
+.loginColumn {
+  display: grid;
+  gap: 24px;
+}
+
+.loginBrand {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+
+.loginLogo {
+  align-items: center;
+  background: #4648d4;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(70, 72, 212, 0.25);
+  color: #ffffff;
+  display: flex;
+  height: 56px;
+  justify-content: center;
+  width: 56px;
+}
+
+.loginBrand h1 {
+  color: #191c1e;
+  font-size: 32px;
+  letter-spacing: 0;
+  line-height: 40px;
+  margin: 0;
+}
+
+.loginBrand p {
+  color: #5e6572;
+  margin: 0;
 }
 
 .loginPanel {
-  background: #ffffff;
-  border: 1px solid #d9e0e8;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(199, 196, 215, 0.68);
+  border-radius: 12px;
+  box-shadow: 0 24px 70px rgba(16, 23, 34, 0.14);
   display: grid;
-  gap: 18px;
-  max-width: 420px;
-  padding: 32px;
+  gap: 20px;
+  padding: 36px;
   width: 100%;
-}
-
-.eyebrow {
-  color: #2f6f73;
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
 }
 
 .loginPanel h1,
@@ -67,6 +117,214 @@ button {
   gap: 7px;
   font-size: 14px;
   font-weight: 700;
+}
+
+.inputIcon {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #c7c4d7;
+  border-radius: 12px;
+  color: #767586;
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  min-height: 50px;
+  padding: 0 12px;
+}
+
+.inputIcon:focus-within {
+  border-color: #4648d4;
+  box-shadow: 0 0 0 3px rgba(70, 72, 212, 0.15);
+}
+
+.inputIcon input {
+  border: 0;
+  min-height: 48px;
+  outline: 0;
+  padding: 0 10px;
+}
+
+.inputIcon input:focus {
+  border-color: transparent;
+  outline: 0;
+}
+
+.inputAction {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: #767586;
+  display: flex;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.inputAction:hover {
+  background: #eceef0;
+  color: #191c1e;
+}
+
+.loginOptions {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.checkLabel {
+  align-items: center;
+  color: #5e6572;
+  display: flex !important;
+  font-weight: 500 !important;
+  gap: 8px !important;
+}
+
+.checkLabel input {
+  accent-color: #4648d4;
+  min-height: auto;
+}
+
+.linkButton {
+  background: transparent;
+  border: 0;
+  color: #4648d4;
+  font-weight: 700;
+  padding: 0;
+}
+
+.linkButton:disabled,
+.ssoGrid button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.loginSubmit {
+  background: #4648d4;
+  border-radius: 12px;
+  box-shadow: 0 16px 32px rgba(70, 72, 212, 0.24);
+  min-height: 54px;
+}
+
+.loginSubmit:hover:not(:disabled) {
+  background: #3c3ec4;
+}
+
+.loginDivider {
+  align-items: center;
+  color: #767586;
+  display: grid;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 12px;
+  grid-template-columns: 1fr auto 1fr;
+  text-transform: uppercase;
+}
+
+.loginDivider::before,
+.loginDivider::after {
+  background: #c7c4d7;
+  content: "";
+  height: 1px;
+}
+
+.ssoGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ssoGrid button {
+  background: #ffffff;
+  border: 1px solid #c7c4d7;
+  border-radius: 12px;
+  color: #191c1e;
+  font-weight: 700;
+  min-height: 44px;
+}
+
+.loginBadges {
+  color: #767586;
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+}
+
+.loginBadges span {
+  align-items: center;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  gap: 6px;
+  text-transform: uppercase;
+}
+
+.loginVisual {
+  background:
+    linear-gradient(90deg, rgba(45, 49, 51, 0.96), rgba(45, 49, 51, 0.68)),
+    linear-gradient(135deg, #111827, #3f465c);
+  border-radius: 16px;
+  color: #ffffff;
+  display: grid;
+  gap: 40px;
+  min-height: 610px;
+  overflow: hidden;
+  padding: 52px;
+  position: relative;
+}
+
+.loginVisual::before {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 42px 42px;
+  content: "";
+  inset: 0;
+  opacity: 0.35;
+  position: absolute;
+}
+
+.visualGrid {
+  align-self: center;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  position: relative;
+  z-index: 1;
+}
+
+.visualGrid span {
+  aspect-ratio: 16 / 9;
+  background:
+    linear-gradient(135deg, rgba(192, 193, 255, 0.24), rgba(70, 72, 212, 0.12)),
+    #101722;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
+}
+
+.visualGrid span:nth-child(2),
+.visualGrid span:nth-child(3) {
+  transform: translateY(26px);
+}
+
+.loginVisual blockquote {
+  align-self: end;
+  margin: 0;
+  max-width: 560px;
+  position: relative;
+  z-index: 1;
+}
+
+.loginVisual p {
+  font-size: 32px;
+  line-height: 40px;
+  margin: 0 0 22px;
+}
+
+.loginVisual footer {
+  color: #c0c1ff;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 input {
@@ -301,6 +559,19 @@ th {
 }
 
 @media (max-width: 980px) {
+  .loginPage {
+    overflow: auto;
+  }
+
+  .loginStage {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+
+  .loginVisual {
+    display: none;
+  }
+
   .appShell {
     grid-template-columns: 1fr;
   }

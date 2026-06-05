@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { LogIn } from "lucide-react";
+import { ArrowRight, Cloud, Eye, EyeOff, Film, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 import { api, ApiError } from "../lib/api";
 import { saveSession } from "../lib/session";
 import type { User } from "../lib/types";
@@ -13,6 +13,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [senha, setSenha] = useState("moviprogy_admin_dev_password");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -35,35 +36,98 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
   return (
     <main className="loginPage">
-      <form className="loginPanel" onSubmit={submit}>
-        <div>
-          <span className="eyebrow">MoviProgy</span>
-          <h1>Acesso administrativo</h1>
+      <section className="loginStage" aria-label="Acesso administrativo MoviProgy">
+        <div className="loginColumn">
+          <div className="loginBrand">
+            <div className="loginLogo" aria-hidden="true">
+              <Film size={32} />
+            </div>
+            <h1>MoviProgy</h1>
+            <p>Console administrativo SaaS</p>
+          </div>
+
+          <form className="loginPanel" onSubmit={submit}>
+            <label>
+              Email
+              <span className="inputIcon">
+                <Mail size={19} aria-hidden="true" />
+                <input
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  type="email"
+                  autoComplete="username"
+                  placeholder="admin@moviprogy.local"
+                />
+              </span>
+            </label>
+            <label>
+              Senha
+              <span className="inputIcon">
+                <LockKeyhole size={19} aria-hidden="true" />
+                <input
+                  value={senha}
+                  onChange={(event) => setSenha(event.target.value)}
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  placeholder="senha"
+                />
+                <button
+                  className="inputAction"
+                  onClick={() => setShowPassword((current) => !current)}
+                  type="button"
+                  title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </span>
+            </label>
+
+            <div className="loginOptions">
+              <label className="checkLabel">
+                <input type="checkbox" />
+                Manter conectado
+              </label>
+              <button className="linkButton" type="button" disabled>
+                Recuperar senha
+              </button>
+            </div>
+
+            {error && <div className="state stateError">{error}</div>}
+
+            <button className="primaryButton loginSubmit" disabled={loading}>
+              {loading ? "Autenticando..." : "Entrar"}
+              <ArrowRight size={18} />
+            </button>
+
+            <div className="loginDivider">
+              <span>SSO futuro</span>
+            </div>
+
+            <div className="ssoGrid">
+              <button type="button" disabled>Google</button>
+              <button type="button" disabled>Meta</button>
+            </div>
+          </form>
+
+          <div className="loginBadges" aria-label="Caracteristicas operacionais">
+            <span><ShieldCheck size={16} /> Seguro</span>
+            <span><Cloud size={16} /> Online</span>
+          </div>
         </div>
-        <label>
-          Email
-          <input
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            type="email"
-            autoComplete="username"
-          />
-        </label>
-        <label>
-          Senha
-          <input
-            value={senha}
-            onChange={(event) => setSenha(event.target.value)}
-            type="password"
-            autoComplete="current-password"
-          />
-        </label>
-        {error && <div className="state stateError">{error}</div>}
-        <button className="primaryButton" disabled={loading}>
-          <LogIn size={18} />
-          {loading ? "Entrando..." : "Entrar"}
-        </button>
-      </form>
+
+        <aside className="loginVisual" aria-label="Orquestracao de midia indoor">
+          <div className="visualGrid">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <blockquote>
+            <p>Orquestracao de campanhas, playlists e dispositivos em uma operacao centralizada.</p>
+            <footer>MoviProgy Admin</footer>
+          </blockquote>
+        </aside>
+      </section>
     </main>
   );
 }

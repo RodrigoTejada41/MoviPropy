@@ -57,6 +57,7 @@ Menu inicial:
 
 Objetivo:
 - Autenticar usuario administrativo.
+- Usar layout visual dedicado com identidade MoviProgy, painel lateral e estados claros.
 
 Campos:
 - Email.
@@ -64,6 +65,12 @@ Campos:
 
 Acoes:
 - Entrar.
+- Mostrar/ocultar senha.
+- Manter conectado.
+
+Limites MVP:
+- Recuperacao de senha permanece desabilitada ate existir contrato backend.
+- Login social/SSO permanece desabilitado ate existir contrato backend.
 
 API:
 - `POST /api/auth/login`.

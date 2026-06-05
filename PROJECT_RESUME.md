@@ -71,6 +71,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Frontend inicial criado em `frontend/` com Vite, React e TypeScript.
 - Login administrativo conectado em `POST /api/auth/login`.
 - Logout conectado em `POST /api/auth/logout`.
+- Tela de login redesenhada com identidade visual MoviProgy, mostrar/ocultar senha e placeholders desabilitados para recursos sem contrato backend.
 - Painel autenticado criado com sidebar, header e navegacao.
 - Telas iniciais criadas para Dashboard, Clientes, Dispositivos, Midias, Playlists, Logs/Auditoria, Usuarios, Sincronizacoes, Google Drive e Configuracoes.
 - Listagens iniciais consomem endpoints paginados do backend.
