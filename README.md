@@ -12,7 +12,7 @@ O player deve baixar as midias, armazenar localmente e continuar exibindo conteu
 - Projeto em fase de documentacao inicial.
 - Backend minimo criado com FastAPI.
 - Testes iniciais criados com pytest.
-- Stack frontend ainda nao aprovada.
+- Frontend inicial criado com Vite, React e TypeScript.
 - Documentacao base criada.
 
 ## Backend
@@ -67,6 +67,26 @@ Parar Docker:
 
 ```powershell
 docker compose down
+```
+
+## Frontend
+
+Executar painel local:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+- Painel: `http://127.0.0.1:5173`
+- API local esperada: `http://127.0.0.1:8000`
+
+Build:
+
+```powershell
+cd frontend
+npm run build
 ```
 
 Endpoints iniciais:

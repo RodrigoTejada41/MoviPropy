@@ -31,7 +31,8 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Logs player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Confirmacao sincronizacao | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Google Drive | Pos-MVP | Pos-MVP | Pos-MVP | Pos-MVP | Pos-MVP | Adiado |
-| Frontend login | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
+| Frontend login | Build | Pendente | Parcial | Pendente | Pendente | Implementado parcial |
+| Frontend dashboard/listagens | Build | Pendente | Parcial | Pendente | Pendente | Implementado parcial |
 | Frontend playlists | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |
 
 ## Regras

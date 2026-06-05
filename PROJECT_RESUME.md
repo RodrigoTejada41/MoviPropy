@@ -68,6 +68,12 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Manual admin e manual operacional documentados.
 - Repositorio Git inicializado localmente.
 - Testes iniciais criados com pytest.
+- Frontend inicial criado em `frontend/` com Vite, React e TypeScript.
+- Login administrativo conectado em `POST /api/auth/login`.
+- Logout conectado em `POST /api/auth/logout`.
+- Painel autenticado criado com sidebar, header e navegacao.
+- Telas iniciais criadas para Dashboard, Clientes, Dispositivos, Midias, Playlists, Logs/Auditoria, Usuarios, Sincronizacoes, Google Drive e Configuracoes.
+- Listagens iniciais consomem endpoints paginados do backend.
 
 ## Arquivos principais
 
@@ -97,10 +103,10 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Nova playlist so substitui a antiga apos validacao completa.
 - Toda decisao critica deve ficar no projeto, nao em memoria externa.
 - Frontend so deve iniciar apos fechamento do backend.
+- Stack frontend MVP: Vite + React + TypeScript.
 
 ## Pendencias de aprovacao
 
-- Stack frontend.
 - Tecnologia do player.
 - Implementacao da integracao Google Drive em fase pos-MVP.
 
@@ -125,8 +131,10 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 
 ## Proximo passo recomendado
 
-Backend MVP fechado para iniciar validacao final e frontend.
+Backend MVP fechado e frontend inicial criado.
 
-Pendencias backend prioritarias:
+Pendencias prioritarias:
+- Completar formularios e acoes do frontend para upload de midia, criacao de playlists, vinculo de midias e gestao detalhada de usuarios/permissoes.
+- Adicionar testes automatizados do frontend.
 - Testes de carga reais em volume de producao continuam recomendados antes de deploy publico.
 - Google Drive fica fora do MVP e entra como fase pos-MVP.

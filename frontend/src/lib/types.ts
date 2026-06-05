@@ -1,0 +1,67 @@
+export type User = {
+  id: string;
+  nome: string;
+  email: string;
+  perfil: string;
+  ativo?: boolean;
+};
+
+export type LoginResponse = {
+  access_token: string;
+  token_type: string;
+  usuario: User;
+};
+
+export type PageResult<T> = {
+  items: T[];
+  limit: number;
+  offset: number;
+  total: number;
+};
+
+export type Cliente = {
+  id: string;
+  nome: string;
+  documento?: string | null;
+  ativo: boolean;
+};
+
+export type Dispositivo = {
+  id: string;
+  cliente_id: string;
+  nome: string;
+  codigo_ativacao: string;
+  bloqueado: boolean;
+  playlist_atual_id?: string | null;
+};
+
+export type Midia = {
+  id: string;
+  cliente_id: string;
+  nome: string;
+  tipo: string;
+  caminho: string;
+  tamanho: number;
+  sha256: string;
+  duracao_segundos?: number | null;
+  ativo: boolean;
+};
+
+export type Playlist = {
+  id: string;
+  cliente_id: string;
+  nome: string;
+  versao: number;
+  ativa: boolean;
+};
+
+export type AdminAudit = {
+  user_id: string;
+  recurso: string;
+  acao: string;
+  status: string;
+  cliente_id?: string | null;
+  ip?: string | null;
+  user_agent?: string | null;
+  created_at?: string | null;
+};

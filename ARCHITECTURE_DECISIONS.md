@@ -908,3 +908,34 @@ Consequencias:
 - Nao existem endpoints reais Google Drive no MVP.
 - Player continua baixando pelo backend, sem credenciais externas.
 - Implementacao futura deve seguir `docs/09-google-drive/integracao-google-drive.md`.
+
+---
+
+### ADR-032 - Frontend MVP em Vite, React e TypeScript
+
+Status: Aprovada
+
+Data: 2026-06-05
+
+Contexto:
+- Backend MVP foi fechado.
+- O painel administrativo precisa consumir contratos REST existentes.
+- A interface precisa ser responsiva, simples e testavel.
+
+Decisao:
+- Criar frontend em `frontend/`.
+- Usar Vite, React e TypeScript.
+- Usar CSS proprio para reduzir dependencias.
+- Usar `lucide-react` para icones.
+- Consumir API por cliente HTTP centralizado.
+
+Motivo:
+- Stack leve para MVP.
+- Build rapido.
+- Boa compatibilidade com API REST.
+- Permite evoluir para testes e componentes sem acoplar ao backend.
+
+Consequencias:
+- O frontend passa a ter `package.json` e `package-lock.json` proprios.
+- Deploy futuro precisa publicar artefato estatico ou container separado.
+- Telas que dependem de endpoints ausentes devem exibir placeholder explicito.

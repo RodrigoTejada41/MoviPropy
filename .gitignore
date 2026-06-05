@@ -1,11 +1,16 @@
 .pytest_cache/
 .pytest_tmp/
+.playwright-mcp/
 __pycache__/
 *.py[cod]
 .venv/
 venv/
 dist/
 build/
+node_modules/
+frontend/dist/
+frontend/node_modules/
+frontend/*.tsbuildinfo
 *.egg-info/
 .env
 .env.*

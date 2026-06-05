@@ -7,7 +7,14 @@ Nenhuma implementacao frontend deve iniciar sem consultar este documento.
 
 ## Stack
 
-Status: pendente de aprovacao.
+Status: aprovada para MVP.
+
+Implementacao inicial:
+- Vite.
+- React.
+- TypeScript.
+- CSS proprio.
+- `lucide-react` para icones.
 
 Requisitos tecnicos:
 - Aplicacao web responsiva.
@@ -17,6 +24,11 @@ Requisitos tecnicos:
 - Estado global minimo.
 - Componentes reutilizaveis.
 - Tabelas com filtros, paginacao e estados vazios.
+
+Local:
+- Codigo em `frontend/`.
+- Servidor dev em `http://127.0.0.1:5173`.
+- Proxy local para API em `http://127.0.0.1:8000`.
 
 ## Layout base
 
@@ -397,4 +409,3 @@ Login
   Usuarios e Permissoes
   Configuracoes
 ```
-

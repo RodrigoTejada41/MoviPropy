@@ -35,6 +35,7 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 ## Conhecimento tecnico atual
 
 - Backend definido: Python 3.12+ com FastAPI.
+- Frontend MVP definido: Vite + React + TypeScript.
 - Testes definidos: pytest com FastAPI TestClient.
 - Documentacao funcional, tecnica, operacional e de homologacao foi fechada como baseline antes de continuar backend/frontend.
 - Banco definido para ambiente Docker local: PostgreSQL.
@@ -116,8 +117,30 @@ Limite:
 ## Stack aprovada operacionalmente
 
 - Backend/API: Python 3.12+ e FastAPI.
+- Frontend/Admin: Vite, React e TypeScript.
 - Testes backend: pytest.
 - Servidor ASGI: uvicorn.
+
+## Frontend administrativo
+
+- Codigo: `frontend/`.
+- Servidor local: `npm run dev` em `frontend/`.
+- Build: `npm run build`.
+- Login usa `POST /api/auth/login`.
+- Logout usa `POST /api/auth/logout`.
+- Token admin fica no `localStorage` como solucao MVP local.
+- API local usa proxy do Vite para `http://127.0.0.1:8000`.
+- Telas implementadas inicialmente:
+  - Dashboard.
+  - Clientes.
+  - Dispositivos.
+  - Midias.
+  - Playlists.
+  - Logs/Auditoria.
+  - Usuarios e permissoes.
+  - Sincronizacoes com placeholder por falta de endpoint especifico.
+  - Google Drive com placeholder pos-MVP.
+  - Configuracoes com placeholder por falta de endpoints.
 
 ## Contratos atuais do player
 
