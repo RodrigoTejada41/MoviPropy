@@ -11,7 +11,8 @@ from moviprogy_api.repositories.postgres_devices import (
     PostgresDeviceSessionRepository,
     run_migrations,
 )
-from moviprogy_api.routes import admin, auth, health, player, system
+from moviprogy_api.repositories.postgres_google_drive import PostgresGoogleDriveRepository
+from moviprogy_api.routes import admin, auth, health, integrations, player, system
 
 
 def _device_registry_file() -> Path | None:
@@ -45,6 +46,7 @@ def create_app() -> FastAPI:
             repository=PostgresDeviceSessionRepository(database_url)
         )
         app.state.core_repository = PostgresCoreRepository(database_url)
+        app.state.google_drive_repository = PostgresGoogleDriveRepository(database_url)
         auth_repository = PostgresAuthRepository(database_url)
         app.state.auth_repository = auth_repository
         admin_email = os.getenv("MOVIPROGY_ADMIN_EMAIL")
@@ -58,6 +60,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(player.router)
     app.include_router(admin.router)
+    app.include_router(integrations.router)
     return app
 
 

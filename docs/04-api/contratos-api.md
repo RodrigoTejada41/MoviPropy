@@ -368,12 +368,13 @@ Implementacao atual:
 
 ## Google Drive
 
-Status: adiado para pos-MVP por decisao arquitetural. Sem implementacao atual.
+Status: implementacao inicial.
 
-Contrato futuro canonico:
+Contrato canonico:
 - Namespace: `/api/integrations/google-drive`.
 - Documento principal: `docs/09-google-drive/integracao-google-drive.md`.
 - Rotas antigas em `/api/admin/google-drive` permanecem apenas como historico de rascunho.
+- OAuth real depende de variaveis Google Cloud e chave de criptografia.
 
 ### POST /api/integrations/google-drive/connect
 
@@ -381,6 +382,7 @@ Finalidade: iniciar OAuth 2.0 com Google Drive.
 Quem usa: painel administrativo.
 Resposta: `authorization_url`.
 Seguranca: admin autenticado, RBAC e `state` anti-CSRF.
+Implementacao atual: retorna erro 503 se OAuth Google nao estiver configurado.
 
 ### GET /api/integrations/google-drive/callback
 
@@ -389,6 +391,7 @@ Quem usa: Google OAuth.
 Query: `code`, `state`.
 Resposta: redirecionamento para o painel com sucesso ou erro.
 Seguranca: validar `state`; nunca expor tokens ao frontend.
+Implementacao atual: callback valida `state` sem Bearer token, troca o code por tokens ou usa simulacao local, e salva tokens criptografados.
 
 ### GET /api/integrations/google-drive/status
 
@@ -407,6 +410,7 @@ Regra: revogar tokens quando possivel e auditar a acao.
 Finalidade: listar pastas do Drive.
 Quem usa: painel administrativo.
 Query: `parent_folder_id` opcional.
+Implementacao atual: lista pasta raiz e pastas de cliente registradas localmente.
 
 ### POST /api/integrations/google-drive/root-folder
 
@@ -425,12 +429,14 @@ Payload: `cliente_id`, `folder_id` opcional, `folder_name` opcional.
 Finalidade: listar arquivos do Drive por cliente/pasta.
 Quem usa: painel administrativo.
 Query: `cliente_id`, `folder_id`, `mime_type` opcional.
+Implementacao atual: lista midias ja importadas com origem Google Drive.
 
 ### POST /api/integrations/google-drive/import-media
 
 Finalidade: importar arquivo do Drive como midia do sistema.
 Quem usa: painel administrativo.
 Payload: `cliente_id`, `file_id`, `tipo`.
+Implementacao atual: exige tambem `nome`, `tamanho` e `sha256` enquanto metadados reais do Drive nao sao consultados.
 
 ### POST /api/integrations/google-drive/validate-access
 

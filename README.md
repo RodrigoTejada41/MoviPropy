@@ -135,7 +135,7 @@ Limite:
 - `ADMIN_API_TOKEN` permanece apenas como fallback local sem repository de auth.
 - Listagens administrativas retornam `items`, `limit`, `offset` e `total`.
 - Gestao de usuarios, vinculos e permissoes existe no backend.
-- Google Drive ficou adiado para pos-MVP.
+- Google Drive possui implementacao inicial em `/api/integrations/google-drive`; OAuth real depende de credenciais Google Cloud.
 
 Banco local:
 - PostgreSQL roda no container `moviprogy-db`.

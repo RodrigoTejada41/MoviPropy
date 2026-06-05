@@ -60,6 +60,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Script de simulacao do player criado.
 - Escopo tecnico da integracao Google Drive documentado.
 - Especificacao Google Drive / Armazenamento consolidada com UX/UI, OAuth, endpoints futuros e checklist.
+- Implementacao inicial Google Drive criada com migrations, repository, OAuth, criptografia de tokens, pastas, importacao por metadados e tela administrativa.
 - Especificacao completa do frontend documentada.
 - RBAC granular planejado e documentado.
 - Storage, upload e download controlado documentados.
@@ -114,7 +115,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 ## Pendencias de aprovacao
 
 - Tecnologia do player.
-- Implementacao da integracao Google Drive em fase pos-MVP.
+- Credenciais reais Google Drive para homologacao externa.
 
 ## Limitacoes atuais
 
@@ -133,8 +134,9 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Rotas de midias/playlists ainda sao CRUD inicial com upload fisico local para midias.
 - Manifesto real depende de `dispositivos.playlist_atual_id`, playlist ativa e midias vinculadas.
 - Download controlado atual serve arquivo local de `MOVIPROGY_MEDIA_DIR`.
-- Google Drive foi formalmente adiado para pos-MVP, preservando storage local e download controlado no MVP.
-- Namespace futuro da integracao Google Drive definido como `/api/integrations/google-drive`.
+- Google Drive possui implementacao inicial em `/api/integrations/google-drive`.
+- Fluxo real depende de `MOVIPROGY_GOOGLE_CLIENT_ID`, `MOVIPROGY_GOOGLE_CLIENT_SECRET`, `MOVIPROGY_GOOGLE_REDIRECT_URI` e `MOVIPROGY_GOOGLE_TOKEN_KEY`.
+- Sem credenciais Google, a tela opera com status e simulacao local controlada, mas nao autentica conta real.
 
 ## Proximo passo recomendado
 
@@ -144,4 +146,4 @@ Pendencias prioritarias:
 - Completar formularios e acoes do frontend para upload de midia, criacao de playlists, vinculo de midias e gestao detalhada de usuarios/permissoes.
 - Adicionar testes automatizados do frontend.
 - Testes de carga reais em volume de producao continuam recomendados antes de deploy publico.
-- Google Drive fica fora do MVP e entra como fase pos-MVP.
+- Homologar Google Drive com credenciais reais Google Cloud.

@@ -3,17 +3,21 @@ import {
   AlertTriangle,
   Building2,
   CheckCircle2,
+  Cloud,
   Download,
   Filter,
+  Folder,
   Monitor,
   MoreVertical,
   PlayCircle,
   Plus,
   QrCode,
+  RefreshCw,
   RotateCcw,
   Search,
   ShieldCheck,
   Tv,
+  UploadCloud,
   Users
 } from "lucide-react";
 import { api, ApiError } from "../lib/api";
@@ -493,6 +497,290 @@ export function AuditoriaPage() {
           { key: "data", label: "Data", render: (item) => item.created_at }
         ]}
       />
+    </section>
+  );
+}
+
+export function GoogleDrivePage() {
+  const clientes = useList(api.clientes);
+  const [statusData, setStatusData] = useState<Awaited<ReturnType<typeof api.googleDriveStatus>> | null>(null);
+  const [folders, setFolders] = useState<Awaited<ReturnType<typeof api.googleDriveFolders>>["items"]>([]);
+  const [files, setFiles] = useState<Awaited<ReturnType<typeof api.googleDriveFiles>>["items"]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState<string | null>(null);
+  const [rootForm, setRootForm] = useState({ folder_id: "", folder_name: "MoviProgy_Midias", create_if_missing: true });
+  const [clientFolderForm, setClientFolderForm] = useState({ cliente_id: "", folder_id: "", folder_name: "" });
+  const [importForm, setImportForm] = useState({
+    cliente_id: "",
+    file_id: "",
+    tipo: "video",
+    nome: "",
+    tamanho: "",
+    sha256: "",
+    folder_id: "",
+    google_drive_mime_type: "",
+    google_drive_web_view_link: ""
+  });
+
+  async function load() {
+    setLoading(true);
+    setMessage(null);
+    try {
+      const [statusResult, folderResult, fileResult] = await Promise.all([
+        api.googleDriveStatus(),
+        api.googleDriveFolders().catch(() => ({ items: [] })),
+        api.googleDriveFiles().catch(() => ({ items: [] }))
+      ]);
+      setStatusData(statusResult);
+      setFolders(folderResult.items);
+      setFiles(fileResult.items);
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao carregar Google Drive.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function connect() {
+    setMessage(null);
+    try {
+      const result = await api.googleDriveConnect();
+      window.location.href = result.authorization_url;
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao iniciar OAuth.");
+    }
+  }
+
+  async function disconnect() {
+    setMessage(null);
+    try {
+      await api.googleDriveDisconnect();
+      await load();
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao desconectar.");
+    }
+  }
+
+  async function validate() {
+    setMessage(null);
+    try {
+      const result = await api.googleDriveValidate();
+      setStatusData(result);
+      setMessage("Validacao concluida.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao validar acesso.");
+    }
+  }
+
+  async function saveRootFolder(event: FormEvent) {
+    event.preventDefault();
+    setMessage(null);
+    try {
+      await api.googleDriveRootFolder({
+        folder_id: rootForm.folder_id || null,
+        folder_name: rootForm.folder_name,
+        create_if_missing: rootForm.create_if_missing
+      });
+      await load();
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao salvar pasta raiz.");
+    }
+  }
+
+  async function saveClientFolder(event: FormEvent) {
+    event.preventDefault();
+    setMessage(null);
+    if (!clientFolderForm.cliente_id) {
+      setMessage("Cliente e obrigatorio.");
+      return;
+    }
+    try {
+      await api.googleDriveClientFolder({
+        cliente_id: clientFolderForm.cliente_id,
+        folder_id: clientFolderForm.folder_id || null,
+        folder_name: clientFolderForm.folder_name || null
+      });
+      setClientFolderForm({ cliente_id: "", folder_id: "", folder_name: "" });
+      await load();
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao salvar pasta do cliente.");
+    }
+  }
+
+  async function importMedia(event: FormEvent) {
+    event.preventDefault();
+    setMessage(null);
+    try {
+      await api.googleDriveImportMedia({
+        cliente_id: importForm.cliente_id,
+        file_id: importForm.file_id,
+        tipo: importForm.tipo,
+        nome: importForm.nome,
+        tamanho: Number(importForm.tamanho),
+        sha256: importForm.sha256,
+        folder_id: importForm.folder_id || null,
+        google_drive_mime_type: importForm.google_drive_mime_type || null,
+        google_drive_web_view_link: importForm.google_drive_web_view_link || null
+      });
+      setImportForm({ ...importForm, file_id: "", nome: "", tamanho: "", sha256: "", google_drive_web_view_link: "" });
+      await load();
+      setMessage("Midia importada.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao importar midia.");
+    }
+  }
+
+  const connected = statusData?.connected === true;
+
+  return (
+    <section className="page drivePage">
+      <div className="driveHeader">
+        <div>
+          <div className="breadcrumb">
+            <span>Integracoes</span>
+            <span>/</span>
+            <strong>Google Drive</strong>
+          </div>
+          <h1>Google Drive / Armazenamento</h1>
+          <p>Conecte uma conta Google, organize pastas por cliente e importe arquivos para midias.</p>
+        </div>
+        <div className="driveActions">
+          <button className="secondaryButton" type="button" onClick={validate} disabled={!connected || loading}><RefreshCw size={17} />Validar</button>
+          {connected ? (
+            <button className="secondaryButton" type="button" onClick={disconnect}><Cloud size={17} />Desconectar</button>
+          ) : (
+            <button className="primaryButton" type="button" onClick={connect}><Cloud size={17} />Conectar</button>
+          )}
+        </div>
+      </div>
+
+      {message && <Status error={message} />}
+      <Status loading={loading} empty={!loading && !statusData} />
+
+      <div className="driveStatusGrid">
+        <div className={connected ? "driveStatusCard connected" : "driveStatusCard"}>
+          <div className="driveStatusIcon"><Cloud size={28} /></div>
+          <span>Status</span>
+          <strong>{statusData?.status ?? "desconectado"}</strong>
+          <p>{statusData?.email ?? "Nenhuma conta conectada."}</p>
+        </div>
+        <div className="driveStatusCard">
+          <div className="driveStatusIcon"><Folder size={28} /></div>
+          <span>Pasta raiz</span>
+          <strong>{statusData?.root_folder_name ?? "Nao definida"}</strong>
+          <p>{statusData?.root_folder_id ?? "Selecione ou crie a pasta raiz."}</p>
+        </div>
+        <div className="driveStatusCard">
+          <div className="driveStatusIcon"><RefreshCw size={28} /></div>
+          <span>Ultima validacao</span>
+          <strong>{statusData?.last_validation_at ? new Date(statusData.last_validation_at).toLocaleString() : "Nao informado"}</strong>
+          <p>Tokens e pastas sao validados pelo backend.</p>
+        </div>
+      </div>
+
+      <div className="driveGrid">
+        <form className="drivePanel" onSubmit={saveRootFolder}>
+          <h2>Pasta raiz</h2>
+          <input placeholder="folder_id existente" value={rootForm.folder_id} onChange={(event) => setRootForm({ ...rootForm, folder_id: event.target.value })} />
+          <input placeholder="nome da pasta" value={rootForm.folder_name} onChange={(event) => setRootForm({ ...rootForm, folder_name: event.target.value })} />
+          <label className="checkLabel">
+            <input type="checkbox" checked={rootForm.create_if_missing} onChange={(event) => setRootForm({ ...rootForm, create_if_missing: event.target.checked })} />
+            Criar id local para simulacao
+          </label>
+          <button className="primaryButton" disabled={!connected}><Folder size={16} />Salvar raiz</button>
+        </form>
+
+        <form className="drivePanel" onSubmit={saveClientFolder}>
+          <h2>Pasta do cliente</h2>
+          <select value={clientFolderForm.cliente_id} onChange={(event) => setClientFolderForm({ ...clientFolderForm, cliente_id: event.target.value })}>
+            <option value="">Cliente</option>
+            {clientes.rows.map((cliente) => <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>)}
+          </select>
+          <input placeholder="folder_id opcional" value={clientFolderForm.folder_id} onChange={(event) => setClientFolderForm({ ...clientFolderForm, folder_id: event.target.value })} />
+          <input placeholder="nome opcional" value={clientFolderForm.folder_name} onChange={(event) => setClientFolderForm({ ...clientFolderForm, folder_name: event.target.value })} />
+          <button className="primaryButton" disabled={!connected}><Folder size={16} />Salvar pasta</button>
+        </form>
+      </div>
+
+      <form className="driveImportPanel" onSubmit={importMedia}>
+        <div>
+          <h2>Importar arquivo do Drive</h2>
+          <p>Use metadados conhecidos do arquivo. O player baixara sempre pelo backend.</p>
+        </div>
+        <select value={importForm.cliente_id} onChange={(event) => setImportForm({ ...importForm, cliente_id: event.target.value })}>
+          <option value="">Cliente</option>
+          {clientes.rows.map((cliente) => <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>)}
+        </select>
+        <select value={importForm.tipo} onChange={(event) => setImportForm({ ...importForm, tipo: event.target.value })}>
+          <option value="video">Video</option>
+          <option value="imagem">Imagem</option>
+        </select>
+        <input placeholder="file_id" value={importForm.file_id} onChange={(event) => setImportForm({ ...importForm, file_id: event.target.value })} />
+        <input placeholder="nome" value={importForm.nome} onChange={(event) => setImportForm({ ...importForm, nome: event.target.value })} />
+        <input placeholder="tamanho bytes" type="number" value={importForm.tamanho} onChange={(event) => setImportForm({ ...importForm, tamanho: event.target.value })} />
+        <input placeholder="sha256" value={importForm.sha256} onChange={(event) => setImportForm({ ...importForm, sha256: event.target.value })} />
+        <input placeholder="folder_id" value={importForm.folder_id} onChange={(event) => setImportForm({ ...importForm, folder_id: event.target.value })} />
+        <input placeholder="mime type" value={importForm.google_drive_mime_type} onChange={(event) => setImportForm({ ...importForm, google_drive_mime_type: event.target.value })} />
+        <input placeholder="web view link" value={importForm.google_drive_web_view_link} onChange={(event) => setImportForm({ ...importForm, google_drive_web_view_link: event.target.value })} />
+        <button className="primaryButton" disabled={!connected}><UploadCloud size={16} />Importar</button>
+      </form>
+
+      <div className="driveGrid">
+        <div className="driveTableCard">
+          <div className="fleetTableHeader">
+            <div>
+              <strong>Pastas registradas</strong>
+              <span>{folders.length} registros locais da integracao</span>
+            </div>
+          </div>
+          {folders.length === 0 ? <div className="emptyPanel">Nenhuma pasta registrada.</div> : (
+            <div className="fleetTableWrap">
+              <table className="driveTable">
+                <thead><tr><th>Nome</th><th>ID</th><th>Cliente</th><th>Status</th></tr></thead>
+                <tbody>
+                  {folders.map((folder) => (
+                    <tr key={`${folder.id}-${folder.cliente_id ?? "root"}`}>
+                      <td>{folder.name}</td>
+                      <td><code>{folder.id}</code></td>
+                      <td>{folder.cliente_id ?? <span className="mutedCell">Raiz</span>}</td>
+                      <td><span className="statusPill success"><i></i>{folder.status}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+        <div className="driveTableCard">
+          <div className="fleetTableHeader">
+            <div>
+              <strong>Arquivos importados</strong>
+              <span>{files.length} midias com origem Google Drive</span>
+            </div>
+          </div>
+          {files.length === 0 ? <div className="emptyPanel">Nenhum arquivo importado.</div> : (
+            <div className="fleetTableWrap">
+              <table className="driveTable">
+                <thead><tr><th>Nome</th><th>ID</th><th>Cliente</th><th>Link</th></tr></thead>
+                <tbody>
+                  {files.map((file) => (
+                    <tr key={file.id}>
+                      <td>{file.name}</td>
+                      <td><code>{file.id}</code></td>
+                      <td>{file.cliente_id}</td>
+                      <td>{file.web_view_link ? <a href={file.web_view_link} target="_blank" rel="noreferrer">Abrir</a> : <span className="mutedCell">Nao informado</span>}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
     </section>
   );
 }

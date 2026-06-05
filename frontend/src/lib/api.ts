@@ -3,6 +3,9 @@ import type {
   AdminAudit,
   Cliente,
   Dispositivo,
+  GoogleDriveFile,
+  GoogleDriveFolder,
+  GoogleDriveStatus,
   LoginResponse,
   Midia,
   PageResult,
@@ -84,5 +87,55 @@ export const api = {
   },
   auditoria() {
     return request<PageResult<AdminAudit>>("/api/admin/auditoria/acessos?limit=50&offset=0");
+  },
+  googleDriveStatus() {
+    return request<GoogleDriveStatus>("/api/integrations/google-drive/status");
+  },
+  googleDriveConnect() {
+    return request<{ authorization_url: string; state: string }>("/api/integrations/google-drive/connect", { method: "POST" });
+  },
+  googleDriveDisconnect() {
+    return request<{ status: string; message: string }>("/api/integrations/google-drive/disconnect", { method: "POST" });
+  },
+  googleDriveValidate() {
+    return request<GoogleDriveStatus>("/api/integrations/google-drive/validate-access", {
+      method: "POST",
+      body: JSON.stringify({})
+    });
+  },
+  googleDriveFolders() {
+    return request<{ items: GoogleDriveFolder[] }>("/api/integrations/google-drive/folders");
+  },
+  googleDriveFiles(clienteId?: string) {
+    const query = clienteId ? `?cliente_id=${encodeURIComponent(clienteId)}` : "";
+    return request<{ items: GoogleDriveFile[] }>(`/api/integrations/google-drive/files${query}`);
+  },
+  googleDriveRootFolder(payload: { folder_id?: string | null; folder_name: string; create_if_missing: boolean }) {
+    return request<GoogleDriveFolder>("/api/integrations/google-drive/root-folder", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+  googleDriveClientFolder(payload: { cliente_id: string; folder_id?: string | null; folder_name?: string | null }) {
+    return request<GoogleDriveFolder>("/api/integrations/google-drive/client-folder", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+  googleDriveImportMedia(payload: {
+    cliente_id: string;
+    file_id: string;
+    tipo: string;
+    nome: string;
+    tamanho: number;
+    sha256: string;
+    folder_id?: string | null;
+    google_drive_mime_type?: string | null;
+    google_drive_web_view_link?: string | null;
+  }) {
+    return request<Midia>("/api/integrations/google-drive/import-media", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
   }
 };

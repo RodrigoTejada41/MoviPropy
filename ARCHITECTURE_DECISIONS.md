@@ -909,6 +909,9 @@ Consequencias:
 - Player continua baixando pelo backend, sem credenciais externas.
 - Implementacao futura deve seguir `docs/09-google-drive/integracao-google-drive.md`.
 
+Atualizacao:
+- A implementacao inicial foi aprovada posteriormente na ADR-034.
+
 ---
 
 ### ADR-032 - Frontend MVP em Vite, React e TypeScript
@@ -942,19 +945,19 @@ Consequencias:
 
 ---
 
-### ADR-033 - Namespace futuro para integracoes externas
+### ADR-033 - Namespace para integracoes externas
 
 Status: Aprovada
 
 Data: 2026-06-05
 
 Contexto:
-- A integracao Google Drive foi adiada para pos-MVP.
+- A integracao Google Drive foi inicialmente adiada para pos-MVP.
 - O rascunho inicial usava rotas em `/api/admin/google-drive`.
 - O escopo funcional define a integracao como modulo externo de storage, nao apenas uma tela administrativa.
 
 Decisao:
-- Usar `/api/integrations/google-drive` como namespace canonico futuro da integracao.
+- Usar `/api/integrations/google-drive` como namespace canonico da integracao.
 - Manter o player sem acesso direto ao Google Drive.
 - Manter `GET /api/player/midias/{midia_id}/download` como fachada preferencial para download pelo player.
 - Criar `GET /api/player/media-download-url` apenas se houver necessidade de contrato separado.
@@ -967,4 +970,41 @@ Motivo:
 Consequencias:
 - Documentos de API e frontend devem referenciar `/api/integrations/google-drive`.
 - Rotas antigas `/api/admin/google-drive` ficam apenas como historico de rascunho.
-- Implementacao futura deve validar OAuth `state`, RBAC, auditoria e criptografia de tokens antes de producao.
+- Implementacao deve validar OAuth `state`, RBAC, auditoria e criptografia de tokens antes de producao.
+
+Atualizacao:
+- Namespace implementado na ADR-034.
+
+---
+
+### ADR-034 - Implementacao inicial Google Drive controlada pelo backend
+
+Status: Aprovada
+
+Data: 2026-06-05
+
+Contexto:
+- O cliente aprovou iniciar a implementacao Google Drive.
+- A especificacao exige OAuth 2.0, tokens protegidos, backend como unico controlador e player sem acesso direto ao Drive.
+- Ainda nao existem credenciais Google Cloud no ambiente local.
+
+Decisao:
+- Implementar base inicial em `/api/integrations/google-drive`.
+- Criar tabelas `integrations`, `google_drive_settings`, `client_storage_folders`, `google_drive_oauth_states` e `google_drive_operations`.
+- Adicionar campos Google Drive em `midias` sem quebrar o contrato publico atual de midias.
+- Criptografar tokens com `MOVIPROGY_GOOGLE_TOKEN_KEY`.
+- Permitir simulacao local do callback com `MOVIPROGY_GOOGLE_OAUTH_SIMULATED=true`.
+- Criar tela Google Drive / Armazenamento no frontend.
+- Manter `GET /api/player/midias/{midia_id}/download` como fachada preferencial do player.
+
+Motivo:
+- Entrega fluxo testavel sem expor tokens.
+- Permite homologar UX e persistencia antes da conta Google real.
+- Preserva storage local do MVP.
+- Mantem o player desacoplado do Google Drive.
+
+Consequencias:
+- OAuth real depende de credenciais Google Cloud.
+- Listagem real de pastas/arquivos do Drive ainda precisa ser implementada sobre a API Google.
+- Importacao inicial exige metadados conhecidos do arquivo (`nome`, `tamanho`, `sha256`).
+- Testes automatizados cobrem a simulacao e a regra de nao persistir token em texto puro.

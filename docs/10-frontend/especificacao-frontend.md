@@ -333,6 +333,7 @@ Criterios de aceite:
 Objetivo:
 - Gerenciar integracao de storage externo.
 - Tela: Google Drive / Armazenamento.
+Status: implementacao inicial.
 
 Funcionalidades:
 - Conectar conta.
@@ -365,7 +366,7 @@ Estados:
 - Falha na importacao.
 - Validacao em andamento.
 
-APIs futuras:
+APIs atuais:
 - `POST /api/integrations/google-drive/connect`.
 - `GET /api/integrations/google-drive/callback`.
 - `GET /api/integrations/google-drive/status`.
@@ -376,6 +377,11 @@ APIs futuras:
 - `GET /api/integrations/google-drive/files`.
 - `POST /api/integrations/google-drive/import-media`.
 - `POST /api/integrations/google-drive/validate-access`.
+
+Implementacao atual:
+- Tela consome os endpoints acima.
+- Conexao real exige configuracao Google no backend.
+- Importacao exige metadados manuais do arquivo enquanto a API Google Drive real nao busca os arquivos.
 
 Documento principal:
 - `docs/09-google-drive/integracao-google-drive.md`.

@@ -1,17 +1,15 @@
 # Integracao Google Drive
 
-Status: pos-MVP.
+Status: implementacao inicial.
 
 Decisao atual:
-- A implementacao Google Drive foi adiada para depois do MVP.
 - O MVP usa storage local em `MOVIPROGY_MEDIA_DIR` e download controlado pelo backend.
-- Este documento permanece como especificacao futura.
+- A integracao Google Drive possui base inicial implementada para simulacao e preparacao de OAuth real.
 
 ## Status
 
-Planejado.
-Nao implementado.
-Este documento define escopo tecnico, riscos e plano de implementacao.
+Implementado parcialmente.
+Este documento define escopo tecnico, riscos, limites atuais e plano de evolucao.
 
 ## Objetivo
 
@@ -21,10 +19,34 @@ O player nao deve acessar o Google Drive diretamente.
 
 ## Limite desta especificacao
 
-- Nao gerar codigo nesta fase.
 - Nao alterar o MVP atual de storage local.
-- A integracao Google Drive permanece pos-MVP.
-- Este documento define UX/UI, fluxo funcional, endpoints necessarios, regras de seguranca e especificacao tecnica para implementacao futura.
+- A integracao inicial nao faz chamada real ao Google Drive sem credenciais configuradas.
+- A simulacao local pode ser ativada com `MOVIPROGY_GOOGLE_OAUTH_SIMULATED=true`.
+- Este documento define UX/UI, fluxo funcional, endpoints, regras de seguranca e especificacao tecnica.
+
+## Implementacao atual
+
+Backend:
+- Migration `006_google_drive.sql`.
+- Repository `PostgresGoogleDriveRepository`.
+- Rotas em `/api/integrations/google-drive`.
+- OAuth URL e callback.
+- Criptografia de tokens com `MOVIPROGY_GOOGLE_TOKEN_KEY`.
+- Persistencia de pasta raiz e pasta por cliente.
+- Importacao de midia por metadados conhecidos.
+- Listagem de arquivos ja importados.
+
+Frontend:
+- Tela Google Drive / Armazenamento.
+- Status de conexao.
+- Acoes de conectar, desconectar e validar.
+- Formularios de pasta raiz, pasta de cliente e importacao.
+
+Limites:
+- Ainda nao lista pastas reais do Google Drive por API externa.
+- Ainda nao busca metadados reais do arquivo no Drive.
+- Importacao exige `nome`, `tamanho` e `sha256` informados pelo painel.
+- Homologacao real exige credenciais Google Cloud.
 
 ## Tela Google Drive / Armazenamento
 

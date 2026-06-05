@@ -9,6 +9,7 @@ import {
   AuditoriaPage,
   ClientesPage,
   DispositivosPage,
+  GoogleDrivePage,
   MidiasPage,
   PlaceholderPage,
   PlaylistsPage,
@@ -46,7 +47,7 @@ function renderView(view: ViewKey) {
     return <PlaceholderPage title="Sincronizacoes" subtitle="Tela depende de endpoint administrativo especifico de sincronizacoes." />;
   }
   if (view === "google") {
-    return <PlaceholderPage title="Google Drive" subtitle="Integracao adiada formalmente para pos-MVP." />;
+    return <GoogleDrivePage />;
   }
   return <PlaceholderPage title="Configuracoes" subtitle="Parametros operacionais ainda nao possuem endpoints de alteracao." />;
 }

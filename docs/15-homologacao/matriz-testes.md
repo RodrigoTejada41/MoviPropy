@@ -30,8 +30,9 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Status player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Logs player | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Confirmacao sincronizacao | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
-| Google Drive especificacao | Nao | Nao | Revisao documental | Revisao documental | Nao | Documentado pos-MVP |
-| Google Drive implementacao | Pos-MVP | Pos-MVP | Pos-MVP | Pos-MVP | Pos-MVP | Adiado |
+| Google Drive especificacao | Nao | Nao | Revisao documental | Revisao documental | Nao | Documentado |
+| Google Drive implementacao inicial | Sim | Sim | Parcial | Sim | Pendente | Implementado parcial |
+| Google Drive OAuth real | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente credenciais Google |
 | Frontend login | Build | Pendente | Parcial | Pendente | Pendente | Implementado parcial |
 | Frontend dashboard/listagens | Build | Pendente | Parcial | Pendente | Pendente | Implementado parcial |
 | Frontend playlists | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente |

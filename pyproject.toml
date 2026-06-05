@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Sistema Online de Midia Indoor com Sincronizacao Offline"
 requires-python = ">=3.12"
 dependencies = [
+    "cryptography",
     "fastapi",
     "psycopg[binary]",
     "python-multipart",

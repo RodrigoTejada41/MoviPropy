@@ -47,8 +47,8 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 - Docker Compose executa PostgreSQL em `moviprogy-db`.
 - Dados de runtime do container devem usar bind mounts em `runtime/` e `logs/` dentro do projeto.
 - Storage local inicial definido em `MOVIPROGY_MEDIA_DIR`.
-- Google Drive esta documentado como opcao pos-MVP de storage externo controlado pelo backend.
-- Google Drive / Armazenamento possui especificacao futura de UX/UI, OAuth, endpoints, dados, seguranca e testes.
+- Google Drive possui implementacao inicial de storage externo controlado pelo backend.
+- Google Drive / Armazenamento possui UX/UI, OAuth, endpoints, dados, seguranca e testes iniciais.
 - Player ainda nao definido.
 - Deploy ainda nao definido alem do container local.
 
@@ -94,11 +94,14 @@ Limite:
 - Retencao de auditoria usa endpoint administrativo com default de 180 dias.
 - Backend deve chegar a 100% antes de iniciar frontend.
 
-## Integracao Google Drive pos-MVP
+## Integracao Google Drive
 
 - Documento principal: `docs/09-google-drive/integracao-google-drive.md`.
-- Decisao atual: adiar implementacao para pos-MVP.
-- Namespace futuro canonico: `/api/integrations/google-drive`.
+- Namespace canonico: `/api/integrations/google-drive`.
+- Implementacao atual cobre status, connect, callback, disconnect, folders, root-folder, client-folder, files, import-media e validate-access.
+- OAuth real depende de variaveis Google Cloud.
+- `MOVIPROGY_GOOGLE_TOKEN_KEY` e obrigatoria para criptografar tokens no callback.
+- `MOVIPROGY_GOOGLE_OAUTH_SIMULATED=true` permite simulacao local de callback sem chamar Google.
 - Player nao deve fazer streaming direto do Google Drive.
 - Player nao deve receber credenciais Google.
 - Backend deve gerar link controlado ou temporario de download.
@@ -143,7 +146,7 @@ Limite:
   - Logs/Auditoria.
   - Usuarios e permissoes.
   - Sincronizacoes com placeholder por falta de endpoint especifico.
-  - Google Drive com placeholder pos-MVP.
+  - Google Drive / Armazenamento com status, OAuth, pastas e importacao por metadados.
   - Configuracoes com placeholder por falta de endpoints.
 - A tela de dispositivos nao deve inventar ultima comunicacao; enquanto a API nao retorna esse campo, mostrar `Nao informado`.
 - A tela de clientes nao deve inventar regiao, data de criacao ou ultimo sync; enquanto a API nao retorna esses campos, mostrar `Nao informado` ou deixar a acao desabilitada.

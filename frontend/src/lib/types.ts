@@ -65,3 +65,31 @@ export type AdminAudit = {
   user_agent?: string | null;
   created_at?: string | null;
 };
+
+export type GoogleDriveStatus = {
+  connected: boolean;
+  status: string;
+  email?: string | null;
+  root_folder_id?: string | null;
+  root_folder_name?: string | null;
+  last_validation_at?: string | null;
+  connected_at?: string | null;
+};
+
+export type GoogleDriveFolder = {
+  id: string;
+  name: string;
+  status: string;
+  cliente_id?: string | null;
+};
+
+export type GoogleDriveFile = {
+  id: string;
+  name: string;
+  mime_type?: string | null;
+  size?: number | null;
+  modified_at?: string | null;
+  web_view_link?: string | null;
+  import_status: string;
+  cliente_id?: string | null;
+};
