@@ -82,6 +82,41 @@ def test_postgres_auth_repository_checks_cliente_permissions():
     assert repository.has_cliente_access(user.id, f"outro-{cliente_id}") is False
 
 
+def test_postgres_auth_repository_lists_users_links_and_permissions():
+    assert DATABASE_URL is not None
+    run_migrations(DATABASE_URL)
+    repository = PostgresAuthRepository(DATABASE_URL)
+    suffix = uuid.uuid4().hex
+    user = UserAccount(
+        id=f"user-management-{suffix}",
+        nome=f"Operador {suffix}",
+        email=f"management-{suffix}@moviprogy.local",
+        senha_hash=hash_password("senha-segura"),
+        perfil="operador",
+        ativo=True,
+    )
+    cliente_id = f"cliente-management-{suffix}"
+
+    repository.save_user(user)
+    repository.link_user_cliente(user.id, cliente_id)
+    permission_id = repository.grant_permission(
+        user.id,
+        "midias",
+        "upload",
+        cliente_id,
+    )
+
+    assert repository.get_user_by_id(user.id) == user
+    assert repository.list_users(perfil="operador", limit=10_000).count(user) == 1
+    assert repository.count_users(perfil="operador") >= 1
+    assert repository.list_user_clientes(user.id)[0].cliente_id == cliente_id
+    permissions = repository.list_user_permissions(user.id)
+    assert permissions[0].id == permission_id
+    assert permissions[0].recurso == "midias"
+    assert permissions[0].acao == "upload"
+    assert permissions[0].cliente_id == cliente_id
+
+
 def test_postgres_auth_repository_persists_admin_access_audit():
     assert DATABASE_URL is not None
     run_migrations(DATABASE_URL)

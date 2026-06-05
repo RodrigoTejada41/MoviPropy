@@ -4,7 +4,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from moviprogy_api.domain.auth import AdminSession
+from moviprogy_api.domain.auth import AdminSession, UserAccount
 from moviprogy_api.domain.core import Cliente, Dispositivo, Midia, Playlist
 from moviprogy_api.main import create_app
 from moviprogy_api.security import hash_token
@@ -188,6 +188,9 @@ class FakeAuthRepository:
         self.clientes = clientes or set()
         self.permissions = permissions or set()
         self.access_audits: list[dict] = []
+        self.users: dict[str, UserAccount] = {}
+        self.user_clientes: dict[tuple[str, str], bool] = {}
+        self.user_permissions: list[dict] = []
         self.sessions = {
             hash_token(ADMIN_TOKEN): AdminSession(
                 user_id=user_id,
@@ -195,12 +198,110 @@ class FakeAuthRepository:
                 ativo=True,
             )
         }
+        self.users[user_id] = UserAccount(
+            id=user_id,
+            nome="Admin Teste",
+            email="admin@moviprogy.local",
+            senha_hash="hash",
+            perfil=perfil,
+            ativo=True,
+        )
 
     def get_session(self, token_hash: str) -> AdminSession | None:
         return self.sessions.get(token_hash)
 
+    def get_user_by_id(self, user_id: str) -> UserAccount | None:
+        return self.users.get(user_id)
+
+    def get_user_by_email(self, email: str) -> UserAccount | None:
+        for user in self.users.values():
+            if user.email.lower() == email.lower():
+                return user
+        return None
+
+    def save_user(self, user: UserAccount) -> None:
+        self.users[user.id] = user
+
+    def list_users(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        ativo: bool | None = None,
+        perfil: str | None = None,
+    ) -> list[UserAccount]:
+        users = [
+            user
+            for user in self.users.values()
+            if (ativo is None or user.ativo is ativo)
+            and (perfil is None or user.perfil == perfil)
+        ]
+        return sorted(users, key=lambda user: (user.nome, user.id))[
+            offset : offset + limit
+        ]
+
+    def count_users(
+        self,
+        ativo: bool | None = None,
+        perfil: str | None = None,
+    ) -> int:
+        return len(
+            [
+                user
+                for user in self.users.values()
+                if (ativo is None or user.ativo is ativo)
+                and (perfil is None or user.perfil == perfil)
+            ]
+        )
+
     def has_cliente_access(self, user_id: str, cliente_id: str) -> bool:
-        return user_id == self.user_id and cliente_id in self.clientes
+        return (
+            user_id == self.user_id
+            and cliente_id in self.clientes
+            or self.user_clientes.get((user_id, cliente_id)) is True
+        )
+
+    def link_user_cliente(
+        self,
+        user_id: str,
+        cliente_id: str,
+        ativo: bool = True,
+    ) -> None:
+        self.user_clientes[(user_id, cliente_id)] = ativo
+
+    def list_user_clientes(self, user_id: str) -> list[dict]:
+        return [
+            {"user_id": uid, "cliente_id": cliente_id, "ativo": ativo}
+            for (uid, cliente_id), ativo in self.user_clientes.items()
+            if uid == user_id
+        ]
+
+    def grant_permission(
+        self,
+        user_id: str,
+        recurso: str,
+        acao: str,
+        cliente_id: str | None = None,
+        permitido: bool = True,
+    ) -> str:
+        permission_id = f"perm-{len(self.user_permissions) + 1}"
+        self.user_permissions.append(
+            {
+                "id": permission_id,
+                "user_id": user_id,
+                "cliente_id": cliente_id,
+                "recurso": recurso,
+                "acao": acao,
+                "permitido": permitido,
+            }
+        )
+        return permission_id
+
+    def list_user_permissions(self, user_id: str) -> list[dict]:
+        return [
+            permission
+            for permission in self.user_permissions
+            if permission["user_id"] == user_id
+        ]
 
     def has_permission(
         self,
@@ -435,6 +536,157 @@ def test_admin_blocks_scoped_user_without_action_permission():
     assert response.json() == {"detail": "permissao insuficiente"}
     assert app.state.auth_repository.access_audits[-1]["status"] == "negado"
     assert app.state.auth_repository.access_audits[-1]["acao"] == "criar"
+
+
+def test_admin_creates_and_lists_users_without_password_hash():
+    app = _create_test_app()
+    client = TestClient(app)
+
+    create_response = client.post(
+        "/api/admin/usuarios",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "user-002",
+            "nome": "Operador Um",
+            "email": "operador@moviprogy.local",
+            "senha": "senha-segura",
+            "perfil": "operador",
+            "ativo": True,
+        },
+    )
+    list_response = client.get(
+        "/api/admin/usuarios?perfil=operador",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert create_response.status_code == 201
+    assert create_response.json() == {
+        "id": "user-002",
+        "nome": "Operador Um",
+        "email": "operador@moviprogy.local",
+        "perfil": "operador",
+        "ativo": True,
+    }
+    assert "senha_hash" not in create_response.text
+    assert "senha-segura" not in create_response.text
+    payload = list_response.json()
+    assert payload["total"] == 1
+    assert payload["items"][0]["id"] == "user-002"
+
+
+def test_admin_rejects_duplicate_user_email():
+    app = _create_test_app()
+    client = TestClient(app)
+    payload = {
+        "id": "user-002",
+        "nome": "Operador Um",
+        "email": "operador@moviprogy.local",
+        "senha": "senha-segura",
+        "perfil": "operador",
+    }
+    client.post("/api/admin/usuarios", headers=ADMIN_HEADERS, json=payload)
+
+    response = client.post(
+        "/api/admin/usuarios",
+        headers=ADMIN_HEADERS,
+        json={**payload, "id": "user-003"},
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "email ja cadastrado"}
+
+
+def test_admin_links_user_to_cliente_and_grants_permission():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+    client.post(
+        "/api/admin/usuarios",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "user-002",
+            "nome": "Operador Um",
+            "email": "operador@moviprogy.local",
+            "senha": "senha-segura",
+            "perfil": "operador",
+        },
+    )
+
+    link_response = client.post(
+        "/api/admin/usuarios/user-002/clientes",
+        headers=ADMIN_HEADERS,
+        json={"cliente_id": "cliente-001", "ativo": True},
+    )
+    permission_response = client.post(
+        "/api/admin/usuarios/user-002/permissoes",
+        headers=ADMIN_HEADERS,
+        json={
+            "recurso": "midias",
+            "acao": "upload",
+            "cliente_id": "cliente-001",
+            "permitido": True,
+        },
+    )
+
+    assert link_response.status_code == 201
+    assert link_response.json() == {
+        "user_id": "user-002",
+        "cliente_id": "cliente-001",
+        "ativo": True,
+    }
+    assert permission_response.status_code == 201
+    assert permission_response.json()["recurso"] == "midias"
+    assert permission_response.json()["acao"] == "upload"
+    assert permission_response.json()["cliente_id"] == "cliente-001"
+
+
+def test_admin_rejects_user_link_for_missing_cliente():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/usuarios",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "user-002",
+            "nome": "Operador Um",
+            "email": "operador@moviprogy.local",
+            "senha": "senha-segura",
+            "perfil": "operador",
+        },
+    )
+
+    response = client.post(
+        "/api/admin/usuarios/user-002/clientes",
+        headers=ADMIN_HEADERS,
+        json={"cliente_id": "cliente-inexistente"},
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {"detail": "cliente_id invalido"}
+
+
+def test_admin_blocks_user_management_without_permission():
+    app = _create_test_app(perfil="operador")
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/admin/usuarios",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "user-002",
+            "nome": "Operador Um",
+            "email": "operador@moviprogy.local",
+            "senha": "senha-segura",
+            "perfil": "operador",
+        },
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {"detail": "permissao insuficiente"}
 
 
 def test_admin_lists_access_audits_with_filters():

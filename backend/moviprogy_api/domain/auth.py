@@ -19,6 +19,61 @@ class UserPublic(BaseModel):
     perfil: str
 
 
+class AdminUserPublic(UserPublic):
+    ativo: bool = True
+
+
+class AdminUserListResponse(BaseModel):
+    items: list[AdminUserPublic]
+    limit: int = Field(ge=1)
+    offset: int = Field(ge=0)
+    total: int = Field(ge=0)
+
+
+class AdminUserCreateRequest(BaseModel):
+    id: str | None = Field(default=None, min_length=1)
+    nome: str = Field(min_length=1)
+    email: str = Field(min_length=3)
+    senha: str = Field(min_length=8)
+    perfil: str = Field(min_length=1)
+    ativo: bool = True
+
+
+class AdminUserUpdateRequest(BaseModel):
+    nome: str | None = Field(default=None, min_length=1)
+    email: str | None = Field(default=None, min_length=3)
+    senha: str | None = Field(default=None, min_length=8)
+    perfil: str | None = Field(default=None, min_length=1)
+    ativo: bool | None = None
+
+
+class UserClienteLinkRequest(BaseModel):
+    cliente_id: str = Field(min_length=1)
+    ativo: bool = True
+
+
+class UserClienteLink(BaseModel):
+    user_id: str
+    cliente_id: str
+    ativo: bool = True
+
+
+class PermissionGrantRequest(BaseModel):
+    recurso: str = Field(min_length=1)
+    acao: str = Field(min_length=1)
+    cliente_id: str | None = Field(default=None, min_length=1)
+    permitido: bool = True
+
+
+class PermissionPublic(BaseModel):
+    id: str
+    user_id: str
+    recurso: str
+    acao: str
+    cliente_id: str | None = None
+    permitido: bool = True
+
+
 class AdminSession(BaseModel):
     user_id: str
     perfil: str

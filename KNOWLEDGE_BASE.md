@@ -86,6 +86,7 @@ Limite:
 - Listagens administrativas retornam envelope paginado com `items`, `limit`, `offset` e `total`.
 - Tabelas `usuarios` e `admin_sessions` implementam login administrativo inicial.
 - Tabelas `usuarios_clientes` e `permissoes` implementam RBAC granular inicial.
+- Endpoints administrativos gerenciam usuarios, vinculos com clientes e permissoes.
 - Tabela `auditoria_acessos` registra tentativas administrativas permitidas e negadas.
 - Backend deve chegar a 100% antes de iniciar frontend.
 
@@ -173,6 +174,14 @@ Persistencia atual:
 - `GET /api/admin/playlists/{playlist_id}`
 - `POST /api/admin/playlists/{playlist_id}/midias`
 - `GET /api/admin/auditoria/acessos`
+- `POST /api/admin/usuarios`
+- `GET /api/admin/usuarios`
+- `GET /api/admin/usuarios/{user_id}`
+- `PATCH /api/admin/usuarios/{user_id}`
+- `POST /api/admin/usuarios/{user_id}/clientes`
+- `GET /api/admin/usuarios/{user_id}/clientes`
+- `POST /api/admin/usuarios/{user_id}/permissoes`
+- `GET /api/admin/usuarios/{user_id}/permissoes`
 
 Seguranca:
 - Exigem `Authorization: Bearer <access_token>` retornado por `POST /api/auth/login`.
@@ -181,7 +190,6 @@ Seguranca:
 - `ADMIN_API_TOKEN` existe apenas como fallback local quando `auth_repository` nao esta disponivel.
 
 Limite:
-- Gestao administrativa de usuarios, vinculos e permissoes ainda nao possui endpoints.
 - Auditoria ainda nao possui politica de retencao.
 - Sessao admin usa hash SHA-256 do token no banco.
 - Senha usa PBKDF2-HMAC-SHA256 com salt individual.

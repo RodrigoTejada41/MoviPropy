@@ -98,12 +98,20 @@ Endpoints iniciais:
 - `GET /api/admin/playlists/{playlist_id}`
 - `POST /api/admin/playlists/{playlist_id}/midias`
 - `GET /api/admin/auditoria/acessos`
+- `POST /api/admin/usuarios`
+- `GET /api/admin/usuarios`
+- `GET /api/admin/usuarios/{user_id}`
+- `PATCH /api/admin/usuarios/{user_id}`
+- `POST /api/admin/usuarios/{user_id}/clientes`
+- `GET /api/admin/usuarios/{user_id}/clientes`
+- `POST /api/admin/usuarios/{user_id}/permissoes`
+- `GET /api/admin/usuarios/{user_id}/permissoes`
 
 Limite:
 - `/api/admin/*` exige `Authorization: Bearer <access_token>` de usuario com perfil `admin`.
 - `ADMIN_API_TOKEN` permanece apenas como fallback local sem repository de auth.
 - Listagens administrativas retornam `items`, `limit`, `offset` e `total`.
-- Gestao de usuarios, vinculos e permissoes ainda esta pendente.
+- Gestao de usuarios, vinculos e permissoes existe no backend.
 
 Banco local:
 - PostgreSQL roda no container `moviprogy-db`.

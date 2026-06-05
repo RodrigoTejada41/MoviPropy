@@ -237,3 +237,21 @@ Impacto:
 - Contrato antigo de lista simples foi substituido.
 - Frontend deve ler dados em `items`.
 - Testes de performance devem considerar consulta de contagem.
+
+## D-015 - Gestao backend de usuarios e permissoes
+
+Status: aprovado.
+
+Decisao:
+- Criar endpoints administrativos para usuarios, vinculos com clientes e permissoes.
+- Nao retornar senha nem hash em respostas.
+- Exigir permissoes `usuarios:*`.
+
+Motivo:
+- Fechar RBAC operacional antes do frontend.
+- Evitar manutencao manual no banco.
+
+Impacto:
+- Backend passa a expor contratos para tela de usuarios.
+- Frontend deve usar `/api/admin/usuarios`.
+- Refresh/logout de sessao continua pendente.

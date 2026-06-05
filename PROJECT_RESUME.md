@@ -40,6 +40,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Login administrativo criado em `POST /api/auth/login`.
 - RBAC minimo criado para `/api/admin/*` com perfil `admin`.
 - RBAC granular inicial criado com vinculo usuario/cliente e permissoes `recurso:acao`.
+- Endpoints administrativos de usuarios, vinculos e permissoes criados.
 - Migration de auth criada para `usuarios` e `admin_sessions`.
 - Migration RBAC criada para `usuarios_clientes` e `permissoes`.
 - Auditoria de acessos administrativos criada para permissoes permitidas e negadas.
@@ -124,7 +125,6 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 Focar no backend ate 100% antes do frontend.
 
 Pendencias backend prioritarias:
-- Endpoint de gestao de usuarios, vinculos e permissoes.
 - Refresh/logout de sessao administrativa.
 - Politica de retencao de auditoria.
 - Integracao Google Drive ou decisao formal de adiar para pos-MVP.

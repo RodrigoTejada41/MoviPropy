@@ -3,7 +3,13 @@ from uuid import uuid4
 
 import psycopg
 
-from moviprogy_api.domain.auth import AdminAccessAudit, AdminSession, UserAccount
+from moviprogy_api.domain.auth import (
+    AdminAccessAudit,
+    AdminSession,
+    PermissionPublic,
+    UserAccount,
+    UserClienteLink,
+)
 from moviprogy_api.security import hash_password
 
 
@@ -20,6 +26,27 @@ class PostgresAuthRepository:
                 WHERE lower(email) = lower(%s)
                 """,
                 (email,),
+            ).fetchone()
+        if row is None:
+            return None
+        return UserAccount(
+            id=row[0],
+            nome=row[1],
+            email=row[2],
+            senha_hash=row[3],
+            perfil=row[4],
+            ativo=row[5],
+        )
+
+    def get_user_by_id(self, user_id: str) -> UserAccount | None:
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                """
+                SELECT id, nome, email, senha_hash, perfil, ativo
+                FROM usuarios
+                WHERE id = %s
+                """,
+                (user_id,),
             ).fetchone()
         if row is None:
             return None
@@ -114,6 +141,22 @@ class PostgresAuthRepository:
             )
             connection.commit()
 
+    def list_user_clientes(self, user_id: str) -> list[UserClienteLink]:
+        with psycopg.connect(self._database_url) as connection:
+            rows = connection.execute(
+                """
+                SELECT usuario_id, cliente_id, ativo
+                FROM usuarios_clientes
+                WHERE usuario_id = %s
+                ORDER BY cliente_id ASC
+                """,
+                (user_id,),
+            ).fetchall()
+        return [
+            UserClienteLink(user_id=row[0], cliente_id=row[1], ativo=row[2])
+            for row in rows
+        ]
+
     def grant_permission(
         self,
         user_id: str,
@@ -140,6 +183,29 @@ class PostgresAuthRepository:
             )
             connection.commit()
         return permission_id
+
+    def list_user_permissions(self, user_id: str) -> list[PermissionPublic]:
+        with psycopg.connect(self._database_url) as connection:
+            rows = connection.execute(
+                """
+                SELECT id, usuario_id, cliente_id, recurso, acao, permitido
+                FROM permissoes
+                WHERE usuario_id = %s
+                ORDER BY recurso ASC, acao ASC, id ASC
+                """,
+                (user_id,),
+            ).fetchall()
+        return [
+            PermissionPublic(
+                id=row[0],
+                user_id=row[1],
+                cliente_id=row[2],
+                recurso=row[3],
+                acao=row[4],
+                permitido=row[5],
+            )
+            for row in rows
+        ]
 
     def has_cliente_access(self, user_id: str, cliente_id: str) -> bool:
         with psycopg.connect(self._database_url) as connection:
@@ -224,6 +290,65 @@ class PostgresAuthRepository:
             )
             connection.commit()
         return audit_id
+
+    def list_users(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        ativo: bool | None = None,
+        perfil: str | None = None,
+    ) -> list[UserAccount]:
+        clauses = []
+        params: list[object] = []
+        if ativo is not None:
+            clauses.append("ativo = %s")
+            params.append(ativo)
+        if perfil is not None:
+            clauses.append("perfil = %s")
+            params.append(perfil)
+        params.extend([limit, offset])
+        with psycopg.connect(self._database_url) as connection:
+            rows = connection.execute(
+                f"""
+                SELECT id, nome, email, senha_hash, perfil, ativo
+                FROM usuarios
+                {_where_clause(clauses)}
+                ORDER BY nome ASC, id ASC
+                LIMIT %s OFFSET %s
+                """,
+                params,
+            ).fetchall()
+        return [
+            UserAccount(
+                id=row[0],
+                nome=row[1],
+                email=row[2],
+                senha_hash=row[3],
+                perfil=row[4],
+                ativo=row[5],
+            )
+            for row in rows
+        ]
+
+    def count_users(
+        self,
+        ativo: bool | None = None,
+        perfil: str | None = None,
+    ) -> int:
+        clauses = []
+        params: list[object] = []
+        if ativo is not None:
+            clauses.append("ativo = %s")
+            params.append(ativo)
+        if perfil is not None:
+            clauses.append("perfil = %s")
+            params.append(perfil)
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                f"SELECT COUNT(*) FROM usuarios {_where_clause(clauses)}",
+                params,
+            ).fetchone()
+        return int(row[0])
 
     def list_admin_access_audits(
         self,

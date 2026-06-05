@@ -9,6 +9,7 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Health | Sim | Sim | Sim | Nao | Sim | Implementado |
 | Readiness | Sim | Sim | Sim | Nao | Sim | Implementado |
 | Login admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
+| Gestao usuarios/permissoes | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | RBAC admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | RBAC granular cliente/acao | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Auditoria admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |

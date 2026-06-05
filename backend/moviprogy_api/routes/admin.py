@@ -27,8 +27,20 @@ from moviprogy_api.domain.core import (
     PlaylistMidia,
     PlaylistMidiaRequest,
 )
-from moviprogy_api.domain.auth import AdminAccessAuditListResponse
+from moviprogy_api.domain.auth import (
+    AdminAccessAuditListResponse,
+    AdminUserCreateRequest,
+    AdminUserListResponse,
+    AdminUserPublic,
+    AdminUserUpdateRequest,
+    PermissionGrantRequest,
+    PermissionPublic,
+    UserAccount,
+    UserClienteLink,
+    UserClienteLinkRequest,
+)
 from moviprogy_api.security import (
+    hash_password,
     record_admin_access,
     require_admin_permission,
     require_admin_user,
@@ -52,6 +64,191 @@ _ALLOWED_UPLOADS = {
         ".webp": "image/webp",
     },
 }
+
+
+@router.post(
+    "/usuarios",
+    response_model=AdminUserPublic,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_user(
+    payload: AdminUserCreateRequest,
+    request: Request,
+) -> AdminUserPublic:
+    repository = _auth_repository(request)
+    require_admin_permission(request, "usuarios", "criar")
+    existing = repository.get_user_by_email(payload.email)
+    if existing is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="email ja cadastrado",
+        )
+    user = UserAccount(
+        id=payload.id or f"user-{uuid4().hex}",
+        nome=payload.nome,
+        email=payload.email.lower(),
+        senha_hash=hash_password(payload.senha),
+        perfil=payload.perfil,
+        ativo=payload.ativo,
+    )
+    repository.save_user(user)
+    return _user_public(user)
+
+
+@router.get("/usuarios", response_model=AdminUserListResponse)
+def list_users(
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    ativo: bool | None = None,
+    perfil: str | None = None,
+) -> AdminUserListResponse:
+    repository = _auth_repository(request)
+    require_admin_permission(request, "usuarios", "ler")
+    return AdminUserListResponse(
+        items=[
+            _user_public(user)
+            for user in repository.list_users(
+                limit=limit,
+                offset=offset,
+                ativo=ativo,
+                perfil=perfil,
+            )
+        ],
+        limit=limit,
+        offset=offset,
+        total=repository.count_users(ativo=ativo, perfil=perfil),
+    )
+
+
+@router.get("/usuarios/{user_id}", response_model=AdminUserPublic)
+def get_user(user_id: str, request: Request) -> AdminUserPublic:
+    repository = _auth_repository(request)
+    require_admin_permission(request, "usuarios", "ler")
+    user = _get_user_or_404(repository, user_id)
+    return _user_public(user)
+
+
+@router.patch("/usuarios/{user_id}", response_model=AdminUserPublic)
+def update_user(
+    user_id: str,
+    payload: AdminUserUpdateRequest,
+    request: Request,
+) -> AdminUserPublic:
+    repository = _auth_repository(request)
+    require_admin_permission(request, "usuarios", "editar")
+    current = _get_user_or_404(repository, user_id)
+    email = payload.email.lower() if payload.email is not None else current.email
+    existing = repository.get_user_by_email(email)
+    if existing is not None and existing.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="email ja cadastrado",
+        )
+    updated = UserAccount(
+        id=current.id,
+        nome=payload.nome if payload.nome is not None else current.nome,
+        email=email,
+        senha_hash=(
+            hash_password(payload.senha)
+            if payload.senha is not None
+            else current.senha_hash
+        ),
+        perfil=payload.perfil if payload.perfil is not None else current.perfil,
+        ativo=payload.ativo if payload.ativo is not None else current.ativo,
+    )
+    repository.save_user(updated)
+    return _user_public(updated)
+
+
+@router.post(
+    "/usuarios/{user_id}/clientes",
+    response_model=UserClienteLink,
+    status_code=status.HTTP_201_CREATED,
+)
+def link_user_cliente(
+    user_id: str,
+    payload: UserClienteLinkRequest,
+    request: Request,
+) -> UserClienteLink:
+    auth_repository = _auth_repository(request)
+    core_repository = _core_repository(request)
+    _get_user_or_404(auth_repository, user_id)
+    if core_repository.get_cliente(payload.cliente_id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="cliente_id invalido",
+        )
+    require_admin_permission(
+        request,
+        "usuarios",
+        "administrar",
+        payload.cliente_id,
+    )
+    auth_repository.link_user_cliente(user_id, payload.cliente_id, payload.ativo)
+    return UserClienteLink(
+        user_id=user_id,
+        cliente_id=payload.cliente_id,
+        ativo=payload.ativo,
+    )
+
+
+@router.get("/usuarios/{user_id}/clientes", response_model=list[UserClienteLink])
+def list_user_clientes(user_id: str, request: Request) -> list[UserClienteLink]:
+    repository = _auth_repository(request)
+    require_admin_permission(request, "usuarios", "ler")
+    _get_user_or_404(repository, user_id)
+    return repository.list_user_clientes(user_id)
+
+
+@router.post(
+    "/usuarios/{user_id}/permissoes",
+    response_model=PermissionPublic,
+    status_code=status.HTTP_201_CREATED,
+)
+def grant_user_permission(
+    user_id: str,
+    payload: PermissionGrantRequest,
+    request: Request,
+) -> PermissionPublic:
+    auth_repository = _auth_repository(request)
+    _get_user_or_404(auth_repository, user_id)
+    if payload.cliente_id is not None:
+        core_repository = _core_repository(request)
+        if core_repository.get_cliente(payload.cliente_id) is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="cliente_id invalido",
+            )
+    require_admin_permission(
+        request,
+        "usuarios",
+        "administrar",
+        payload.cliente_id,
+    )
+    permission_id = auth_repository.grant_permission(
+        user_id=user_id,
+        recurso=payload.recurso,
+        acao=payload.acao,
+        cliente_id=payload.cliente_id,
+        permitido=payload.permitido,
+    )
+    return PermissionPublic(
+        id=permission_id,
+        user_id=user_id,
+        recurso=payload.recurso,
+        acao=payload.acao,
+        cliente_id=payload.cliente_id,
+        permitido=payload.permitido,
+    )
+
+
+@router.get("/usuarios/{user_id}/permissoes", response_model=list[PermissionPublic])
+def list_user_permissions(user_id: str, request: Request) -> list[PermissionPublic]:
+    repository = _auth_repository(request)
+    require_admin_permission(request, "usuarios", "ler")
+    _get_user_or_404(repository, user_id)
+    return repository.list_user_permissions(user_id)
 
 
 @router.get("/auditoria/acessos", response_model=AdminAccessAuditListResponse)
@@ -447,6 +644,26 @@ def _auth_repository(request: Request):
             detail="repository indisponivel",
         )
     return repository
+
+
+def _get_user_or_404(repository, user_id: str) -> UserAccount:
+    user = repository.get_user_by_id(user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="usuario nao encontrado",
+        )
+    return user
+
+
+def _user_public(user: UserAccount) -> AdminUserPublic:
+    return AdminUserPublic(
+        id=user.id,
+        nome=user.nome,
+        email=user.email,
+        perfil=user.perfil,
+        ativo=user.ativo,
+    )
 
 
 def _require_scoped_list_permission(

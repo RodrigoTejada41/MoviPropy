@@ -706,7 +706,7 @@ Motivo:
 
 Consequencias:
 - Auditoria de acessos foi definida posteriormente na ADR-025.
-- Tela de gestao de usuarios/permissoes ainda nao existe.
+- Frontend de gestao de usuarios/permissoes ainda nao existe.
 - Retorno de listagens para usuario escopado exige filtro por cliente.
 
 ---
@@ -792,3 +792,33 @@ Consequencias:
 - Ha quebra controlada do contrato antigo de lista simples.
 - Frontend deve consumir `items` para dados e `total` para paginacao.
 - Consultas de contagem precisam ser consideradas nos testes de performance.
+
+---
+
+### ADR-028 - Endpoints administrativos para usuarios e permissoes
+
+Status: Aprovada
+
+Data: 2026-06-04
+
+Contexto:
+- O RBAC granular ja possuia tabelas de usuarios, vinculos e permissoes.
+- Faltava API administrativa para manter esses dados.
+- O frontend nao deve iniciar com gestao de acesso dependente de manipulacao manual no banco.
+
+Decisao:
+- Criar endpoints em `/api/admin/usuarios`.
+- Respostas de usuario nao retornam senha nem hash.
+- Criacao e atualizacao de senha usam hash no backend.
+- Vinculos com clientes e permissoes sao mantidos por endpoints dedicados.
+- As rotas exigem permissoes `usuarios:criar`, `usuarios:ler`, `usuarios:editar` ou `usuarios:administrar`.
+
+Motivo:
+- Fecha a base minima de administracao de acesso antes do frontend.
+- Evita manutencao manual de RBAC no banco.
+- Mantem auditoria centralizada por `require_admin_permission`.
+
+Consequencias:
+- Frontend deve consumir os endpoints administrativos para tela de usuarios.
+- Perfis escopados precisam de permissao explicita para administrar usuarios.
+- Ainda falta refresh/logout de sessao administrativa.

@@ -13,11 +13,12 @@ Definir o controle de acesso definitivo do painel e da API administrativa.
 - Perfis escopados validam vinculo por cliente e permissao `recurso:acao`.
 - Tabelas `usuarios_clientes` e `permissoes` existem.
 - Tabela `auditoria_acessos` registra permissoes permitidas e negadas.
+- Endpoints administrativos de usuarios, vinculos e permissoes existem.
 - `ADMIN_API_TOKEN` e fallback local sem repository de auth.
 
 ## Limite atual
 
-- Ainda nao existe tela administrativa para manter usuarios, vinculos e permissoes.
+- Ainda nao existe frontend para manter usuarios, vinculos e permissoes.
 - Ainda nao existe seed automatico de perfis operacionais.
 - Ainda nao existe politica de retencao de auditoria.
 
@@ -157,6 +158,9 @@ Regra:
 - Usuario sem cliente vinculado nao enxerga dados do cliente. Implementado nas rotas administrativas com `cliente_id`.
 - Permissoes permitidas e negadas geram auditoria. Implementado.
 - Auditoria pode ser consultada por endpoint administrativo. Implementado.
+- Usuario pode ser criado sem expor senha ou hash. Implementado.
+- Usuario pode ser vinculado a cliente por endpoint administrativo. Implementado.
+- Permissao granular pode ser concedida por endpoint administrativo. Implementado.
 - Super Admin enxerga todos os clientes.
 - Admin Cliente nao altera configuracao global.
 - Operador nao gerencia usuarios.

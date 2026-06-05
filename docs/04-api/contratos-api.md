@@ -34,7 +34,69 @@ Implementacao atual:
 Limite:
 - Ainda nao possui refresh token.
 - Ainda nao possui rate limit.
-- Ainda nao possui permissoes granulares por cliente/acao.
+- Permissoes granulares por cliente/acao existem para rotas administrativas.
+
+## Usuarios administrativos
+
+### POST /api/admin/usuarios
+
+Finalidade: criar usuario administrativo.
+Quem usa: painel administrativo.
+Parametros: id opcional, nome, email, senha, perfil, ativo.
+Resposta: usuario publico sem senha e sem hash.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `usuarios:criar`.
+
+### GET /api/admin/usuarios
+
+Finalidade: listar usuarios administrativos.
+Quem usa: painel administrativo.
+Query: `limit`, `offset`, `ativo`, `perfil`.
+Resposta: envelope paginado com `items`, `limit`, `offset` e `total`.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `usuarios:ler`.
+
+### GET /api/admin/usuarios/{user_id}
+
+Finalidade: obter usuario administrativo por ID.
+Quem usa: painel administrativo.
+Resposta: usuario publico sem senha e sem hash.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `usuarios:ler`.
+
+### PATCH /api/admin/usuarios/{user_id}
+
+Finalidade: atualizar nome, email, senha, perfil ou status do usuario.
+Quem usa: painel administrativo.
+Resposta: usuario publico sem senha e sem hash.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `usuarios:editar`.
+
+### POST /api/admin/usuarios/{user_id}/clientes
+
+Finalidade: vincular usuario a cliente.
+Quem usa: painel administrativo.
+Parametros: cliente_id, ativo.
+Resposta: vinculo criado ou atualizado.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `usuarios:administrar`.
+
+### GET /api/admin/usuarios/{user_id}/clientes
+
+Finalidade: listar clientes vinculados ao usuario.
+Quem usa: painel administrativo.
+Resposta: lista de vinculos.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `usuarios:ler`.
+
+### POST /api/admin/usuarios/{user_id}/permissoes
+
+Finalidade: conceder permissao granular ao usuario.
+Quem usa: painel administrativo.
+Parametros: recurso, acao, cliente_id opcional, permitido.
+Resposta: permissao criada.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `usuarios:administrar`.
+
+### GET /api/admin/usuarios/{user_id}/permissoes
+
+Finalidade: listar permissoes do usuario.
+Quem usa: painel administrativo.
+Resposta: lista de permissoes.
+Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC `usuarios:ler`.
 
 ## Clientes
 
@@ -45,7 +107,7 @@ Quem usa: painel administrativo.
 Parametros: id, nome, documento, ativo.
 Resposta: cliente criado.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: gestao de usuarios/permissoes via painel ainda pendente.
+Limite: frontend de gestao ainda pendente.
 
 ### GET /api/admin/clientes/{cliente_id}
 
@@ -53,7 +115,7 @@ Finalidade: obter cliente por id.
 Quem usa: painel administrativo.
 Resposta: cliente encontrado ou 404.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: gestao de usuarios/permissoes via painel ainda pendente.
+Limite: frontend de gestao ainda pendente.
 
 ### GET /api/admin/clientes
 
@@ -72,7 +134,7 @@ Quem usa: painel administrativo.
 Parametros: id, cliente_id, nome, codigo_ativacao, bloqueado, playlist_atual_id.
 Resposta: dispositivo criado.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: gestao de usuarios/permissoes via painel ainda pendente.
+Limite: frontend de gestao ainda pendente.
 
 ### GET /api/admin/dispositivos/{dispositivo_id}
 
@@ -80,7 +142,7 @@ Finalidade: obter dispositivo por id.
 Quem usa: painel administrativo.
 Resposta: dispositivo encontrado ou 404.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: gestao de usuarios/permissoes via painel ainda pendente.
+Limite: frontend de gestao ainda pendente.
 
 ### GET /api/admin/dispositivos
 
