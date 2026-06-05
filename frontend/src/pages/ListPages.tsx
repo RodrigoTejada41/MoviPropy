@@ -1,5 +1,21 @@
-import { FormEvent, useEffect, useState } from "react";
-import { Download, Filter, Monitor, PlayCircle, Plus, QrCode, RotateCcw, ShieldCheck, Tv } from "lucide-react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
+import {
+  AlertTriangle,
+  Building2,
+  CheckCircle2,
+  Download,
+  Filter,
+  Monitor,
+  MoreVertical,
+  PlayCircle,
+  Plus,
+  QrCode,
+  RotateCcw,
+  Search,
+  ShieldCheck,
+  Tv,
+  Users
+} from "lucide-react";
 import { api, ApiError } from "../lib/api";
 import { DataTable } from "../components/DataTable";
 import { Status } from "../components/Status";
@@ -35,8 +51,11 @@ function useList<T>(loader: () => Promise<PageResult<T>>) {
 
 export function ClientesPage() {
   const list = useList(api.clientes);
+  const devices = useList(api.dispositivos);
   const [form, setForm] = useState({ id: "", nome: "", documento: "" });
   const [message, setMessage] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("todos");
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -49,33 +68,177 @@ export function ClientesPage() {
       await api.criarCliente({ id: form.id.trim(), nome: form.nome.trim(), documento: form.documento || null, ativo: true });
       setForm({ id: "", nome: "", documento: "" });
       await list.reload();
+      await devices.reload();
     } catch (err) {
       setMessage(err instanceof ApiError ? err.message : "Falha ao criar cliente.");
     }
   }
 
+  const filteredRows = list.rows.filter((item) => {
+    const term = search.trim().toLowerCase();
+    const matchesSearch = !term || [item.id, item.nome, item.documento ?? ""].some((value) => value.toLowerCase().includes(term));
+    const matchesStatus =
+      statusFilter === "todos" ||
+      (statusFilter === "ativos" && item.ativo) ||
+      (statusFilter === "inativos" && !item.ativo);
+    return matchesSearch && matchesStatus;
+  });
+  const activeClients = list.rows.filter((item) => item.ativo).length;
+  const activeDevices = devices.rows.filter((item) => !item.bloqueado).length;
+  const blockedDevices = devices.rows.filter((item) => item.bloqueado).length;
+  const clientsWithDevices = list.rows.filter((client) => devices.rows.some((device) => device.cliente_id === client.id)).length;
+
+  function countDevices(clienteId: string) {
+    return devices.rows.filter((device) => device.cliente_id === clienteId).length;
+  }
+
+  function initials(name: string) {
+    return name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "CL";
+  }
+
   return (
-    <section className="page">
-      <PageTitle title="Clientes" subtitle={`${list.total} registros encontrados.`} />
-      <form className="inlineForm" onSubmit={submit}>
+    <section className="page clientsPage">
+      <div className="clientsHeader">
+        <div>
+          <div className="breadcrumb">
+            <span>Console</span>
+            <span>/</span>
+            <strong>Clientes</strong>
+          </div>
+          <h1>Gestao de clientes</h1>
+          <p>Controle a base de contratantes e o vinculo operacional dos dispositivos.</p>
+        </div>
+        <div className="clientActions">
+          <button className="secondaryButton" type="button" disabled><Download size={17} />Exportar</button>
+          <a className="primaryButton" href="#novo-cliente"><Plus size={17} />Adicionar cliente</a>
+        </div>
+      </div>
+
+      <div className="clientStats">
+        <ClientStat icon={<Users size={22} />} label="Total de clientes" value={list.total} tone="primary" />
+        <ClientStat icon={<CheckCircle2 size={22} />} label="Clientes ativos" value={activeClients} tone="success" />
+        <ClientStat icon={<Monitor size={22} />} label="Dispositivos ativos" value={activeDevices} tone="neutral" />
+        <ClientStat icon={<AlertTriangle size={22} />} label="Dispositivos bloqueados" value={blockedDevices} tone="danger" />
+      </div>
+
+      <form className="clientForm" id="novo-cliente" onSubmit={submit}>
+        <div>
+          <h2>Novo cliente</h2>
+          <p>Cadastre o identificador usado nas rotas administrativas e no isolamento de dados.</p>
+        </div>
         <input placeholder="id" value={form.id} onChange={(event) => setForm({ ...form, id: event.target.value })} />
         <input placeholder="nome" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} />
         <input placeholder="documento" value={form.documento} onChange={(event) => setForm({ ...form, documento: event.target.value })} />
         <button className="primaryButton"><Plus size={16} />Criar</button>
       </form>
       {message && <Status error={message} />}
-      <DataTable<Cliente>
-        rows={list.rows}
-        loading={list.loading}
-        error={list.error}
-        columns={[
-          { key: "id", label: "Id", render: (item) => item.id },
-          { key: "nome", label: "Nome", render: (item) => item.nome },
-          { key: "documento", label: "Documento", render: (item) => item.documento },
-          { key: "ativo", label: "Ativo", render: (item) => item.ativo }
-        ]}
-      />
+
+      <div className="clientTableCard">
+        <div className="clientTableHeader">
+          <div>
+            <strong>Clientes cadastrados</strong>
+            <span>{filteredRows.length} exibidos de {list.total}. {clientsWithDevices} com dispositivo vinculado.</span>
+          </div>
+          <div className="clientFilters">
+            <label className="clientSearch">
+              <Search size={17} />
+              <input
+                placeholder="Buscar por nome, id ou documento"
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+            </label>
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+              <option value="todos">Todos os status</option>
+              <option value="ativos">Ativos</option>
+              <option value="inativos">Inativos</option>
+            </select>
+            <button className="secondaryButton" type="button" disabled><Filter size={17} />Regiao indisponivel</button>
+          </div>
+        </div>
+        <Status
+          loading={list.loading || devices.loading}
+          error={list.error ?? devices.error}
+          empty={!list.loading && !devices.loading && !list.error && !devices.error && filteredRows.length === 0}
+        />
+        {!list.loading && !devices.loading && !list.error && !devices.error && filteredRows.length > 0 && (
+          <div className="clientTableWrap">
+            <table className="clientTable">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Status</th>
+                  <th>Dispositivos</th>
+                  <th>Sincronizacao</th>
+                  <th>Documento</th>
+                  <th>Acoes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRows.map((item) => {
+                  const totalDevices = countDevices(item.id);
+                  return (
+                    <tr key={item.id}>
+                      <td>
+                        <div className="clientName">
+                          <div className="clientAvatar">{initials(item.nome)}</div>
+                          <div>
+                            <strong>{item.nome}</strong>
+                            <span>ID: {item.id}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={item.ativo ? "statusPill success" : "statusPill danger"}>
+                          <i></i>{item.ativo ? "Ativo" : "Inativo"}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="deviceMeter">
+                          <Building2 size={18} />
+                          <strong>{totalDevices}</strong>
+                          <span>{totalDevices === 1 ? "dispositivo" : "dispositivos"}</span>
+                        </div>
+                      </td>
+                      <td><span className="mutedCell">Nao informado</span></td>
+                      <td>{item.documento || <span className="mutedCell">Nao informado</span>}</td>
+                      <td>
+                        <button className="tableIconButton" type="button" disabled title="Detalhes dependem de endpoint de atualizacao">
+                          <MoreVertical size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div className="clientPager">
+          <span>Pagina unica com limite atual da API.</span>
+          <div>
+            <button type="button" disabled>Anterior</button>
+            <button type="button" disabled>Proxima</button>
+          </div>
+        </div>
+      </div>
     </section>
+  );
+}
+
+function ClientStat({ icon, label, value, tone }: { icon: ReactNode; label: string; value: number; tone: "primary" | "success" | "danger" | "neutral" }) {
+  return (
+    <div className={`clientStat ${tone}`}>
+      <div>{icon}</div>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }
 

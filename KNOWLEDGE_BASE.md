@@ -134,7 +134,7 @@ Limite:
 - API local usa proxy do Vite para `http://127.0.0.1:8000`.
 - Telas implementadas inicialmente:
   - Dashboard com cards analiticos, auditoria e alertas derivados de dados reais.
-  - Clientes.
+  - Clientes com layout de gestao, KPIs reais, busca local, filtro por status, cadastro e contagem de dispositivos vinculados.
   - Dispositivos com layout de frota, KPIs, busca local e cadastro.
   - Midias.
   - Playlists.
@@ -144,6 +144,7 @@ Limite:
   - Google Drive com placeholder pos-MVP.
   - Configuracoes com placeholder por falta de endpoints.
 - A tela de dispositivos nao deve inventar ultima comunicacao; enquanto a API nao retorna esse campo, mostrar `Nao informado`.
+- A tela de clientes nao deve inventar regiao, data de criacao ou ultimo sync; enquanto a API nao retorna esses campos, mostrar `Nao informado` ou deixar a acao desabilitada.
 - O dashboard nao deve inventar numeros de infraestrutura; deve calcular indicadores a partir de clientes, dispositivos, midias, playlists e auditoria.
 
 ## Contratos atuais do player

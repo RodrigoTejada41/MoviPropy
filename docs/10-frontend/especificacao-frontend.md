@@ -115,33 +115,44 @@ Criterios de aceite:
 
 Objetivo:
 - Gerenciar clientes.
+- Exibir visao operacional com indicadores reais e vinculo de dispositivos.
 
 Funcionalidades:
 - Listar clientes.
 - Criar cliente.
-- Editar cliente.
-- Ativar/inativar cliente.
-- Abrir detalhes do cliente.
+- Buscar localmente por id, nome ou documento.
+- Filtrar localmente por status ativo/inativo.
+- Exibir quantidade de dispositivos vinculados por cliente.
+- Editar cliente. Pendente de API.
+- Ativar/inativar cliente. Pendente de API.
+- Abrir detalhes do cliente. Pendente de API.
 
 Campos:
 - Id.
 - Nome.
 - Documento.
 - Ativo.
+- Quantidade de dispositivos calculada por `GET /api/admin/dispositivos`.
+- Sincronizacao: exibir `Nao informado` enquanto a API nao retornar ultimo sync.
 
 API atual:
+- `GET /api/admin/clientes`.
 - `POST /api/admin/clientes`.
 - `GET /api/admin/clientes/{cliente_id}`.
 
 APIs pendentes:
-- `GET /api/admin/clientes`.
 - `PATCH /api/admin/clientes/{cliente_id}`.
+- Campo de regiao do cliente.
+- Campo de data de criacao do cliente.
+- Campo de ultimo sync por cliente/dispositivo.
 
 Criterios de aceite:
 - Validar nome obrigatorio.
 - Documento opcional.
 - Nao duplicar cliente com mesmo id.
 - Exibir mensagens tecnicas de erro sem expor stack trace.
+- Nao inventar regiao, data de criacao ou ultimo sync.
+- Desabilitar acoes sem endpoint backend.
 
 ### Dispositivos
 
