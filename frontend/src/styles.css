@@ -680,6 +680,346 @@ th {
   color: #9f1d1d;
 }
 
+.overviewPage {
+  gap: 30px;
+  margin: 0 auto;
+  max-width: 1280px;
+  width: 100%;
+}
+
+.overviewHeader {
+  align-items: end;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+}
+
+.overviewHeader h1 {
+  color: #191c1e;
+  font-size: 32px;
+  letter-spacing: 0;
+  line-height: 40px;
+  margin: 0;
+}
+
+.overviewHeader p {
+  color: #6b7786;
+  font-size: 16px;
+  margin: 6px 0 0;
+}
+
+.systemBadge {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid #dce3ea;
+  border-radius: 10px;
+  color: #464554;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.systemBadge span {
+  animation: pulseStatus 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background: #10b981;
+  border-radius: 999px;
+  height: 8px;
+  width: 8px;
+}
+
+.overviewMetrics {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.overviewCard {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid #dce3ea;
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(16, 23, 34, 0.06);
+  display: grid;
+  gap: 10px;
+  min-height: 220px;
+  overflow: hidden;
+  padding: 22px;
+  position: relative;
+}
+
+.overviewIcon {
+  align-items: center;
+  border-radius: 14px;
+  display: flex;
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+
+.overviewCard.primary .overviewIcon {
+  background: rgba(70, 72, 212, 0.10);
+  color: #4648d4;
+}
+
+.overviewCard.success .overviewIcon {
+  background: #e9fbf3;
+  color: #087f5b;
+}
+
+.overviewCard.danger .overviewIcon {
+  background: #fff0ed;
+  color: #ba1a1a;
+}
+
+.overviewCard.neutral .overviewIcon {
+  background: #eceef0;
+  color: #565e74;
+}
+
+.overviewCard span {
+  color: #5d6978;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.overviewCard strong {
+  color: #191c1e;
+  font-size: 36px;
+  letter-spacing: 0;
+  line-height: 42px;
+}
+
+.overviewCard p {
+  color: #6b7786;
+  margin: 0;
+}
+
+.overviewCard svg {
+  align-self: end;
+  height: 46px;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.overviewCard path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.overviewCard.primary path {
+  color: rgba(70, 72, 212, 0.35);
+}
+
+.overviewCard.success path {
+  color: rgba(8, 127, 91, 0.32);
+}
+
+.overviewCard.danger path {
+  color: rgba(186, 26, 26, 0.30);
+}
+
+.overviewCard.neutral path {
+  color: rgba(86, 94, 116, 0.30);
+}
+
+.overviewGrid {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+}
+
+.overviewPanel {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid #dce3ea;
+  border-radius: 18px;
+  box-shadow: 0 22px 54px rgba(16, 23, 34, 0.08);
+  overflow: hidden;
+}
+
+.panelHeader {
+  align-items: center;
+  border-bottom: 1px solid #edf1f5;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 20px 22px;
+}
+
+.panelHeader.compact {
+  align-items: start;
+}
+
+.panelHeader h2 {
+  font-size: 18px;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.panelHeader p {
+  color: #6b7786;
+  margin: 4px 0 0;
+}
+
+.panelHeader button {
+  background: transparent;
+  border: 0;
+  color: #4648d4;
+  cursor: not-allowed;
+  font-weight: 800;
+  opacity: 0.62;
+}
+
+.panelHeader > span {
+  background: #ffdad6;
+  border-radius: 999px;
+  color: #93000a;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 5px 9px;
+}
+
+.eventTableWrap {
+  overflow-x: auto;
+}
+
+.eventTable {
+  min-width: 720px;
+}
+
+.eventTable th {
+  background: rgba(242, 244, 246, 0.68);
+}
+
+.eventTable td:first-child {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.eventIcon {
+  align-items: center;
+  color: #4648d4;
+  display: inline-flex;
+}
+
+.eventTable code {
+  background: #eceef0;
+  border-radius: 6px;
+  color: #565e74;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 7px;
+}
+
+.eventStatus {
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 7px;
+  text-transform: uppercase;
+}
+
+.eventStatus.ok {
+  background: #e9fbf3;
+  color: #087f5b;
+}
+
+.eventStatus.danger {
+  background: #fff0ed;
+  color: #ba1a1a;
+}
+
+.alertList {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.alertItem {
+  border: 1px solid #edf1f5;
+  border-radius: 14px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 40px 1fr;
+  padding: 14px;
+}
+
+.alertItem svg {
+  border-radius: 999px;
+  height: 40px;
+  padding: 9px;
+  width: 40px;
+}
+
+.alertItem.primary svg {
+  background: rgba(70, 72, 212, 0.10);
+  color: #4648d4;
+}
+
+.alertItem.danger svg {
+  background: #fff0ed;
+  color: #ba1a1a;
+}
+
+.alertItem.neutral svg {
+  background: #eceef0;
+  color: #565e74;
+}
+
+.alertItem strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+
+.alertItem p {
+  color: #6b7786;
+  font-size: 13px;
+  margin: 0;
+}
+
+.emptyPanel {
+  color: #6b7786;
+  padding: 22px;
+}
+
+.geoPanel {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(70, 72, 212, 0.06), rgba(192, 193, 255, 0.20)),
+    #f2f4f6;
+  border-top: 1px solid #edf1f5;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 48px 1fr;
+  margin-top: 10px;
+  padding: 20px;
+}
+
+.geoPanel svg {
+  background: #e1e0ff;
+  border-radius: 14px;
+  color: #4648d4;
+  height: 48px;
+  padding: 10px;
+  width: 48px;
+}
+
+.geoPanel strong,
+.geoPanel span {
+  display: block;
+}
+
+.geoPanel span {
+  color: #6b7786;
+  margin-top: 3px;
+}
+
 .secondaryButton {
   align-items: center;
   background: #ffffff;
@@ -1077,6 +1417,7 @@ th {
 
   .topbar,
   .topActions,
+  .overviewHeader,
   .fleetHeader,
   .fleetTableHeader {
     align-items: stretch;
@@ -1097,6 +1438,8 @@ th {
   }
 
   .metricGrid,
+  .overviewMetrics,
+  .overviewGrid,
   .split,
   .inlineForm,
   .fleetStats,

@@ -133,7 +133,7 @@ Limite:
 - Token admin fica no `localStorage` como solucao MVP local.
 - API local usa proxy do Vite para `http://127.0.0.1:8000`.
 - Telas implementadas inicialmente:
-  - Dashboard.
+  - Dashboard com cards analiticos, auditoria e alertas derivados de dados reais.
   - Clientes.
   - Dispositivos com layout de frota, KPIs, busca local e cadastro.
   - Midias.
@@ -144,6 +144,7 @@ Limite:
   - Google Drive com placeholder pos-MVP.
   - Configuracoes com placeholder por falta de endpoints.
 - A tela de dispositivos nao deve inventar ultima comunicacao; enquanto a API nao retorna esse campo, mostrar `Nao informado`.
+- O dashboard nao deve inventar numeros de infraestrutura; deve calcular indicadores a partir de clientes, dispositivos, midias, playlists e auditoria.
 
 ## Contratos atuais do player
 

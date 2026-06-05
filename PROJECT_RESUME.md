@@ -74,6 +74,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Tela de login redesenhada com identidade visual MoviProgy, mostrar/ocultar senha e placeholders desabilitados para recursos sem contrato backend.
 - Painel autenticado criado com sidebar, header e navegacao.
 - Layout autenticado refinado com sidebar escura, topbar com busca e perfil lateral.
+- Dashboard redesenhado com cards analiticos, eventos de auditoria e alertas derivados dos dados reais da API.
 - Tela de Dispositivos redesenhada como gestao de frota com KPIs, busca local, cadastro e tabela detalhada.
 - Telas iniciais criadas para Dashboard, Clientes, Dispositivos, Midias, Playlists, Logs/Auditoria, Usuarios, Sincronizacoes, Google Drive e Configuracoes.
 - Listagens iniciais consomem endpoints paginados do backend.

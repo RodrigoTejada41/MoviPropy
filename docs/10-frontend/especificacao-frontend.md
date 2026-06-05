@@ -91,6 +91,7 @@ Criterios de aceite:
 
 Objetivo:
 - Exibir visao operacional rapida.
+- Usar layout analitico com cards, eventos e alertas baseados em dados reais da API.
 
 Cards:
 - Clientes ativos.
@@ -98,17 +99,17 @@ Cards:
 - Dispositivos bloqueados.
 - Playlists ativas.
 - Midias cadastradas.
-- Falhas recentes.
+- Alertas derivados de dados existentes.
 
 Listas:
-- Ultimos dispositivos sincronizados.
-- Ultimos erros.
-- Playlists publicadas recentemente.
+- Ultimos eventos administrativos quando `GET /api/admin/auditoria/acessos` retornar dados.
+- Alertas de dispositivos bloqueados, dispositivos sem playlist, midias inativas e auditoria negada.
 
 Criterios de aceite:
 - Nao exibir dados inventados.
 - Mostrar estado vazio quando nao houver dados.
 - Mostrar erro quando API falhar.
+- Mostrar `Nao informado` quando a API nao retornar data ou evento.
 
 ### Clientes
 
