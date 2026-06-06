@@ -106,6 +106,10 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Scripts remotos de deploy, smoke, backup e rollback criados.
 - VPS preparada com Docker, Compose, usuario de deploy, firewall e fail2ban.
 - API desabilita documentacao publica em PROD e valida hosts permitidos.
+- Ambiente DEV publicado e homologado em `http://172.233.177.135:8081`.
+- Player DEV publicado e homologado em `http://172.233.177.135:8092`.
+- Resultado registrado em `docs/15-homologacao/resultado-dev-2026-06-06.md`.
+- Ambiente PROD permanece sem containers e bloqueado no servidor.
 - Manifesto do player inclui `media_id`, tipo e duracao para permitir download e reproducao pelo player real.
 - Design do player PWA offline-first registrado e implementado conforme `docs/superpowers/specs/2026-06-06-player-pwa-design.md`.
 
