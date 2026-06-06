@@ -695,6 +695,30 @@ nav {
   margin: 0;
 }
 
+.accessGrid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.accessGrid > div {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.accessForm {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(120px, 1fr)) auto;
+}
+
+.accessForm h3 {
+  font-size: 15px;
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .sectionHeader p {
   color: #6b7786;
   margin-top: 4px;
@@ -1968,8 +1992,8 @@ th {
     min-width: 0;
   }
 
-    .metricGrid,
-    .settingsGrid,
+  .metricGrid,
+  .settingsGrid,
   .overviewMetrics,
   .overviewGrid,
   .split,
@@ -1982,6 +2006,11 @@ th {
   .fleetStats,
   .fleetForm,
   .fleetHelpGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .accessGrid,
+  .accessForm {
     grid-template-columns: 1fr;
   }
 

@@ -10,10 +10,12 @@ import type {
   Midia,
   OperationalConfiguration,
   PageResult,
+  Permission,
   Playlist,
   PlaylistMidia,
   SyncConfirmation,
-  User
+  User,
+  UserClienteLink
 } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -157,6 +159,24 @@ export const api = {
   atualizarUsuario(id: string, payload: Partial<Pick<User, "nome" | "email" | "perfil" | "ativo">> & { senha?: string }) {
     return request<User>(`/api/admin/usuarios/${encodeURIComponent(id)}`, {
       method: "PATCH",
+      body: JSON.stringify(payload)
+    });
+  },
+  usuarioClientes(id: string) {
+    return request<UserClienteLink[]>(`/api/admin/usuarios/${encodeURIComponent(id)}/clientes`);
+  },
+  vincularUsuarioCliente(id: string, payload: { cliente_id: string; ativo: boolean }) {
+    return request<UserClienteLink>(`/api/admin/usuarios/${encodeURIComponent(id)}/clientes`, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+  usuarioPermissoes(id: string) {
+    return request<Permission[]>(`/api/admin/usuarios/${encodeURIComponent(id)}/permissoes`);
+  },
+  concederPermissao(id: string, payload: { recurso: string; acao: string; cliente_id?: string | null; permitido: boolean }) {
+    return request<Permission>(`/api/admin/usuarios/${encodeURIComponent(id)}/permissoes`, {
+      method: "POST",
       body: JSON.stringify(payload)
     });
   },

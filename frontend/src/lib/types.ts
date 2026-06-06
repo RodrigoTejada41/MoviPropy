@@ -6,6 +6,21 @@ export type User = {
   ativo?: boolean;
 };
 
+export type UserClienteLink = {
+  user_id: string;
+  cliente_id: string;
+  ativo: boolean;
+};
+
+export type Permission = {
+  id: string;
+  user_id: string;
+  recurso: string;
+  acao: string;
+  cliente_id?: string | null;
+  permitido: boolean;
+};
+
 export type LoginResponse = {
   access_token: string;
   token_type: string;

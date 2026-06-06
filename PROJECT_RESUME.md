@@ -88,6 +88,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Tela de sincronizacoes conectada a confirmacoes reais dos players.
 - Tela de configuracoes exibe somente parametros operacionais seguros do backend.
 - Upload local de midia, criacao/publicacao de playlists e criacao/inativacao de usuarios foram conectados no frontend.
+- Gestao de usuarios permite consultar e criar vinculos com clientes e conceder permissoes por recurso, acao e escopo.
 - Manifesto do player inclui `media_id`, tipo e duracao para permitir download e reproducao pelo player real.
 - Design aprovado do player PWA offline-first registrado em `docs/superpowers/specs/2026-06-06-player-pwa-design.md`.
 
@@ -155,7 +156,6 @@ Backend administrativo e frontend operacional consolidados.
 
 Pendencias prioritarias:
 - Implementar o player PWA offline-first conforme design aprovado.
-- Completar gestao visual de vinculos e permissoes de usuarios.
 - Adicionar testes automatizados do frontend.
 - Testes de carga reais em volume de producao continuam recomendados antes de deploy publico.
 - Executar homologacao offline e de producao.

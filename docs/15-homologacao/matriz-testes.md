@@ -10,7 +10,7 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Readiness | Sim | Sim | Sim | Nao | Sim | Implementado |
 | Login admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Refresh/logout admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
-| Gestao usuarios/permissoes | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
+| Gestao usuarios/permissoes | Sim | Sim | Sim | Sim | Pendente | Implementado |
 | RBAC admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | RBAC granular cliente/acao | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Auditoria admin | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |

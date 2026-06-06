@@ -664,7 +664,13 @@ export function PlaylistsPage() {
 
 export function UsuariosPage() {
   const list = useList(api.usuarios);
+  const clientes = useList(api.clientes);
   const [form, setForm] = useState({ nome: "", email: "", senha: "", perfil: "operador" });
+  const [selectedId, setSelectedId] = useState("");
+  const [links, setLinks] = useState<Awaited<ReturnType<typeof api.usuarioClientes>>>([]);
+  const [permissions, setPermissions] = useState<Awaited<ReturnType<typeof api.usuarioPermissoes>>>([]);
+  const [linkForm, setLinkForm] = useState({ cliente_id: "" });
+  const [permissionForm, setPermissionForm] = useState({ recurso: "midias", acao: "ler", cliente_id: "" });
   const [message, setMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -698,6 +704,61 @@ export function UsuariosPage() {
     }
   }
 
+  async function selectUser(id: string) {
+    setMessage(null);
+    setSelectedId(id);
+    if (!id) {
+      setLinks([]);
+      setPermissions([]);
+      return;
+    }
+    try {
+      const [userLinks, userPermissions] = await Promise.all([
+        api.usuarioClientes(id),
+        api.usuarioPermissoes(id)
+      ]);
+      setLinks(userLinks);
+      setPermissions(userPermissions);
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao carregar acessos do usuario.");
+    }
+  }
+
+  async function linkCliente(event: FormEvent) {
+    event.preventDefault();
+    if (!selectedId || !linkForm.cliente_id) return;
+    setMessage(null);
+    setSuccess(null);
+    try {
+      await api.vincularUsuarioCliente(selectedId, { cliente_id: linkForm.cliente_id, ativo: true });
+      await selectUser(selectedId);
+      setSuccess("Cliente vinculado.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao vincular cliente.");
+    }
+  }
+
+  async function grantPermission(event: FormEvent) {
+    event.preventDefault();
+    if (!selectedId || !permissionForm.recurso.trim() || !permissionForm.acao.trim()) return;
+    setMessage(null);
+    setSuccess(null);
+    try {
+      await api.concederPermissao(selectedId, {
+        recurso: permissionForm.recurso.trim(),
+        acao: permissionForm.acao.trim(),
+        cliente_id: permissionForm.cliente_id || null,
+        permitido: true
+      });
+      await selectUser(selectedId);
+      setSuccess("Permissao concedida.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao conceder permissao.");
+    }
+  }
+
+  const selected = list.rows.find((item) => item.id === selectedId);
+
   return (
     <section className="page">
       <PageTitle title="Usuarios e permissoes" subtitle={`${list.total} usuarios encontrados.`} />
@@ -727,13 +788,64 @@ export function UsuariosPage() {
             key: "acoes",
             label: "Acoes",
             render: (item) => (
-              <button className="secondaryButton compactButton" type="button" onClick={() => toggle(item)}>
-                {item.ativo ? "Inativar" : "Ativar"}
-              </button>
+              <div className="tableActions">
+                <button className="secondaryButton compactButton" type="button" onClick={() => selectUser(item.id)}>Acessos</button>
+                <button className="secondaryButton compactButton" type="button" onClick={() => toggle(item)}>
+                  {item.ativo ? "Inativar" : "Ativar"}
+                </button>
+              </div>
             )
           }
         ]}
       />
+      {selected && (
+        <section className="editorSection">
+          <div className="sectionHeader">
+            <div><h2>Acessos de {selected.nome}</h2><p>{selected.email}</p></div>
+            <button className="tableIconButton" type="button" title="Fechar editor" onClick={() => selectUser("")}><RotateCcw size={18} /></button>
+          </div>
+          <div className="accessGrid">
+            <div>
+              <form className="accessForm" onSubmit={linkCliente}>
+                <h3>Vincular cliente</h3>
+                <select value={linkForm.cliente_id} onChange={(event) => setLinkForm({ cliente_id: event.target.value })}>
+                  <option value="">Cliente</option>
+                  {clientes.rows.map((cliente) => <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>)}
+                </select>
+                <button className="primaryButton"><Plus size={16} />Vincular</button>
+              </form>
+              <DataTable
+                rows={links}
+                columns={[
+                  { key: "cliente", label: "Cliente", render: (item) => item.cliente_id },
+                  { key: "status", label: "Status", render: (item) => item.ativo ? "Ativo" : "Inativo" }
+                ]}
+              />
+            </div>
+            <div>
+              <form className="accessForm" onSubmit={grantPermission}>
+                <h3>Conceder permissao</h3>
+                <input placeholder="recurso" value={permissionForm.recurso} onChange={(event) => setPermissionForm({ ...permissionForm, recurso: event.target.value })} />
+                <input placeholder="acao" value={permissionForm.acao} onChange={(event) => setPermissionForm({ ...permissionForm, acao: event.target.value })} />
+                <select value={permissionForm.cliente_id} onChange={(event) => setPermissionForm({ ...permissionForm, cliente_id: event.target.value })}>
+                  <option value="">Escopo global</option>
+                  {clientes.rows.map((cliente) => <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>)}
+                </select>
+                <button className="primaryButton"><ShieldCheck size={16} />Conceder</button>
+              </form>
+              <DataTable
+                rows={permissions}
+                columns={[
+                  { key: "recurso", label: "Recurso", render: (item) => item.recurso },
+                  { key: "acao", label: "Acao", render: (item) => item.acao },
+                  { key: "cliente", label: "Escopo", render: (item) => item.cliente_id ?? "Global" },
+                  { key: "status", label: "Status", render: (item) => item.permitido ? "Permitida" : "Negada" }
+                ]}
+              />
+            </div>
+          </div>
+        </section>
+      )}
     </section>
   );
 }

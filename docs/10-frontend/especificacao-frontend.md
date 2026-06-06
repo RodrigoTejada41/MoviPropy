@@ -414,6 +414,14 @@ APIs atuais:
 - `POST /api/admin/usuarios`.
 - `PATCH /api/admin/usuarios/{usuario_id}`.
 - `POST /api/admin/usuarios/{usuario_id}/permissoes`.
+- `GET /api/admin/usuarios/{usuario_id}/permissoes`.
+- `POST /api/admin/usuarios/{usuario_id}/clientes`.
+- `GET /api/admin/usuarios/{usuario_id}/clientes`.
+
+Implementacao atual:
+- Cadastro e ativacao/inativacao de usuario.
+- Consulta e criacao de vinculos com clientes.
+- Consulta e concessao de permissoes por recurso, acao e cliente opcional.
 
 Criterios de aceite:
 - Senha nunca deve aparecer.
