@@ -1065,6 +1065,27 @@ Consequencias:
 
 ---
 
+### ADR-039 - CI separado para backend e frontend
+
+Status: Aprovada
+
+Data: 2026-06-06
+
+Contexto:
+- Testes locais existem, mas nao havia verificacao automatica por commit.
+
+Decisao:
+- Usar GitHub Actions.
+- Backend executa Python 3.12 e PostgreSQL 16 real.
+- Frontend executa Node 22, Vitest e build TypeScript/Vite.
+- Workflow usa permissao somente leitura.
+
+Consequencias:
+- Pull requests e pushes executam validacao reproduzivel.
+- Deploy automatico continua fora de escopo ate definir provedor e dominio.
+
+---
+
 ### ADR-034 - Implementacao inicial Google Drive controlada pelo backend
 
 Status: Aprovada

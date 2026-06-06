@@ -28,6 +28,18 @@
 8. Executar smoke tests.
 9. Monitorar logs.
 
+## Integracao continua
+
+Workflow:
+- `.github/workflows/ci.yml`.
+
+Validacoes:
+- Backend Python 3.12 com PostgreSQL 16 real.
+- Suite completa `pytest`.
+- Frontend Node 22 com `npm ci`.
+- Testes Vitest.
+- Build Vite/TypeScript.
+
 ## Execucao local com Docker
 
 Subir backend:
@@ -83,4 +95,4 @@ Limite:
 - Definir provedor.
 - Definir dominio.
 - Definir estrategia de storage.
-- Definir CI/CD.
+- Definir CD do ambiente escolhido.

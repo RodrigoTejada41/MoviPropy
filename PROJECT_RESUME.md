@@ -99,8 +99,9 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Logs estruturados nao incluem Authorization, corpo ou credenciais.
 - Backup automatizado gera dump PostgreSQL, copia midias e cria manifesto com checksum.
 - Restore automatizado foi validado em banco temporario isolado.
+- CI criado para backend com PostgreSQL real e frontend com testes/build.
 - Manifesto do player inclui `media_id`, tipo e duracao para permitir download e reproducao pelo player real.
-- Design aprovado do player PWA offline-first registrado em `docs/superpowers/specs/2026-06-06-player-pwa-design.md`.
+- Design do player PWA offline-first registrado em `docs/superpowers/specs/2026-06-06-player-pwa-design.md`, aguardando aprovacao explicita para implementacao.
 
 ## Arquivos principais
 
