@@ -166,6 +166,81 @@ class FakeCoreRepository:
         self.playlist_midias.append(
             (playlist_id, midia_id, ordem, duracao_override)
         )
+        playlist = self.playlists[playlist_id]
+        self.playlists[playlist_id] = playlist.model_copy(
+            update={"versao": playlist.versao + 1}
+        )
+
+    def list_playlist_midias(self, playlist_id: str):
+        return [
+            {
+                "playlist_id": item[0],
+                "midia_id": item[1],
+                "ordem": item[2],
+                "duracao_override": item[3],
+            }
+            for item in self.playlist_midias
+            if item[0] == playlist_id
+        ]
+
+    def remove_midia_from_playlist(self, playlist_id: str, midia_id: str) -> bool:
+        before = len(self.playlist_midias)
+        self.playlist_midias = [
+            item
+            for item in self.playlist_midias
+            if not (item[0] == playlist_id and item[1] == midia_id)
+        ]
+        removed = len(self.playlist_midias) < before
+        if removed:
+            playlist = self.playlists[playlist_id]
+            self.playlists[playlist_id] = playlist.model_copy(
+                update={"versao": playlist.versao + 1}
+            )
+        return removed
+
+    def list_sync_confirmations(
+        self,
+        limit=50,
+        offset=0,
+        cliente_id=None,
+        dispositivo_id=None,
+        status=None,
+    ):
+        items = []
+        for device in self.dispositivos.values():
+            if cliente_id is not None and device.cliente_id != cliente_id:
+                continue
+            if dispositivo_id is not None and device.id != dispositivo_id:
+                continue
+            items.append(
+                {
+                    "device_id": device.id,
+                    "cliente_id": device.cliente_id,
+                    "playlist_id": device.playlist_atual_id or "playlist-001",
+                    "versao": 1,
+                    "arquivos_baixados": [],
+                    "status": "concluida",
+                    "created_at": datetime.now(timezone.utc),
+                }
+            )
+        if status is not None:
+            items = [item for item in items if item["status"] == status]
+        return items[offset : offset + limit]
+
+    def count_sync_confirmations(
+        self,
+        cliente_id=None,
+        dispositivo_id=None,
+        status=None,
+    ):
+        return len(
+            self.list_sync_confirmations(
+                limit=10_000,
+                cliente_id=cliente_id,
+                dispositivo_id=dispositivo_id,
+                status=status,
+            )
+        )
 
     def get_player_events_for_device(self, device_id: str) -> dict[str, list[dict]]:
         if device_id not in self.dispositivos:
@@ -1513,3 +1588,184 @@ def test_admin_rejects_link_when_midia_belongs_to_other_cliente():
 
     assert response.status_code == 400
     assert response.json() == {"detail": "midia de outro cliente"}
+
+
+def test_admin_updates_cliente():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Original", "ativo": True},
+    )
+
+    response = client.patch(
+        "/api/admin/clientes/cliente-001",
+        headers=ADMIN_HEADERS,
+        json={"nome": "Atualizado", "ativo": False},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["nome"] == "Atualizado"
+    assert response.json()["ativo"] is False
+
+
+def test_admin_updates_and_blocks_dispositivo():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente"},
+    )
+    client.post(
+        "/api/admin/dispositivos",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "device-001",
+            "cliente_id": "cliente-001",
+            "nome": "TV",
+            "codigo_ativacao": "CODE-001",
+        },
+    )
+
+    response = client.patch(
+        "/api/admin/dispositivos/device-001",
+        headers=ADMIN_HEADERS,
+        json={"nome": "TV Recepcao", "bloqueado": True},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["nome"] == "TV Recepcao"
+    assert response.json()["bloqueado"] is True
+
+
+def test_admin_updates_midia_status():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente"},
+    )
+    client.post(
+        "/api/admin/midias",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "midia-001",
+            "cliente_id": "cliente-001",
+            "nome": "Imagem",
+            "tipo": "imagem",
+            "caminho": "imagem.png",
+            "tamanho": 10,
+            "sha256": "a" * 64,
+        },
+    )
+
+    response = client.patch(
+        "/api/admin/midias/midia-001",
+        headers=ADMIN_HEADERS,
+        json={"nome": "Imagem Atualizada", "ativo": False},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["nome"] == "Imagem Atualizada"
+    assert response.json()["ativo"] is False
+
+
+def test_admin_updates_playlist_lists_and_removes_media():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente"},
+    )
+    client.post(
+        "/api/admin/midias",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "midia-001",
+            "cliente_id": "cliente-001",
+            "nome": "Imagem",
+            "tipo": "imagem",
+            "caminho": "imagem.png",
+            "tamanho": 10,
+            "sha256": "a" * 64,
+        },
+    )
+    client.post(
+        "/api/admin/playlists",
+        headers=ADMIN_HEADERS,
+        json={"id": "playlist-001", "cliente_id": "cliente-001", "nome": "Principal"},
+    )
+    client.post(
+        "/api/admin/playlists/playlist-001/midias",
+        headers=ADMIN_HEADERS,
+        json={"midia_id": "midia-001", "ordem": 1},
+    )
+
+    update = client.patch(
+        "/api/admin/playlists/playlist-001",
+        headers=ADMIN_HEADERS,
+        json={"nome": "Principal Atualizada", "ativa": True},
+    )
+    items = client.get(
+        "/api/admin/playlists/playlist-001/midias",
+        headers=ADMIN_HEADERS,
+    )
+    removal = client.delete(
+        "/api/admin/playlists/playlist-001/midias/midia-001",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert update.status_code == 200
+    assert update.json()["ativa"] is True
+    assert update.json()["versao"] == 3
+    assert items.status_code == 200
+    assert items.json()[0]["midia_id"] == "midia-001"
+    assert removal.status_code == 204
+
+
+def test_admin_lists_sync_confirmations():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente"},
+    )
+    client.post(
+        "/api/admin/dispositivos",
+        headers=ADMIN_HEADERS,
+        json={
+            "id": "device-001",
+            "cliente_id": "cliente-001",
+            "nome": "TV",
+            "codigo_ativacao": "CODE-001",
+        },
+    )
+
+    response = client.get(
+        "/api/admin/sincronizacoes?cliente_id=cliente-001",
+        headers=ADMIN_HEADERS,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["total"] == 1
+    assert response.json()["items"][0]["device_id"] == "device-001"
+
+
+def test_admin_returns_safe_operational_configuration():
+    app = _create_test_app()
+    app.state.max_upload_bytes = 1024
+    client = TestClient(app)
+
+    response = client.get("/api/admin/configuracoes", headers=ADMIN_HEADERS)
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "storage_provider": "local",
+        "max_upload_bytes": 1024,
+        "offline_first": True,
+    }

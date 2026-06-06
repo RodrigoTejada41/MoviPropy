@@ -58,6 +58,28 @@ Status: Resolvido
 
 ---
 
+### ERR-004
+
+Data: 2026-06-06
+
+Descricao do Problema:
+- Frontend recebeu `404` ao validar uma rota administrativa recem-criada.
+
+Causa Raiz:
+- O container da API ainda executava a imagem anterior ao codigo local.
+
+Solucao Aplicada:
+- Reconstruir o servico `moviprogy-api`.
+- Validar `/health` e repetir o fluxo no navegador.
+
+Como Evitar no Futuro:
+- Apos alterar rotas do backend, executar `docker compose up -d --build moviprogy-api`.
+- Nao considerar validacao do frontend concluida usando container desatualizado.
+
+Status: Resolvido
+
+---
+
 ### ERR-014
 
 Data: 2026-06-04

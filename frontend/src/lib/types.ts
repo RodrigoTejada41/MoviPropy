@@ -55,6 +55,29 @@ export type Playlist = {
   ativa: boolean;
 };
 
+export type PlaylistMidia = {
+  playlist_id: string;
+  midia_id: string;
+  ordem: number;
+  duracao_override?: number | null;
+};
+
+export type SyncConfirmation = {
+  device_id: string;
+  cliente_id: string;
+  playlist_id: string;
+  versao: number;
+  arquivos_baixados: string[];
+  status: string;
+  created_at: string;
+};
+
+export type OperationalConfiguration = {
+  storage_provider: string;
+  max_upload_bytes: number;
+  offline_first: boolean;
+};
+
 export type AdminAudit = {
   user_id: string;
   recurso: string;

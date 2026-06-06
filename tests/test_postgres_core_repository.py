@@ -61,7 +61,9 @@ def test_postgres_core_repository_persists_core_entities():
     assert repository.get_cliente(cliente.id) == cliente
     assert repository.get_dispositivo(dispositivo.id) == dispositivo
     assert repository.get_midia(midia.id) == midia
-    assert repository.get_playlist(playlist.id) == playlist
+    persisted_playlist = repository.get_playlist(playlist.id)
+    assert persisted_playlist is not None
+    assert persisted_playlist.versao == playlist.versao + 1
     assert repository.get_dispositivo_by_activation_code(
         dispositivo.codigo_ativacao
     ) == dispositivo
@@ -69,10 +71,13 @@ def test_postgres_core_repository_persists_core_entities():
     manifest = repository.get_playlist_manifest_for_device(dispositivo.id)
     assert manifest is not None
     assert manifest.playlist_id == playlist.id
-    assert manifest.version == playlist.versao
+    assert manifest.version == persisted_playlist.versao
+    assert manifest.files[0].media_id == midia.id
     assert manifest.files[0].file_name == midia.caminho
+    assert manifest.files[0].media_type == midia.tipo
     assert manifest.files[0].size == midia.tamanho
     assert manifest.files[0].sha256 == midia.sha256
+    assert manifest.files[0].duration_seconds == midia.duracao_segundos
     assert repository.get_downloadable_midia_for_device(
         dispositivo.id,
         midia.id,
@@ -84,7 +89,10 @@ def test_postgres_core_repository_persists_core_entities():
     assert cliente in repository.list_clientes(limit=10_000)
     assert dispositivo in repository.list_dispositivos(limit=10_000)
     assert midia in repository.list_midias(limit=10_000)
-    assert playlist in repository.list_playlists(limit=10_000)
+    assert persisted_playlist in repository.list_playlists(limit=10_000)
+    assert repository.list_playlist_midias(playlist.id)[0]["midia_id"] == midia.id
+    assert repository.remove_midia_from_playlist(playlist.id, midia.id) is True
+    assert repository.list_playlist_midias(playlist.id) == []
 
 
 def test_postgres_core_repository_filters_and_paginates_admin_lists():
@@ -245,3 +253,15 @@ def test_postgres_core_repository_persists_player_events():
     assert events["status"][0]["status"] == "online"
     assert events["logs"][0]["evento"] == "download_concluido"
     assert events["sync"][0]["status"] == "concluida"
+    sync_items = repository.list_sync_confirmations(
+        cliente_id=cliente.id,
+        dispositivo_id=dispositivo.id,
+        status="concluida",
+    )
+    assert sync_items[0]["device_id"] == dispositivo.id
+    assert sync_items[0]["cliente_id"] == cliente.id
+    assert repository.count_sync_confirmations(
+        cliente_id=cliente.id,
+        dispositivo_id=dispositivo.id,
+        status="concluida",
+    ) == 1

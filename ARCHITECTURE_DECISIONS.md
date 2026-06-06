@@ -977,6 +977,28 @@ Atualizacao:
 
 ---
 
+### ADR-035 - Configuracoes operacionais somente leitura no MVP
+
+Status: Aprovada
+
+Data: 2026-06-06
+
+Contexto:
+- O painel precisa mostrar a configuracao efetiva da operacao.
+- Edicao remota de storage, seguranca e deploy aumenta risco e exige contratos adicionais.
+
+Decisao:
+- Criar `GET /api/admin/configuracoes`.
+- Retornar somente provider de storage, limite efetivo de upload e modo offline-first.
+- Manter alteracoes sensiveis em configuracao de ambiente.
+- Nao retornar caminhos, tokens, senhas ou valores secretos.
+
+Consequencias:
+- A tela de Configuracoes deixa de ser placeholder.
+- Mudancas sensiveis continuam controladas pelo ambiente e processo de deploy.
+
+---
+
 ### ADR-034 - Implementacao inicial Google Drive controlada pelo backend
 
 Status: Aprovada

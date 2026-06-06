@@ -1,9 +1,10 @@
+import type { ReactNode } from "react";
 import { Status } from "./Status";
 
 type Column<T> = {
   key: string;
   label: string;
-  render: (item: T) => string | number | boolean | null | undefined;
+  render: (item: T) => ReactNode;
 };
 
 type DataTableProps<T> = {
@@ -42,8 +43,8 @@ export function DataTable<T>({ columns, rows, loading, error, emptyText }: DataT
   );
 }
 
-function formatCell(value: string | number | boolean | null | undefined) {
+function formatCell(value: ReactNode) {
   if (typeof value === "boolean") return value ? "Sim" : "Nao";
   if (value === null || value === undefined || value === "") return "-";
-  return String(value);
+  return value;
 }

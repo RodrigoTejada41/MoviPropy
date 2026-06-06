@@ -82,6 +82,14 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Tela de Dispositivos redesenhada como gestao de frota com KPIs, busca local, cadastro e tabela detalhada.
 - Telas iniciais criadas para Dashboard, Clientes, Dispositivos, Midias, Playlists, Logs/Auditoria, Usuarios, Sincronizacoes, Google Drive e Configuracoes.
 - Listagens iniciais consomem endpoints paginados do backend.
+- Edicao administrativa criada para clientes, dispositivos, midias e playlists.
+- Editor de playlist permite listar, vincular e remover midias, com incremento de versao.
+- Consulta administrativa de sincronizacoes criada em `GET /api/admin/sincronizacoes`.
+- Tela de sincronizacoes conectada a confirmacoes reais dos players.
+- Tela de configuracoes exibe somente parametros operacionais seguros do backend.
+- Upload local de midia, criacao/publicacao de playlists e criacao/inativacao de usuarios foram conectados no frontend.
+- Manifesto do player inclui `media_id`, tipo e duracao para permitir download e reproducao pelo player real.
+- Design aprovado do player PWA offline-first registrado em `docs/superpowers/specs/2026-06-06-player-pwa-design.md`.
 
 ## Arquivos principais
 
@@ -113,10 +121,9 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Frontend so deve iniciar apos fechamento do backend.
 - Stack frontend MVP: Vite + React + TypeScript.
 
-## Pendencias de aprovacao
+## Pendencias externas
 
-- Tecnologia do player.
-- Credenciais reais Google Drive para homologacao externa.
+- Credenciais reais Google Drive para nova homologacao externa, se a conta configurada for alterada.
 
 ## Limitacoes atuais
 
@@ -132,7 +139,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Perfil legado `admin` possui acesso total.
 - Perfis escopados dependem de vinculo com cliente e permissao por recurso/acao.
 - Auditoria de acessos RBAC registra permissoes permitidas e negadas, sem gravar tokens.
-- Rotas de midias/playlists ainda sao CRUD inicial com upload fisico local para midias.
+- Edicao de item de playlist ainda usa remocao e nova inclusao; endpoint `PATCH` do item nao foi criado.
 - Manifesto real depende de `dispositivos.playlist_atual_id`, playlist ativa e midias vinculadas.
 - Download controlado atual serve arquivo local de `MOVIPROGY_MEDIA_DIR`.
 - Google Drive possui implementacao inicial em `/api/integrations/google-drive`.
@@ -144,10 +151,11 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 
 ## Proximo passo recomendado
 
-Backend MVP fechado e frontend inicial criado.
+Backend administrativo e frontend operacional consolidados.
 
 Pendencias prioritarias:
-- Completar formularios e acoes do frontend para upload de midia, criacao de playlists, vinculo de midias e gestao detalhada de usuarios/permissoes.
+- Implementar o player PWA offline-first conforme design aprovado.
+- Completar gestao visual de vinculos e permissoes de usuarios.
 - Adicionar testes automatizados do frontend.
 - Testes de carga reais em volume de producao continuam recomendados antes de deploy publico.
-- Homologar Google Drive com credenciais reais Google Cloud.
+- Executar homologacao offline e de producao.

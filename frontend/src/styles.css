@@ -622,6 +622,10 @@ nav {
   font-size: 30px;
 }
 
+.settingsGrid {
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+}
+
 .split {
   display: grid;
   gap: 20px;
@@ -656,6 +660,44 @@ nav {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(4, minmax(120px, 1fr)) auto;
+}
+
+.compactButton {
+  min-height: 34px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
+.tableActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.editorSection {
+  background: #ffffff;
+  border: 1px solid #dce3ea;
+  border-radius: 8px;
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.sectionHeader {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.sectionHeader h2,
+.sectionHeader p {
+  margin: 0;
+}
+
+.sectionHeader p {
+  color: #6b7786;
+  margin-top: 4px;
 }
 
 .tableWrap {
@@ -1926,7 +1968,8 @@ th {
     min-width: 0;
   }
 
-  .metricGrid,
+    .metricGrid,
+    .settingsGrid,
   .overviewMetrics,
   .overviewGrid,
   .split,

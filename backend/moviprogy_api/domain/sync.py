@@ -5,9 +5,12 @@ from pydantic import BaseModel, Field
 
 
 class MediaFile(BaseModel):
+    media_id: str | None = None
     file_name: str = Field(min_length=1)
+    media_type: str | None = None
     size: int = Field(ge=0)
     sha256: str = Field(min_length=64, max_length=64)
+    duration_seconds: int | None = Field(default=None, ge=0)
 
 
 class PlaylistManifest(BaseModel):

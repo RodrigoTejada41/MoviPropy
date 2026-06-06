@@ -16,6 +16,7 @@ import {
   RotateCcw,
   Search,
   ShieldCheck,
+  Trash2,
   Tv,
   UploadCloud,
   Users
@@ -94,6 +95,16 @@ export function ClientesPage() {
 
   function countDevices(clienteId: string) {
     return devices.rows.filter((device) => device.cliente_id === clienteId).length;
+  }
+
+  async function toggleCliente(item: Cliente) {
+    setMessage(null);
+    try {
+      await api.atualizarCliente(item.id, { ativo: !item.ativo });
+      await list.reload();
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao atualizar cliente.");
+    }
   }
 
   function initials(name: string) {
@@ -213,8 +224,8 @@ export function ClientesPage() {
                       <td><span className="mutedCell">Nao informado</span></td>
                       <td>{item.documento || <span className="mutedCell">Nao informado</span>}</td>
                       <td>
-                        <button className="tableIconButton" type="button" disabled title="Detalhes dependem de endpoint de atualizacao">
-                          <MoreVertical size={18} />
+                        <button className="secondaryButton compactButton" type="button" onClick={() => toggleCliente(item)}>
+                          {item.ativo ? "Inativar" : "Ativar"}
                         </button>
                       </td>
                     </tr>
@@ -278,6 +289,16 @@ export function DispositivosPage() {
   const active = list.rows.length - blocked;
   const withPlaylist = list.rows.filter((item) => item.playlist_atual_id).length;
   const withoutPlaylist = list.rows.length - withPlaylist;
+
+  async function toggleBloqueio(item: Dispositivo) {
+    setMessage(null);
+    try {
+      await api.atualizarDispositivo(item.id, { bloqueado: !item.bloqueado });
+      await list.reload();
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao atualizar dispositivo.");
+    }
+  }
 
   return (
     <section className="page fleetPage">
@@ -377,8 +398,8 @@ export function DispositivosPage() {
                       </span>
                     </td>
                     <td>
-                      <button className="tableIconButton" type="button" disabled title="Configuracoes pendentes">
-                        <Monitor size={18} />
+                      <button className="secondaryButton compactButton" type="button" onClick={() => toggleBloqueio(item)}>
+                        {item.bloqueado ? "Desbloquear" : "Bloquear"}
                       </button>
                     </td>
                   </tr>
@@ -418,20 +439,83 @@ function FleetStat({ label, value, tone }: { label: string; value: number; tone:
 
 export function MidiasPage() {
   const list = useList(api.midias);
+  const clientes = useList(api.clientes);
+  const [form, setForm] = useState({ cliente_id: "", tipo: "imagem", duracao: "" });
+  const [arquivo, setArquivo] = useState<File | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  async function upload(event: FormEvent) {
+    event.preventDefault();
+    setMessage(null);
+    setSuccess(null);
+    if (!form.cliente_id || !arquivo) {
+      setMessage("Cliente e arquivo sao obrigatorios.");
+      return;
+    }
+    try {
+      await api.uploadMidia({
+        cliente_id: form.cliente_id,
+        tipo: form.tipo,
+        duracao_segundos: form.duracao ? Number(form.duracao) : null,
+        arquivo
+      });
+      setArquivo(null);
+      await list.reload();
+      setSuccess("Midia enviada.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha no upload.");
+    }
+  }
+
+  async function toggle(item: Midia) {
+    setMessage(null);
+    setSuccess(null);
+    try {
+      await api.atualizarMidia(item.id, { ativo: !item.ativo });
+      await list.reload();
+      setSuccess(item.ativo ? "Midia inativada." : "Midia ativada.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao atualizar midia.");
+    }
+  }
+
   return (
     <section className="page">
-      <PageTitle title="Midias" subtitle={`${list.total} registros encontrados. Upload fisico sera a proxima acao da tela.`} />
+      <PageTitle title="Midias" subtitle={`${list.total} registros encontrados.`} />
+      <form className="inlineForm" onSubmit={upload}>
+        <select value={form.cliente_id} onChange={(event) => setForm({ ...form, cliente_id: event.target.value })}>
+          <option value="">Cliente</option>
+          {clientes.rows.map((cliente) => <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>)}
+        </select>
+        <select value={form.tipo} onChange={(event) => setForm({ ...form, tipo: event.target.value })}>
+          <option value="imagem">Imagem</option>
+          <option value="video">Video</option>
+        </select>
+        <input type="number" min="0" placeholder="duracao em segundos" value={form.duracao} onChange={(event) => setForm({ ...form, duracao: event.target.value })} />
+        <input type="file" accept={form.tipo === "video" ? "video/mp4" : "image/jpeg,image/png,image/webp"} onChange={(event) => setArquivo(event.target.files?.[0] ?? null)} />
+        <button className="primaryButton"><UploadCloud size={16} />Enviar</button>
+      </form>
+      <Status error={message} success={success} />
       <DataTable<Midia>
         rows={list.rows}
         loading={list.loading}
         error={list.error}
         columns={[
-          { key: "id", label: "Id", render: (item) => item.id },
-          { key: "cliente", label: "Cliente", render: (item) => item.cliente_id },
           { key: "nome", label: "Nome", render: (item) => item.nome },
+          { key: "cliente", label: "Cliente", render: (item) => item.cliente_id },
           { key: "tipo", label: "Tipo", render: (item) => item.tipo },
-          { key: "tamanho", label: "Tamanho", render: (item) => item.tamanho },
-          { key: "ativo", label: "Ativo", render: (item) => item.ativo }
+          { key: "tamanho", label: "Tamanho", render: (item) => formatBytes(item.tamanho) },
+          { key: "ativo", label: "Status", render: (item) => item.ativo ? "Ativa" : "Inativa" },
+          {
+            key: "acoes",
+            label: "Acoes",
+            render: (item) => (
+              <button className="secondaryButton compactButton" type="button" onClick={() => toggle(item)}>
+                {item.ativo ? "Inativar" : "Ativar"}
+              </button>
+            )
+          }
         ]}
       />
     </section>
@@ -440,30 +524,195 @@ export function MidiasPage() {
 
 export function PlaylistsPage() {
   const list = useList(api.playlists);
+  const clientes = useList(api.clientes);
+  const midias = useList(api.midias);
+  const [form, setForm] = useState({ id: "", cliente_id: "", nome: "" });
+  const [selectedId, setSelectedId] = useState("");
+  const [items, setItems] = useState<Awaited<ReturnType<typeof api.playlistMidias>>>([]);
+  const [itemForm, setItemForm] = useState({ midia_id: "", ordem: "1", duracao: "" });
+  const [message, setMessage] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  async function loadItems(id: string) {
+    setSelectedId(id);
+    setItems(id ? await api.playlistMidias(id) : []);
+  }
+
+  async function create(event: FormEvent) {
+    event.preventDefault();
+    setMessage(null);
+    setSuccess(null);
+    if (!form.id.trim() || !form.cliente_id || !form.nome.trim()) {
+      setMessage("Id, cliente e nome sao obrigatorios.");
+      return;
+    }
+    try {
+      await api.criarPlaylist({ ...form, versao: 1, ativa: false });
+      setForm({ id: "", cliente_id: "", nome: "" });
+      await list.reload();
+      setSuccess("Playlist criada.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao criar playlist.");
+    }
+  }
+
+  async function toggle(playlist: Playlist) {
+    try {
+      await api.atualizarPlaylist(playlist.id, { ativa: !playlist.ativa });
+      await list.reload();
+      setSuccess(playlist.ativa ? "Playlist inativada." : "Playlist publicada.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao atualizar playlist.");
+    }
+  }
+
+  async function addItem(event: FormEvent) {
+    event.preventDefault();
+    if (!selectedId || !itemForm.midia_id) return;
+    try {
+      await api.vincularMidia(selectedId, {
+        midia_id: itemForm.midia_id,
+        ordem: Number(itemForm.ordem),
+        duracao_override: itemForm.duracao ? Number(itemForm.duracao) : null
+      });
+      await loadItems(selectedId);
+      await list.reload();
+      setSuccess("Midia vinculada.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao vincular midia.");
+    }
+  }
+
+  async function removeItem(midiaId: string) {
+    if (!selectedId) return;
+    try {
+      await api.removerMidia(selectedId, midiaId);
+      await loadItems(selectedId);
+      await list.reload();
+      setSuccess("Midia removida.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao remover midia.");
+    }
+  }
+
+  const selected = list.rows.find((item) => item.id === selectedId);
+  const availableMedia = midias.rows.filter((item) => !selected || item.cliente_id === selected.cliente_id);
+
   return (
     <section className="page">
       <PageTitle title="Playlists" subtitle={`${list.total} registros encontrados.`} />
+      <form className="inlineForm" onSubmit={create}>
+        <input placeholder="id" value={form.id} onChange={(event) => setForm({ ...form, id: event.target.value })} />
+        <select value={form.cliente_id} onChange={(event) => setForm({ ...form, cliente_id: event.target.value })}>
+          <option value="">Cliente</option>
+          {clientes.rows.map((cliente) => <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>)}
+        </select>
+        <input placeholder="nome" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} />
+        <button className="primaryButton"><Plus size={16} />Criar</button>
+      </form>
+      <Status error={message} success={success} />
       <DataTable<Playlist>
         rows={list.rows}
         loading={list.loading}
         error={list.error}
         columns={[
-          { key: "id", label: "Id", render: (item) => item.id },
-          { key: "cliente", label: "Cliente", render: (item) => item.cliente_id },
           { key: "nome", label: "Nome", render: (item) => item.nome },
+          { key: "cliente", label: "Cliente", render: (item) => item.cliente_id },
           { key: "versao", label: "Versao", render: (item) => item.versao },
-          { key: "ativa", label: "Ativa", render: (item) => item.ativa }
+          { key: "ativa", label: "Status", render: (item) => item.ativa ? "Publicada" : "Rascunho" },
+          {
+            key: "acoes",
+            label: "Acoes",
+            render: (item) => (
+              <div className="tableActions">
+                <button className="secondaryButton compactButton" type="button" onClick={() => loadItems(item.id)}>Editar</button>
+                <button className="secondaryButton compactButton" type="button" onClick={() => toggle(item)}>{item.ativa ? "Inativar" : "Publicar"}</button>
+              </div>
+            )
+          }
         ]}
       />
+      {selected && (
+        <section className="editorSection">
+          <div className="sectionHeader">
+            <div><h2>{selected.nome}</h2><p>Versao {selected.versao}</p></div>
+            <button className="tableIconButton" type="button" title="Fechar editor" onClick={() => loadItems("")}><RotateCcw size={18} /></button>
+          </div>
+          <form className="inlineForm" onSubmit={addItem}>
+            <select value={itemForm.midia_id} onChange={(event) => setItemForm({ ...itemForm, midia_id: event.target.value })}>
+              <option value="">Midia</option>
+              {availableMedia.map((item) => <option key={item.id} value={item.id}>{item.nome}</option>)}
+            </select>
+            <input type="number" min="1" value={itemForm.ordem} onChange={(event) => setItemForm({ ...itemForm, ordem: event.target.value })} />
+            <input type="number" min="0" placeholder="duracao" value={itemForm.duracao} onChange={(event) => setItemForm({ ...itemForm, duracao: event.target.value })} />
+            <button className="primaryButton"><Plus size={16} />Adicionar</button>
+          </form>
+          <DataTable
+            rows={items}
+            columns={[
+              { key: "ordem", label: "Ordem", render: (item) => item.ordem },
+              { key: "midia", label: "Midia", render: (item) => midias.rows.find((media) => media.id === item.midia_id)?.nome ?? item.midia_id },
+              { key: "duracao", label: "Duracao", render: (item) => item.duracao_override ?? "Padrao" },
+              { key: "acoes", label: "Acoes", render: (item) => <button className="tableIconButton" type="button" title="Remover" onClick={() => removeItem(item.midia_id)}><Trash2 size={17} /></button> }
+            ]}
+          />
+        </section>
+      )}
     </section>
   );
 }
 
 export function UsuariosPage() {
   const list = useList(api.usuarios);
+  const [form, setForm] = useState({ nome: "", email: "", senha: "", perfil: "operador" });
+  const [message, setMessage] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  async function create(event: FormEvent) {
+    event.preventDefault();
+    setMessage(null);
+    setSuccess(null);
+    if (!form.nome.trim() || !form.email.trim() || form.senha.length < 8) {
+      setMessage("Nome, email e senha com no minimo 8 caracteres sao obrigatorios.");
+      return;
+    }
+    try {
+      await api.criarUsuario({ ...form, ativo: true });
+      setForm({ nome: "", email: "", senha: "", perfil: "operador" });
+      await list.reload();
+      setSuccess("Usuario criado.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao criar usuario.");
+    }
+  }
+
+  async function toggle(item: User) {
+    setMessage(null);
+    setSuccess(null);
+    try {
+      await api.atualizarUsuario(item.id, { ativo: !item.ativo });
+      await list.reload();
+      setSuccess(item.ativo ? "Usuario inativado." : "Usuario ativado.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao atualizar usuario.");
+    }
+  }
+
   return (
     <section className="page">
       <PageTitle title="Usuarios e permissoes" subtitle={`${list.total} usuarios encontrados.`} />
+      <form className="inlineForm" onSubmit={create}>
+        <input placeholder="nome" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} />
+        <input type="email" placeholder="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
+        <input type="password" minLength={8} placeholder="senha" value={form.senha} onChange={(event) => setForm({ ...form, senha: event.target.value })} />
+        <select value={form.perfil} onChange={(event) => setForm({ ...form, perfil: event.target.value })}>
+          <option value="operador">Operador</option>
+          <option value="cliente">Cliente</option>
+          <option value="admin">Administrador</option>
+        </select>
+        <button className="primaryButton"><Plus size={16} />Criar</button>
+      </form>
+      <Status error={message} success={success} />
       <DataTable<User>
         rows={list.rows}
         loading={list.loading}
@@ -473,9 +722,66 @@ export function UsuariosPage() {
           { key: "nome", label: "Nome", render: (item) => item.nome },
           { key: "email", label: "Email", render: (item) => item.email },
           { key: "perfil", label: "Perfil", render: (item) => item.perfil },
-          { key: "ativo", label: "Ativo", render: (item) => item.ativo }
+          { key: "ativo", label: "Status", render: (item) => item.ativo ? "Ativo" : "Inativo" },
+          {
+            key: "acoes",
+            label: "Acoes",
+            render: (item) => (
+              <button className="secondaryButton compactButton" type="button" onClick={() => toggle(item)}>
+                {item.ativo ? "Inativar" : "Ativar"}
+              </button>
+            )
+          }
         ]}
       />
+    </section>
+  );
+}
+
+export function SincronizacoesPage() {
+  const list = useList(api.sincronizacoes);
+  return (
+    <section className="page">
+      <PageTitle title="Sincronizacoes" subtitle={`${list.total} confirmacoes recebidas dos players.`} />
+      <DataTable
+        rows={list.rows}
+        loading={list.loading}
+        error={list.error}
+        columns={[
+          { key: "device", label: "Dispositivo", render: (item) => item.device_id },
+          { key: "cliente", label: "Cliente", render: (item) => item.cliente_id },
+          { key: "playlist", label: "Playlist", render: (item) => `${item.playlist_id} v${item.versao}` },
+          { key: "arquivos", label: "Arquivos", render: (item) => item.arquivos_baixados.length },
+          { key: "status", label: "Status", render: (item) => item.status },
+          { key: "data", label: "Recebida em", render: (item) => new Date(item.created_at).toLocaleString() }
+        ]}
+      />
+    </section>
+  );
+}
+
+export function ConfiguracoesPage() {
+  const [data, setData] = useState<Awaited<ReturnType<typeof api.configuracoes>> | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    api.configuracoes()
+      .then(setData)
+      .catch((err) => setError(err instanceof ApiError ? err.message : "Falha ao carregar configuracoes."));
+  }, []);
+
+  return (
+    <section className="page">
+      <PageTitle title="Configuracoes" subtitle="Parametros operacionais efetivos do backend." />
+      <Status loading={!data && !error} error={error} />
+      {data && (
+        <div className="metricGrid settingsGrid">
+          <div className="metric"><span>Storage ativo</span><strong>{data.storage_provider}</strong></div>
+          <div className="metric"><span>Upload local maximo</span><strong>{formatBytes(data.max_upload_bytes)}</strong></div>
+          <div className="metric"><span>Operacao offline</span><strong>{data.offline_first ? "Ativa" : "Inativa"}</strong></div>
+        </div>
+      )}
+      <div className="state">Alteracoes sensiveis permanecem bloqueadas e devem ser feitas por configuracao de ambiente com auditoria.</div>
     </section>
   );
 }

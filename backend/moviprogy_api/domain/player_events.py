@@ -35,3 +35,20 @@ class SyncConfirmationPayload(BaseModel):
 
 class SyncConfirmation(SyncConfirmationPayload):
     device_id: str = Field(min_length=1)
+
+
+class AdminSyncConfirmation(BaseModel):
+    device_id: str
+    cliente_id: str
+    playlist_id: str
+    versao: int
+    arquivos_baixados: list[str]
+    status: str
+    created_at: datetime
+
+
+class AdminSyncConfirmationListResponse(BaseModel):
+    items: list[AdminSyncConfirmation]
+    limit: int = Field(ge=1)
+    offset: int = Field(ge=0)
+    total: int = Field(ge=0)

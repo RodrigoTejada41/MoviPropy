@@ -123,8 +123,8 @@ Funcionalidades:
 - Buscar localmente por id, nome ou documento.
 - Filtrar localmente por status ativo/inativo.
 - Exibir quantidade de dispositivos vinculados por cliente.
-- Editar cliente. Pendente de API.
-- Ativar/inativar cliente. Pendente de API.
+- Editar cliente.
+- Ativar/inativar cliente.
 - Abrir detalhes do cliente. Pendente de API.
 
 Campos:
@@ -139,9 +139,9 @@ API atual:
 - `GET /api/admin/clientes`.
 - `POST /api/admin/clientes`.
 - `GET /api/admin/clientes/{cliente_id}`.
+- `PATCH /api/admin/clientes/{cliente_id}`.
 
 APIs pendentes:
-- `PATCH /api/admin/clientes/{cliente_id}`.
 - Campo de regiao do cliente.
 - Campo de data de criacao do cliente.
 - Campo de ultimo sync por cliente/dispositivo.
@@ -180,13 +180,12 @@ Campos:
 
 API atual:
 - `POST /api/admin/dispositivos`.
+- `GET /api/admin/dispositivos`.
 - `GET /api/admin/dispositivos/{dispositivo_id}`.
+- `PATCH /api/admin/dispositivos/{dispositivo_id}`.
 
 APIs pendentes:
-- `GET /api/admin/dispositivos`.
-- `PATCH /api/admin/dispositivos/{dispositivo_id}`.
-- `POST /api/admin/dispositivos/{dispositivo_id}/bloquear`.
-- `POST /api/admin/dispositivos/{dispositivo_id}/desbloquear`.
+- Campo de ultima comunicacao consolidado no dispositivo.
 
 Criterios de aceite:
 - Nao permitir dispositivo sem cliente.
@@ -221,13 +220,13 @@ Campos:
 
 API atual:
 - `POST /api/admin/midias`.
-- `GET /api/admin/midias/{midia_id}`.
-
-APIs pendentes:
 - `GET /api/admin/midias`.
+- `GET /api/admin/midias/{midia_id}`.
 - `POST /api/admin/midias/upload`.
 - `PATCH /api/admin/midias/{midia_id}`.
-- `POST /api/admin/midias/{midia_id}/inativar`.
+
+APIs pendentes:
+- Nenhuma para o fluxo atual de ativacao/inativacao.
 
 Criterios de aceite:
 - Validar tipo permitido.
@@ -250,13 +249,14 @@ Funcionalidades:
 
 API atual:
 - `POST /api/admin/playlists`.
+- `GET /api/admin/playlists`.
 - `GET /api/admin/playlists/{playlist_id}`.
+- `PATCH /api/admin/playlists/{playlist_id}`.
 - `POST /api/admin/playlists/{playlist_id}/midias`.
+- `GET /api/admin/playlists/{playlist_id}/midias`.
+- `DELETE /api/admin/playlists/{playlist_id}/midias/{midia_id}`.
 
 APIs pendentes:
-- `GET /api/admin/playlists`.
-- `PATCH /api/admin/playlists/{playlist_id}`.
-- `DELETE /api/admin/playlists/{playlist_id}/midias/{midia_id}`.
 - `PATCH /api/admin/playlists/{playlist_id}/midias/{midia_id}`.
 
 Criterios de aceite:
@@ -301,8 +301,10 @@ Dados:
 - Fim.
 - Mensagem.
 
-APIs pendentes:
+APIs atuais:
 - `GET /api/admin/sincronizacoes`.
+
+APIs pendentes:
 - `GET /api/admin/dispositivos/{id}/sincronizacoes`.
 
 Criterios de aceite:
@@ -407,7 +409,7 @@ Funcionalidades:
 - Definir permissoes.
 - Inativar usuario.
 
-APIs pendentes:
+APIs atuais:
 - `GET /api/admin/usuarios`.
 - `POST /api/admin/usuarios`.
 - `PATCH /api/admin/usuarios/{usuario_id}`.
@@ -430,6 +432,12 @@ Secoes:
 - Sincronizacao.
 - Segurança.
 - Deploy.
+
+Implementacao atual:
+- Consulta somente leitura em `GET /api/admin/configuracoes`.
+- Exibe provider de storage, limite efetivo de upload e modo offline-first.
+- Nao exibe caminhos, tokens, senhas ou variaveis de ambiente.
+- Alteracoes sensiveis permanecem por configuracao de ambiente.
 
 Criterios de aceite:
 - Alteracoes sensiveis exigem perfil admin.

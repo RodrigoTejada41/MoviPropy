@@ -8,11 +8,13 @@ import { LoginPage } from "./pages/LoginPage";
 import {
   AuditoriaPage,
   ClientesPage,
+  ConfiguracoesPage,
   DispositivosPage,
   GoogleDrivePage,
   MidiasPage,
   PlaceholderPage,
   PlaylistsPage,
+  SincronizacoesPage,
   UsuariosPage
 } from "./pages/ListPages";
 
@@ -43,11 +45,9 @@ function renderView(view: ViewKey) {
   if (view === "playlists") return <PlaylistsPage />;
   if (view === "usuarios") return <UsuariosPage />;
   if (view === "logs") return <AuditoriaPage />;
-  if (view === "sincronizacoes") {
-    return <PlaceholderPage title="Sincronizacoes" subtitle="Tela depende de endpoint administrativo especifico de sincronizacoes." />;
-  }
+  if (view === "sincronizacoes") return <SincronizacoesPage />;
   if (view === "google") {
     return <GoogleDrivePage />;
   }
-  return <PlaceholderPage title="Configuracoes" subtitle="Parametros operacionais ainda nao possuem endpoints de alteracao." />;
+  return <ConfiguracoesPage />;
 }

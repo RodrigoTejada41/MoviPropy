@@ -203,18 +203,26 @@ Persistencia atual:
 - `POST /api/admin/clientes`
 - `GET /api/admin/clientes`
 - `GET /api/admin/clientes/{cliente_id}`
+- `PATCH /api/admin/clientes/{cliente_id}`
 - `POST /api/admin/dispositivos`
 - `GET /api/admin/dispositivos`
 - `GET /api/admin/dispositivos/{dispositivo_id}`
+- `PATCH /api/admin/dispositivos/{dispositivo_id}`
 - `GET /api/admin/dispositivos/{dispositivo_id}/eventos`
 - `POST /api/admin/midias`
 - `POST /api/admin/midias/upload`
 - `GET /api/admin/midias`
 - `GET /api/admin/midias/{midia_id}`
+- `PATCH /api/admin/midias/{midia_id}`
 - `POST /api/admin/playlists`
 - `GET /api/admin/playlists`
 - `GET /api/admin/playlists/{playlist_id}`
+- `PATCH /api/admin/playlists/{playlist_id}`
 - `POST /api/admin/playlists/{playlist_id}/midias`
+- `GET /api/admin/playlists/{playlist_id}/midias`
+- `DELETE /api/admin/playlists/{playlist_id}/midias/{midia_id}`
+- `GET /api/admin/sincronizacoes`
+- `GET /api/admin/configuracoes`
 - `GET /api/admin/auditoria/acessos`
 - `POST /api/admin/auditoria/retencao/executar`
 - `POST /api/admin/usuarios`
@@ -246,6 +254,9 @@ Regras de negocio atuais:
 - Midias filtram por `cliente_id` e `ativo`.
 - Playlists filtram por `cliente_id` e `ativa`.
 - Resposta das listagens usa envelope paginado com `items`, `limit`, `offset` e `total`.
+- Alteracao de playlist e inclusao/remocao de midia incrementam a versao.
+- Manifesto retorna `media_id`, nome, tipo, tamanho, hash e duracao.
+- Configuracoes administrativas retornam somente provider, limite efetivo de upload e modo offline-first.
 
 ## Autenticacao administrativa
 

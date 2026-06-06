@@ -19,7 +19,9 @@ class FakeCoreRepository:
             version=3,
             files=[
                 MediaFile(
+                    media_id="midia-real-001",
                     file_name="media/video-real.mp4",
+                    media_type="video",
                     size=2048,
                     sha256="b" * 64,
                 )
@@ -208,9 +210,12 @@ def test_player_playlist_returns_real_manifest_for_activated_device():
         "version": 3,
         "files": [
             {
+                "media_id": "midia-real-001",
                 "file_name": "media/video-real.mp4",
+                "media_type": "video",
                 "size": 2048,
                 "sha256": "b" * 64,
+                "duration_seconds": None,
             }
         ],
     }

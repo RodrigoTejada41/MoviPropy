@@ -8,8 +8,11 @@ import type {
   GoogleDriveStatus,
   LoginResponse,
   Midia,
+  OperationalConfiguration,
   PageResult,
   Playlist,
+  PlaylistMidia,
+  SyncConfirmation,
   User
 } from "./types";
 
@@ -67,6 +70,12 @@ export const api = {
       body: JSON.stringify(payload)
     });
   },
+  atualizarCliente(id: string, payload: Partial<Pick<Cliente, "nome" | "documento" | "ativo">>) {
+    return request<Cliente>(`/api/admin/clientes/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload)
+    });
+  },
   dispositivos() {
     return request<PageResult<Dispositivo>>("/api/admin/dispositivos?limit=50&offset=0");
   },
@@ -76,14 +85,80 @@ export const api = {
       body: JSON.stringify(payload)
     });
   },
+  atualizarDispositivo(id: string, payload: Partial<Pick<Dispositivo, "nome" | "codigo_ativacao" | "bloqueado" | "playlist_atual_id">>) {
+    return request<Dispositivo>(`/api/admin/dispositivos/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload)
+    });
+  },
   midias() {
     return request<PageResult<Midia>>("/api/admin/midias?limit=50&offset=0");
+  },
+  uploadMidia(payload: { cliente_id: string; tipo: string; duracao_segundos?: number | null; arquivo: File }) {
+    const body = new FormData();
+    body.set("cliente_id", payload.cliente_id);
+    body.set("tipo", payload.tipo);
+    if (payload.duracao_segundos !== undefined && payload.duracao_segundos !== null) {
+      body.set("duracao_segundos", String(payload.duracao_segundos));
+    }
+    body.set("arquivo", payload.arquivo);
+    return request<Midia>("/api/admin/midias/upload", { method: "POST", body });
+  },
+  atualizarMidia(id: string, payload: Partial<Pick<Midia, "nome" | "duracao_segundos" | "ativo">>) {
+    return request<Midia>(`/api/admin/midias/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload)
+    });
   },
   playlists() {
     return request<PageResult<Playlist>>("/api/admin/playlists?limit=50&offset=0");
   },
+  criarPlaylist(payload: Playlist) {
+    return request<Playlist>("/api/admin/playlists", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+  atualizarPlaylist(id: string, payload: Partial<Pick<Playlist, "nome" | "ativa">>) {
+    return request<Playlist>(`/api/admin/playlists/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload)
+    });
+  },
+  playlistMidias(id: string) {
+    return request<PlaylistMidia[]>(`/api/admin/playlists/${encodeURIComponent(id)}/midias`);
+  },
+  vincularMidia(playlistId: string, payload: Omit<PlaylistMidia, "playlist_id">) {
+    return request<PlaylistMidia>(`/api/admin/playlists/${encodeURIComponent(playlistId)}/midias`, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+  removerMidia(playlistId: string, midiaId: string) {
+    return request<void>(`/api/admin/playlists/${encodeURIComponent(playlistId)}/midias/${encodeURIComponent(midiaId)}`, {
+      method: "DELETE"
+    });
+  },
+  sincronizacoes() {
+    return request<PageResult<SyncConfirmation>>("/api/admin/sincronizacoes?limit=50&offset=0");
+  },
+  configuracoes() {
+    return request<OperationalConfiguration>("/api/admin/configuracoes");
+  },
   usuarios() {
     return request<PageResult<User>>("/api/admin/usuarios?limit=50&offset=0");
+  },
+  criarUsuario(payload: { id?: string; nome: string; email: string; senha: string; perfil: string; ativo: boolean }) {
+    return request<User>("/api/admin/usuarios", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+  atualizarUsuario(id: string, payload: Partial<Pick<User, "nome" | "email" | "perfil" | "ativo">> & { senha?: string }) {
+    return request<User>(`/api/admin/usuarios/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload)
+    });
   },
   auditoria() {
     return request<PageResult<AdminAudit>>("/api/admin/auditoria/acessos?limit=50&offset=0");

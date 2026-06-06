@@ -19,14 +19,19 @@ from fastapi import (
 from moviprogy_api.domain.core import (
     Cliente,
     ClienteListResponse,
+    ClienteUpdateRequest,
     Dispositivo,
     DispositivoListResponse,
+    DispositivoUpdateRequest,
     Midia,
     MidiaListResponse,
+    MidiaUpdateRequest,
+    OperationalConfiguration,
     Playlist,
     PlaylistListResponse,
     PlaylistMidia,
     PlaylistMidiaRequest,
+    PlaylistUpdateRequest,
 )
 from moviprogy_api.domain.auth import (
     AdminAccessAuditListResponse,
@@ -47,6 +52,7 @@ from moviprogy_api.security import (
     require_admin_permission,
     require_admin_user,
 )
+from moviprogy_api.domain.player_events import AdminSyncConfirmationListResponse
 
 
 router = APIRouter(
@@ -66,6 +72,16 @@ _ALLOWED_UPLOADS = {
         ".webp": "image/webp",
     },
 }
+
+
+@router.get("/configuracoes", response_model=OperationalConfiguration)
+def get_operational_configuration(request: Request) -> OperationalConfiguration:
+    require_admin_permission(request, "configuracoes", "ler")
+    return OperationalConfiguration(
+        storage_provider="local",
+        max_upload_bytes=request.app.state.max_upload_bytes,
+        offline_first=True,
+    )
 
 
 @router.post(
@@ -345,6 +361,32 @@ def get_cliente(cliente_id: str, request: Request) -> Cliente:
     return cliente
 
 
+@router.patch("/clientes/{cliente_id}", response_model=Cliente)
+def update_cliente(
+    cliente_id: str,
+    payload: ClienteUpdateRequest,
+    request: Request,
+) -> Cliente:
+    repository = _core_repository(request)
+    current = repository.get_cliente(cliente_id)
+    if current is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="cliente nao encontrado")
+    require_admin_permission(request, "clientes", "editar", cliente_id)
+    updated = current.model_copy(
+        update={
+            "nome": payload.nome if payload.nome is not None else current.nome,
+            "documento": (
+                payload.documento
+                if "documento" in payload.model_fields_set
+                else current.documento
+            ),
+            "ativo": payload.ativo if payload.ativo is not None else current.ativo,
+        }
+    )
+    repository.save_cliente(updated)
+    return updated
+
+
 @router.post(
     "/dispositivos",
     response_model=Dispositivo,
@@ -417,6 +459,46 @@ def get_dispositivo(dispositivo_id: str, request: Request) -> Dispositivo:
         )
     require_admin_permission(request, "dispositivos", "ler", dispositivo.cliente_id)
     return dispositivo
+
+
+@router.patch("/dispositivos/{dispositivo_id}", response_model=Dispositivo)
+def update_dispositivo(
+    dispositivo_id: str,
+    payload: DispositivoUpdateRequest,
+    request: Request,
+) -> Dispositivo:
+    repository = _core_repository(request)
+    current = repository.get_dispositivo(dispositivo_id)
+    if current is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="dispositivo nao encontrado")
+    require_admin_permission(request, "dispositivos", "editar", current.cliente_id)
+    playlist_id = (
+        payload.playlist_atual_id
+        if "playlist_atual_id" in payload.model_fields_set
+        else current.playlist_atual_id
+    )
+    if playlist_id is not None:
+        playlist = repository.get_playlist(playlist_id)
+        if playlist is None or playlist.cliente_id != current.cliente_id:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="playlist_id invalido")
+    updated = current.model_copy(
+        update={
+            "nome": payload.nome if payload.nome is not None else current.nome,
+            "codigo_ativacao": (
+                payload.codigo_ativacao
+                if payload.codigo_ativacao is not None
+                else current.codigo_ativacao
+            ),
+            "bloqueado": (
+                payload.bloqueado
+                if payload.bloqueado is not None
+                else current.bloqueado
+            ),
+            "playlist_atual_id": playlist_id,
+        }
+    )
+    repository.save_dispositivo(updated)
+    return updated
 
 
 @router.post(
@@ -538,6 +620,32 @@ def get_midia(midia_id: str, request: Request) -> Midia:
     return midia
 
 
+@router.patch("/midias/{midia_id}", response_model=Midia)
+def update_midia(
+    midia_id: str,
+    payload: MidiaUpdateRequest,
+    request: Request,
+) -> Midia:
+    repository = _core_repository(request)
+    current = repository.get_midia(midia_id)
+    if current is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="midia nao encontrada")
+    require_admin_permission(request, "midias", "editar", current.cliente_id)
+    updated = current.model_copy(
+        update={
+            "nome": payload.nome if payload.nome is not None else current.nome,
+            "duracao_segundos": (
+                payload.duracao_segundos
+                if "duracao_segundos" in payload.model_fields_set
+                else current.duracao_segundos
+            ),
+            "ativo": payload.ativo if payload.ativo is not None else current.ativo,
+        }
+    )
+    repository.save_midia(updated)
+    return updated
+
+
 @router.post(
     "/playlists",
     response_model=Playlist,
@@ -591,6 +699,28 @@ def get_playlist(playlist_id: str, request: Request) -> Playlist:
     return playlist
 
 
+@router.patch("/playlists/{playlist_id}", response_model=Playlist)
+def update_playlist(
+    playlist_id: str,
+    payload: PlaylistUpdateRequest,
+    request: Request,
+) -> Playlist:
+    repository = _core_repository(request)
+    current = repository.get_playlist(playlist_id)
+    if current is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="playlist nao encontrada")
+    require_admin_permission(request, "playlists", "editar", current.cliente_id)
+    updated = current.model_copy(
+        update={
+            "nome": payload.nome if payload.nome is not None else current.nome,
+            "ativa": payload.ativa if payload.ativa is not None else current.ativa,
+            "versao": current.versao + 1,
+        }
+    )
+    repository.save_playlist(updated)
+    return updated
+
+
 @router.post(
     "/playlists/{playlist_id}/midias",
     response_model=PlaylistMidia,
@@ -631,6 +761,71 @@ def add_midia_to_playlist(
         midia_id=payload.midia_id,
         ordem=payload.ordem,
         duracao_override=payload.duracao_override,
+    )
+
+
+@router.get(
+    "/playlists/{playlist_id}/midias",
+    response_model=list[PlaylistMidia],
+)
+def list_playlist_midias(
+    playlist_id: str,
+    request: Request,
+) -> list[PlaylistMidia]:
+    repository = _core_repository(request)
+    playlist = repository.get_playlist(playlist_id)
+    if playlist is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="playlist nao encontrada")
+    require_admin_permission(request, "playlists", "ler", playlist.cliente_id)
+    return repository.list_playlist_midias(playlist_id)
+
+
+@router.delete(
+    "/playlists/{playlist_id}/midias/{midia_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def remove_midia_from_playlist(
+    playlist_id: str,
+    midia_id: str,
+    request: Request,
+) -> None:
+    repository = _core_repository(request)
+    playlist = repository.get_playlist(playlist_id)
+    if playlist is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="playlist nao encontrada")
+    require_admin_permission(request, "playlists", "editar", playlist.cliente_id)
+    if not repository.remove_midia_from_playlist(playlist_id, midia_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="vinculo nao encontrado")
+
+
+@router.get(
+    "/sincronizacoes",
+    response_model=AdminSyncConfirmationListResponse,
+)
+def list_sync_confirmations(
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    cliente_id: str | None = None,
+    dispositivo_id: str | None = None,
+    status_filtro: str | None = Query(default=None, alias="status"),
+) -> AdminSyncConfirmationListResponse:
+    repository = _core_repository(request)
+    _require_scoped_list_permission(request, "sincronizacoes", "ler", cliente_id)
+    filters = {
+        "cliente_id": cliente_id,
+        "dispositivo_id": dispositivo_id,
+        "status": status_filtro,
+    }
+    return AdminSyncConfirmationListResponse(
+        items=repository.list_sync_confirmations(
+            limit=limit,
+            offset=offset,
+            **filters,
+        ),
+        limit=limit,
+        offset=offset,
+        total=repository.count_sync_confirmations(**filters),
     )
 
 

@@ -122,7 +122,6 @@ Quem usa: painel administrativo.
 Parametros: id, nome, documento, ativo.
 Resposta: cliente criado.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: frontend de gestao ainda pendente.
 
 ### GET /api/admin/clientes/{cliente_id}
 
@@ -130,7 +129,12 @@ Finalidade: obter cliente por id.
 Quem usa: painel administrativo.
 Resposta: cliente encontrado ou 404.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: frontend de gestao ainda pendente.
+
+### PATCH /api/admin/clientes/{cliente_id}
+
+Finalidade: atualizar nome, documento ou status do cliente.
+Quem usa: painel administrativo.
+Seguranca atual: exige permissao RBAC `clientes:editar`.
 
 ### GET /api/admin/clientes
 
@@ -149,7 +153,6 @@ Quem usa: painel administrativo.
 Parametros: id, cliente_id, nome, codigo_ativacao, bloqueado, playlist_atual_id.
 Resposta: dispositivo criado.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: frontend de gestao ainda pendente.
 
 ### GET /api/admin/dispositivos/{dispositivo_id}
 
@@ -157,7 +160,12 @@ Finalidade: obter dispositivo por id.
 Quem usa: painel administrativo.
 Resposta: dispositivo encontrado ou 404.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
-Limite: frontend de gestao ainda pendente.
+
+### PATCH /api/admin/dispositivos/{dispositivo_id}
+
+Finalidade: atualizar nome, codigo, bloqueio ou playlist atual.
+Regra: playlist vinculada deve pertencer ao mesmo cliente.
+Seguranca atual: exige permissao RBAC `dispositivos:editar`.
 
 ### GET /api/admin/dispositivos
 
@@ -174,6 +182,20 @@ Quem usa: painel administrativo.
 Resposta: status, logs e sync.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 Limite: filtro por periodo e paginacao de eventos ainda pendentes.
+
+### GET /api/admin/sincronizacoes
+
+Finalidade: listar confirmacoes de sincronizacao dos players.
+Query: `limit`, `offset`, `cliente_id`, `dispositivo_id`, `status`.
+Resposta: envelope paginado.
+Seguranca atual: exige permissao RBAC `sincronizacoes:ler`.
+
+### GET /api/admin/configuracoes
+
+Finalidade: consultar parametros operacionais nao sensiveis.
+Resposta: provider de storage, limite efetivo de upload e modo offline-first.
+Regra: nao retorna caminhos, tokens, senhas ou variaveis de ambiente.
+Seguranca atual: exige permissao RBAC `configuracoes:ler`.
 
 ## Auditoria
 

@@ -15,6 +15,12 @@ class ClienteListResponse(BaseModel):
     total: int = Field(ge=0)
 
 
+class ClienteUpdateRequest(BaseModel):
+    nome: str | None = Field(default=None, min_length=1)
+    documento: str | None = None
+    ativo: bool | None = None
+
+
 class Dispositivo(BaseModel):
     id: str = Field(min_length=1)
     cliente_id: str = Field(min_length=1)
@@ -29,6 +35,13 @@ class DispositivoListResponse(BaseModel):
     limit: int = Field(ge=1)
     offset: int = Field(ge=0)
     total: int = Field(ge=0)
+
+
+class DispositivoUpdateRequest(BaseModel):
+    nome: str | None = Field(default=None, min_length=1)
+    codigo_ativacao: str | None = Field(default=None, min_length=1)
+    bloqueado: bool | None = None
+    playlist_atual_id: str | None = None
 
 
 class Midia(BaseModel):
@@ -50,6 +63,12 @@ class MidiaListResponse(BaseModel):
     total: int = Field(ge=0)
 
 
+class MidiaUpdateRequest(BaseModel):
+    nome: str | None = Field(default=None, min_length=1)
+    duracao_segundos: int | None = Field(default=None, ge=0)
+    ativo: bool | None = None
+
+
 class Playlist(BaseModel):
     id: str = Field(min_length=1)
     cliente_id: str = Field(min_length=1)
@@ -63,6 +82,17 @@ class PlaylistListResponse(BaseModel):
     limit: int = Field(ge=1)
     offset: int = Field(ge=0)
     total: int = Field(ge=0)
+
+
+class PlaylistUpdateRequest(BaseModel):
+    nome: str | None = Field(default=None, min_length=1)
+    ativa: bool | None = None
+
+
+class OperationalConfiguration(BaseModel):
+    storage_provider: str
+    max_upload_bytes: int = Field(ge=1)
+    offline_first: bool
 
 
 class PlaylistMidia(BaseModel):

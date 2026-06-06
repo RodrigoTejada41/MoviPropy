@@ -519,7 +519,50 @@ class PostgresCoreRepository:
                 """,
                 (playlist_id, midia_id, ordem, duracao_override),
             )
+            connection.execute(
+                "UPDATE playlists SET versao = versao + 1, updated_at = NOW() WHERE id = %s",
+                (playlist_id,),
+            )
             connection.commit()
+
+    def list_playlist_midias(self, playlist_id: str) -> list[dict]:
+        with psycopg.connect(self._database_url) as connection:
+            rows = connection.execute(
+                """
+                SELECT playlist_id, midia_id, ordem, duracao_override
+                FROM playlist_midias
+                WHERE playlist_id = %s
+                ORDER BY ordem ASC, midia_id ASC
+                """,
+                (playlist_id,),
+            ).fetchall()
+        return [
+            {
+                "playlist_id": row[0],
+                "midia_id": row[1],
+                "ordem": row[2],
+                "duracao_override": row[3],
+            }
+            for row in rows
+        ]
+
+    def remove_midia_from_playlist(self, playlist_id: str, midia_id: str) -> bool:
+        with psycopg.connect(self._database_url) as connection:
+            cursor = connection.execute(
+                """
+                DELETE FROM playlist_midias
+                WHERE playlist_id = %s AND midia_id = %s
+                """,
+                (playlist_id, midia_id),
+            )
+            removed = cursor.rowcount > 0
+            if removed:
+                connection.execute(
+                    "UPDATE playlists SET versao = versao + 1, updated_at = NOW() WHERE id = %s",
+                    (playlist_id,),
+                )
+            connection.commit()
+        return removed
 
     def get_playlist_manifest_for_device(
         self,
@@ -541,7 +584,13 @@ class PostgresCoreRepository:
                 return None
             media_rows = connection.execute(
                 """
-                SELECT m.caminho, m.tamanho, m.sha256
+                SELECT
+                    m.id,
+                    m.caminho,
+                    m.tipo,
+                    m.tamanho,
+                    m.sha256,
+                    COALESCE(pm.duracao_override, m.duracao_segundos)
                 FROM playlist_midias pm
                 JOIN midias m ON m.id = pm.midia_id
                 WHERE pm.playlist_id = %s
@@ -555,7 +604,14 @@ class PostgresCoreRepository:
             playlist_id=playlist_row[0],
             version=playlist_row[1],
             files=[
-                MediaFile(file_name=row[0], size=row[1], sha256=row[2])
+                MediaFile(
+                    media_id=row[0],
+                    file_name=row[1],
+                    media_type=row[2],
+                    size=row[3],
+                    sha256=row[4],
+                    duration_seconds=row[5],
+                )
                 for row in media_rows
             ],
         )
@@ -672,6 +728,87 @@ class PostgresCoreRepository:
                 ),
             )
             connection.commit()
+
+    def list_sync_confirmations(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        cliente_id: str | None = None,
+        dispositivo_id: str | None = None,
+        status: str | None = None,
+    ) -> list[dict]:
+        clauses = []
+        params: list[object] = []
+        if cliente_id is not None:
+            clauses.append("d.cliente_id = %s")
+            params.append(cliente_id)
+        if dispositivo_id is not None:
+            clauses.append("s.device_id = %s")
+            params.append(dispositivo_id)
+        if status is not None:
+            clauses.append("s.status = %s")
+            params.append(status)
+        params.extend([limit, offset])
+        with psycopg.connect(self._database_url) as connection:
+            rows = connection.execute(
+                f"""
+                SELECT
+                    s.device_id,
+                    d.cliente_id,
+                    s.playlist_id,
+                    s.versao,
+                    s.arquivos_baixados,
+                    s.status,
+                    s.created_at
+                FROM player_sync_confirmations s
+                JOIN dispositivos d ON d.id = s.device_id
+                {_where_clause(clauses)}
+                ORDER BY s.created_at DESC
+                LIMIT %s OFFSET %s
+                """,
+                params,
+            ).fetchall()
+        return [
+            {
+                "device_id": row[0],
+                "cliente_id": row[1],
+                "playlist_id": row[2],
+                "versao": row[3],
+                "arquivos_baixados": row[4],
+                "status": row[5],
+                "created_at": row[6],
+            }
+            for row in rows
+        ]
+
+    def count_sync_confirmations(
+        self,
+        cliente_id: str | None = None,
+        dispositivo_id: str | None = None,
+        status: str | None = None,
+    ) -> int:
+        clauses = []
+        params: list[object] = []
+        if cliente_id is not None:
+            clauses.append("d.cliente_id = %s")
+            params.append(cliente_id)
+        if dispositivo_id is not None:
+            clauses.append("s.device_id = %s")
+            params.append(dispositivo_id)
+        if status is not None:
+            clauses.append("s.status = %s")
+            params.append(status)
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                f"""
+                SELECT COUNT(*)
+                FROM player_sync_confirmations s
+                JOIN dispositivos d ON d.id = s.device_id
+                {_where_clause(clauses)}
+                """,
+                params,
+            ).fetchone()
+        return int(row[0])
 
     def get_player_events_for_device(self, device_id: str) -> dict[str, list[dict]]:
         with psycopg.connect(self._database_url) as connection:
