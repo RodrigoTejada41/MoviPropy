@@ -6,6 +6,7 @@ Definir criterios para aprovar uma versao.
 
 ## Backend
 
+- Smoke test integrado passa.
 - Health responde.
 - Readiness responde.
 - Login admin funciona.
@@ -48,6 +49,7 @@ Definir criterios para aprovar uma versao.
 
 ## Frontend
 
+- Health proprio responde em `/health-ui`.
 - Login.
 - Dashboard.
 - Clientes.

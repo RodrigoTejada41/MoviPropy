@@ -30,6 +30,16 @@ npm test
 npm run build
 ```
 
+Stack integrado:
+
+```powershell
+.\scripts\smoke_stack.ps1 `
+  -Email $env:MOVIPROGY_ADMIN_EMAIL `
+  -Password $env:MOVIPROGY_ADMIN_PASSWORD
+```
+
+O resultado deve confirmar frontend, health, readiness, login, rota protegida e logout.
+
 Com PostgreSQL:
 
 ```powershell

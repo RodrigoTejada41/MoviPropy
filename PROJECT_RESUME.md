@@ -93,6 +93,8 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Frontend empacotado em container Nginx com proxy para a API e health check proprio.
 - Compose integrado publica o painel em `http://127.0.0.1:8080`.
 - Credenciais de desenvolvimento foram removidas dos valores iniciais da tela de login.
+- Smoke test integrado criado para frontend, health, readiness, login, rota protegida e logout.
+- Proxy do frontend encaminha `/health` e `/health/ready` para a API.
 - Manifesto do player inclui `media_id`, tipo e duracao para permitir download e reproducao pelo player real.
 - Design aprovado do player PWA offline-first registrado em `docs/superpowers/specs/2026-06-06-player-pwa-design.md`.
 

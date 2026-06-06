@@ -58,6 +58,28 @@ Status: Resolvido
 
 ---
 
+### ERR-006
+
+Data: 2026-06-06
+
+Descricao do Problema:
+- `/health/ready` acessado pela porta do frontend retornava o HTML da SPA.
+
+Causa Raiz:
+- O Nginx encaminhava somente a rota exata `/health`.
+
+Solucao Aplicada:
+- Alterar o proxy para o prefixo `/health`.
+- Criar smoke test estrito para frontend, API, banco, login e logout.
+
+Como Evitar no Futuro:
+- Validar health e readiness pela mesma entrada publica usada pelo painel.
+- Smoke tests devem falhar quando um campo obrigatorio estiver ausente.
+
+Status: Resolvido
+
+---
+
 ### ERR-005
 
 Data: 2026-06-06

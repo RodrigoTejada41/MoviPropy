@@ -43,6 +43,14 @@ http://127.0.0.1:8080
 
 A porta `8080` publica o frontend e encaminha `/api` e `/health` para o backend.
 
+Smoke test integrado:
+
+```powershell
+.\scripts\smoke_stack.ps1 `
+  -Email $env:MOVIPROGY_ADMIN_EMAIL `
+  -Password $env:MOVIPROGY_ADMIN_PASSWORD
+```
+
 Pre-requisito:
 - Docker Desktop precisa estar aberto e com daemon ativo.
 
