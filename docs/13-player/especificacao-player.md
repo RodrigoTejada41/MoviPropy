@@ -9,7 +9,10 @@ Definir o comportamento do player em Android TV Box, Android, Windows, Linux e n
 - Backend possui ativacao por codigo real.
 - Backend retorna manifesto real quando dispositivo tem playlist atual ativa.
 - Backend registra status, logs e confirmacao de sincronizacao do player.
-- Player real ainda nao foi implementado.
+- Player PWA implementado em `player/`.
+- IndexedDB persiste configuracao, manifesto, midias e telemetria.
+- Service worker mantém o shell disponivel offline.
+- Container local disponivel em `http://127.0.0.1:8091`.
 
 ## Plataformas alvo
 
@@ -109,8 +112,8 @@ Atual:
 - `POST /api/player/logs`.
 - `POST /api/player/sincronizacao/confirmar`.
 
-Pendente:
-- Listagens administrativas de eventos do player.
+Administracao:
+- Eventos e confirmacoes do player podem ser consultados pelo painel.
 
 Implementado:
 - `GET /api/player/midias/{midia_id}/download`.
@@ -126,3 +129,16 @@ Implementado:
 - Opera offline.
 - Nao substitui playlist valida por download incompleto.
 - Recupera sincronizacao quando internet volta.
+
+## Homologacao local
+
+Data: 2026-06-06.
+
+- Ativacao com codigo real: aprovado.
+- Download autenticado: aprovado.
+- Validacao de tamanho e SHA-256: aprovado.
+- Reproducao de imagem em loop: aprovado.
+- Reinicio com API indisponivel: aprovado.
+- Preservacao da playlist em falha HTTP: aprovado.
+- Reenvio de telemetria apos retorno da API: aprovado.
+- Viewport 1920x1080 e mobile sem overflow: aprovado.

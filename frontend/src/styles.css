@@ -75,14 +75,10 @@ button {
 }
 
 .loginLogo {
-  align-items: center;
-  background: #4648d4;
-  border-radius: 12px;
+  border-radius: 10px;
   box-shadow: 0 18px 40px rgba(70, 72, 212, 0.25);
-  color: #ffffff;
-  display: flex;
   height: 56px;
-  justify-content: center;
+  object-fit: cover;
   width: 56px;
 }
 
@@ -287,28 +283,19 @@ button {
   position: absolute;
 }
 
-.visualGrid {
+.loginHeroImage {
   align-self: center;
-  display: grid;
-  gap: 18px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-radius: 12px;
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.32);
+  display: block;
+  height: auto;
+  justify-self: center;
+  max-height: 390px;
+  max-width: 100%;
+  object-fit: contain;
   position: relative;
+  width: 390px;
   z-index: 1;
-}
-
-.visualGrid span {
-  aspect-ratio: 16 / 9;
-  background:
-    linear-gradient(135deg, rgba(192, 193, 255, 0.24), rgba(70, 72, 212, 0.12)),
-    #101722;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 10px;
-  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
-}
-
-.visualGrid span:nth-child(2),
-.visualGrid span:nth-child(3) {
-  transform: translateY(26px);
 }
 
 .loginVisual blockquote {

@@ -1117,3 +1117,31 @@ Consequencias:
 - Listagem real de pastas/arquivos do Drive ainda precisa ser implementada sobre a API Google.
 - Importacao inicial exige metadados conhecidos do arquivo (`nome`, `tamanho`, `sha256`).
 - Testes automatizados cobrem a simulacao e a regra de nao persistir token em texto puro.
+
+---
+
+### ADR-035 - Player PWA offline-first
+
+Status: Aprovada
+
+Data: 2026-06-06
+
+Contexto:
+- O MVP precisava atender navegador kiosk, Windows, Linux e Android sem duplicar implementacoes.
+- O player deve continuar reproduzindo quando a API ou internet estiver indisponivel.
+
+Decisao:
+- Implementar o player em `player/` com React, TypeScript, IndexedDB e service worker.
+- Armazenar dispositivo, manifesto, midias e fila de telemetria no navegador.
+- Validar tamanho e SHA-256 de todas as midias antes da promocao atomica.
+- Publicar o container local na porta `8091`.
+
+Motivo:
+- Reutiliza a stack aprovada.
+- Entrega multiplataforma no MVP.
+- Mantem controle de cache e troca atomica sem expor credenciais externas.
+
+Consequencias:
+- Navegador precisa suportar IndexedDB, Web Crypto e service worker.
+- Operacao kiosk nativa por sistema operacional continua sendo configuracao de deploy.
+- Wrapper Electron ou Android nativo permanece pos-MVP.

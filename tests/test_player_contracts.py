@@ -136,6 +136,28 @@ def test_player_activation_with_repository_rejects_demo_fallback_code():
     assert response.json() == {"detail": "codigo de ativacao invalido"}
 
 
+def test_player_activation_rejects_blocked_device():
+    app = create_app()
+    repository = FakeCoreRepository()
+    repository.dispositivo = repository.dispositivo.model_copy(
+        update={"bloqueado": True}
+    )
+    app.state.core_repository = repository
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "REAL-CODE-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {"detail": "dispositivo bloqueado"}
+
+
 def test_player_activation_rejects_invalid_code():
     client = TestClient(create_app())
 

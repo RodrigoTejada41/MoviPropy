@@ -1,5 +1,6 @@
 param(
     [string]$BaseUrl = "http://127.0.0.1:8080",
+    [string]$PlayerUrl = "http://127.0.0.1:8091",
     [string]$Email = $env:MOVIPROGY_ADMIN_EMAIL,
     [string]$Password = $env:MOVIPROGY_ADMIN_PASSWORD
 )
@@ -12,6 +13,8 @@ if (-not $Email -or -not $Password) {
 
 $ui = Invoke-WebRequest -Uri $BaseUrl -UseBasicParsing
 $uiHealth = Invoke-WebRequest -Uri "$BaseUrl/health-ui" -UseBasicParsing
+$player = Invoke-WebRequest -Uri $PlayerUrl -UseBasicParsing
+$playerHealth = Invoke-WebRequest -Uri "$PlayerUrl/health-player" -UseBasicParsing
 $health = Invoke-RestMethod -Uri "$BaseUrl/health"
 $ready = Invoke-RestMethod -Uri "$BaseUrl/health/ready"
 
@@ -37,6 +40,8 @@ $logout = Invoke-RestMethod `
 $result = [pscustomobject]@{
     frontend = $ui.StatusCode -eq 200 -and $ui.Content -match '<div id="root"></div>'
     frontend_health = $uiHealth.StatusCode -eq 200
+    player = $player.StatusCode -eq 200 -and $player.Content -match '<div id="root"></div>'
+    player_health = $playerHealth.StatusCode -eq 200
     api_health = $health.status
     database = $ready.database
     login = $login.usuario.email -eq $Email
@@ -47,6 +52,8 @@ $result = [pscustomobject]@{
 if (
     -not $result.frontend -or
     -not $result.frontend_health -or
+    -not $result.player -or
+    -not $result.player_health -or
     $result.api_health -ne "ok" -or
     $result.database -ne "available" -or
     -not $result.login -or

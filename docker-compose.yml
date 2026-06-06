@@ -87,3 +87,25 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+
+  moviprogy-player:
+    build:
+      context: ./player
+      dockerfile: Dockerfile
+    container_name: moviprogy-player
+    ports:
+      - "8091:80"
+    depends_on:
+      moviprogy-api:
+        condition: service_healthy
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health-player"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

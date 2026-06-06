@@ -101,3 +101,10 @@ Responsaveis:
 - CEO Agent.
 - QA Agent.
 - Cliente/Product Owner.
+
+## Resultado local 2026-06-06
+
+- Resultado: Aprovado com restricoes.
+- Escopo aprovado: MVP local em Docker.
+- Restricoes: HTTPS, dominio, provedor, monitoramento externo e carga de producao.
+- Evidencia: `docs/15-homologacao/relatorio-local-2026-06-06.md`.

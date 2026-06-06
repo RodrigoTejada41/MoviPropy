@@ -27,6 +27,84 @@ Status:
 
 ## Licoes registradas
 
+### ERR-017
+
+Data: 2026-06-06
+
+Descricao do Problema:
+- Dispositivo marcado como bloqueado ainda conseguia ativar o player.
+
+Causa Raiz:
+- A rota validava o codigo de ativacao, mas nao verificava `dispositivo.bloqueado`.
+
+Solucao Aplicada:
+- Bloquear ativacao com HTTP 403.
+- Adicionar teste de regressao.
+
+Como Evitar no Futuro:
+- Toda ativacao deve validar existencia, bloqueio e permissao antes de emitir token.
+- Estados administrativos de seguranca precisam de teste no contrato publico.
+
+Arquivos Afetados:
+- `backend/moviprogy_api/routes/player.py`
+- `tests/test_player_contracts.py`
+
+Status: Resolvido
+
+---
+
+### ERR-016
+
+Data: 2026-06-06
+
+Descricao do Problema:
+- A porta local `8090` retornava HTTP 501 antes de atingir o container do player.
+
+Causa Raiz:
+- O processo Wondershare NativePush mantinha listener local na porta `8090`.
+
+Solucao Aplicada:
+- Publicado `moviprogy-player` na porta `8091`.
+
+Como Evitar no Futuro:
+- Verificar `Get-NetTCPConnection` antes de reservar nova porta local.
+- Nao encerrar processos do usuario quando uma porta alternativa estiver disponivel.
+
+Arquivos Afetados:
+- `docker-compose.yml`
+- `README.md`
+- `KNOWLEDGE_BASE.md`
+
+Status: Resolvido
+
+---
+
+### ERR-015
+
+Data: 2026-06-06
+
+Descricao do Problema:
+- Blob persistido diretamente no IndexedDB simulado nao preservou tamanho no teste.
+
+Causa Raiz:
+- Serializacao de Blob varia entre ambiente jsdom/fake-indexeddb e navegador real.
+
+Solucao Aplicada:
+- Persistir `ArrayBuffer` e MIME type.
+- Reconstruir Blob ao carregar a midia.
+
+Como Evitar no Futuro:
+- Usar formato binario explicito em persistencia IndexedDB testada fora do navegador.
+- Manter teste de promocao e leitura de midia.
+
+Arquivos Afetados:
+- `player/src/storage.ts`
+- `player/src/storage.test.ts`
+
+Status: Resolvido
+
+---
+
 ### ERR-015
 
 Data: 2026-06-05

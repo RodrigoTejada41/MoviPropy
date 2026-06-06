@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { ArrowRight, Cloud, Eye, EyeOff, Film, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, Cloud, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 import { api, ApiError } from "../lib/api";
 import { saveSession } from "../lib/session";
 import type { User } from "../lib/types";
@@ -39,9 +39,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       <section className="loginStage" aria-label="Acesso administrativo MoviProgy">
         <div className="loginColumn">
           <div className="loginBrand">
-            <div className="loginLogo" aria-hidden="true">
-              <Film size={32} />
-            </div>
+            <img className="loginLogo" src="/moviprogy-brand.webp" alt="MoviProgy Tecnologia" />
             <h1>MoviProgy</h1>
             <p>Console administrativo SaaS</p>
           </div>
@@ -116,12 +114,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         </div>
 
         <aside className="loginVisual" aria-label="Orquestracao de midia indoor">
-          <div className="visualGrid">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
+          <img className="loginHeroImage" src="/moviprogy-brand.webp" alt="" aria-hidden="true" />
           <blockquote>
             <p>Orquestracao de campanhas, playlists e dispositivos em uma operacao centralizada.</p>
             <footer>MoviProgy Admin</footer>

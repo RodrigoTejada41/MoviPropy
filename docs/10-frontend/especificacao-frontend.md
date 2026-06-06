@@ -125,7 +125,7 @@ Funcionalidades:
 - Exibir quantidade de dispositivos vinculados por cliente.
 - Editar cliente.
 - Ativar/inativar cliente.
-- Abrir detalhes do cliente. Pendente de API.
+- Consultar dados do cliente na listagem operacional.
 
 Campos:
 - Id.
@@ -141,7 +141,7 @@ API atual:
 - `GET /api/admin/clientes/{cliente_id}`.
 - `PATCH /api/admin/clientes/{cliente_id}`.
 
-APIs pendentes:
+Campos ainda nao disponiveis:
 - Campo de regiao do cliente.
 - Campo de data de criacao do cliente.
 - Campo de ultimo sync por cliente/dispositivo.
@@ -184,7 +184,7 @@ API atual:
 - `GET /api/admin/dispositivos/{dispositivo_id}`.
 - `PATCH /api/admin/dispositivos/{dispositivo_id}`.
 
-APIs pendentes:
+Campos ainda nao disponiveis:
 - Campo de ultima comunicacao consolidado no dispositivo.
 
 Criterios de aceite:
@@ -256,7 +256,7 @@ API atual:
 - `GET /api/admin/playlists/{playlist_id}/midias`.
 - `DELETE /api/admin/playlists/{playlist_id}/midias/{midia_id}`.
 
-APIs pendentes:
+API opcional:
 - `PATCH /api/admin/playlists/{playlist_id}/midias/{midia_id}`.
 
 Criterios de aceite:
@@ -304,7 +304,7 @@ Dados:
 APIs atuais:
 - `GET /api/admin/sincronizacoes`.
 
-APIs pendentes:
+API opcional:
 - `GET /api/admin/dispositivos/{id}/sincronizacoes`.
 
 Criterios de aceite:
@@ -323,8 +323,11 @@ Tipos:
 - Storage.
 - Google Drive.
 
-APIs pendentes:
-- `GET /api/admin/logs`.
+APIs atuais:
+- `GET /api/admin/auditoria/acessos`.
+
+Limite:
+- Logs agregados de API, player, storage e Google Drive ainda nao possuem endpoint unico.
 
 Criterios de aceite:
 - Nao exibir segredos.

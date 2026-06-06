@@ -36,7 +36,8 @@ O player nao pode parar quando houver queda de internet.
 
 ## Estado atual
 
-- Workspace criado.
-- Documentacao inicial criada.
-- Codigo-fonte ainda inexistente.
-- Stack tecnologica ainda pendente de aprovacao.
+- Backend, banco PostgreSQL e painel administrativo implementados.
+- Docker Compose integrado e validado localmente.
+- Google Drive integrado pelo backend, com OAuth configuravel e metadados automaticos.
+- Player PWA offline-first especificado, implementado e homologado localmente.
+- Deploy publico ainda depende de infraestrutura externa.

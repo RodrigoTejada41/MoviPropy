@@ -55,8 +55,5 @@ Registra status dos dispositivos, falhas, downloads, erros de player e eventos a
 
 ## Decisoes pendentes
 
-- Stack frontend.
-- Tecnologia do player.
-- Formato final do manifesto.
-- Implementacao da integracao Google Drive.
-- Estrategia definitiva de protecao de tokens OAuth.
+- Provedor, dominio, HTTPS e estrategia de storage da producao.
+- Politica operacional de rotacao da chave de criptografia dos tokens OAuth.

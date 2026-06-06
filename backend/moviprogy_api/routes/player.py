@@ -29,6 +29,11 @@ def activate_player(
             payload.activation_code
         )
         if dispositivo is not None:
+            if dispositivo.bloqueado:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="dispositivo bloqueado",
+                )
             manifest = repository.get_playlist_manifest_for_device(dispositivo.id)
             playlist_version = manifest.version if manifest is not None else 1
             return request.app.state.device_registry.activate_device(

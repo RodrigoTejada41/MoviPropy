@@ -51,7 +51,8 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 - Google Drive / Armazenamento possui UX/UI, OAuth, endpoints, dados, seguranca, quota e testes iniciais.
 - Google Drive nao deve expor IDs, tokens, links internos, MIME, tamanho ou hash como campos manuais no frontend.
 - Pasta raiz do Google Drive deve ser criada/localizada automaticamente pela API Google Drive e persistida no banco pelo backend.
-- Player ainda nao definido.
+- Player MVP implementado como PWA offline-first.
+- Player MVP definido e implementado como PWA React/TypeScript em `player/`.
 - Deploy ainda nao definido alem do container local.
 
 ## Documentacao baseline
@@ -151,9 +152,9 @@ Limite:
   - Playlists.
   - Logs/Auditoria.
   - Usuarios e permissoes.
-  - Sincronizacoes com placeholder por falta de endpoint especifico.
+  - Sincronizacoes conectadas a `GET /api/admin/sincronizacoes`.
   - Google Drive / Armazenamento com status, OAuth, quota, pastas e importacao por arquivo selecionado.
-  - Configuracoes com placeholder por falta de endpoints.
+  - Configuracoes somente leitura conectadas a `GET /api/admin/configuracoes`.
 - A tela de dispositivos nao deve inventar ultima comunicacao; enquanto a API nao retorna esse campo, mostrar `Nao informado`.
 - A tela de clientes nao deve inventar regiao, data de criacao ou ultimo sync; enquanto a API nao retorna esses campos, mostrar `Nao informado` ou deixar a acao desabilitada.
 - O dashboard nao deve inventar numeros de infraestrutura; deve calcular indicadores a partir de clientes, dispositivos, midias, playlists e auditoria.
@@ -197,6 +198,18 @@ Persistencia atual:
 - Caminhos de midia sao resolvidos dentro do diretorio base para bloquear path traversal.
 - Upload local salva arquivos em `clientes/{cliente_id}/midias/{midia_id}/original.ext`.
 - Limite padrao de upload: `MOVIPROGY_MAX_UPLOAD_BYTES`, default 512 MB.
+
+## Player PWA
+
+- Codigo: `player/`.
+- URL Docker local: `http://127.0.0.1:8091`.
+- Porta `8090` nao deve ser usada neste ambiente porque conflita com Wondershare NativePush.
+- Persistencia local: IndexedDB.
+- Service worker armazena somente shell e ativos estaticos.
+- Midias sao armazenadas no IndexedDB e promovidas em uma unica transacao.
+- Atualizacao incompleta ou invalida nunca substitui a playlist ativa.
+- Tecla `D` abre o diagnostico local.
+- CI executa testes e build do player.
 
 ## Rotas administrativas atuais
 

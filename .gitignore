@@ -11,6 +11,7 @@ node_modules/
 frontend/dist/
 frontend/node_modules/
 frontend/*.tsbuildinfo
+player/*.tsbuildinfo
 *.egg-info/
 backups/
 .env

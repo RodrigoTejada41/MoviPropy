@@ -9,11 +9,12 @@ O player deve baixar as midias, armazenar localmente e continuar exibindo conteu
 
 ## Estado atual
 
-- Projeto em fase de documentacao inicial.
-- Backend minimo criado com FastAPI.
-- Testes iniciais criados com pytest.
-- Frontend inicial criado com Vite, React e TypeScript.
-- Documentacao base criada.
+- Backend administrativo e contratos do player implementados em FastAPI.
+- Frontend administrativo implementado com Vite, React e TypeScript.
+- PostgreSQL, API, frontend e player integrados por Docker Compose.
+- Testes automatizados de backend, frontend e player executados por CI.
+- Player PWA offline-first implementado com IndexedDB, service worker e telemetria.
+- Deploy publico depende da definicao de provedor, dominio, HTTPS e storage.
 
 ## Backend
 
@@ -42,6 +43,14 @@ http://127.0.0.1:8080
 ```
 
 A porta `8080` publica o frontend e encaminha `/api` e `/health` para o backend.
+
+Player:
+
+```text
+http://127.0.0.1:8091
+```
+
+A porta `8091` publica o player PWA e encaminha `/api` para o backend.
 
 Smoke test integrado:
 
@@ -77,6 +86,21 @@ Simular player:
 
 ```powershell
 .\scripts\simulate_player.ps1
+```
+
+Desenvolver o player:
+
+```powershell
+cd player
+npm install
+npm run dev
+```
+
+Testar e compilar:
+
+```powershell
+npm test
+npm run build
 ```
 
 Parar Docker:
@@ -176,14 +200,17 @@ Upload local:
 - Limite padrao: 512 MB por arquivo.
 - Variavel: `MOVIPROGY_MAX_UPLOAD_BYTES`.
 
-Login admin local padrao do Compose:
+Login admin local:
 
 ```powershell
 $login = Invoke-RestMethod `
   -Method Post `
   -Uri "http://127.0.0.1:8000/api/auth/login" `
   -ContentType "application/json" `
-  -Body '{"email":"admin@moviprogy.local","senha":"moviprogy_admin_dev_password"}'
+  -Body (@{
+    email = $env:MOVIPROGY_ADMIN_EMAIL
+    senha = $env:MOVIPROGY_ADMIN_PASSWORD
+  } | ConvertTo-Json)
 $headers = @{ Authorization = "Bearer $($login.access_token)" }
 ```
 

@@ -101,7 +101,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Restore automatizado foi validado em banco temporario isolado.
 - CI criado para backend com PostgreSQL real e frontend com testes/build.
 - Manifesto do player inclui `media_id`, tipo e duracao para permitir download e reproducao pelo player real.
-- Design do player PWA offline-first registrado em `docs/superpowers/specs/2026-06-06-player-pwa-design.md`, aguardando aprovacao explicita para implementacao.
+- Design do player PWA offline-first registrado e implementado conforme `docs/superpowers/specs/2026-06-06-player-pwa-design.md`.
 
 ## Arquivos principais
 
@@ -160,13 +160,20 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Fluxo real depende de `MOVIPROGY_GOOGLE_CLIENT_ID`, `MOVIPROGY_GOOGLE_CLIENT_SECRET`, `MOVIPROGY_GOOGLE_REDIRECT_URI` e `MOVIPROGY_GOOGLE_TOKEN_KEY`.
 - Sem credenciais Google, a tela opera com status e simulacao local controlada, mas nao autentica conta real.
 - Script `scripts/configure_google_oauth.ps1` cria `.env` local para OAuth real ou simulacao.
+- Player PWA offline-first implementado em `player/`.
+- Player persiste dispositivo, manifesto, midias e telemetria em IndexedDB.
+- Player valida tamanho e SHA-256 antes de promover uma playlist.
+- Player preserva a playlist ativa quando API ou download falham.
+- Service worker mantém o shell do player disponível offline.
+- Container `moviprogy-player` publicado localmente em `http://127.0.0.1:8091`.
+- Homologacao real executada com ativacao, download, reproducao, reinicio sem API e recuperacao.
 
 ## Proximo passo recomendado
 
 Backend administrativo e frontend operacional consolidados.
 
 Pendencias prioritarias:
-- Implementar o player PWA offline-first conforme design aprovado.
-- Ampliar cobertura automatizada do frontend para fluxos completos.
+- Ampliar cobertura E2E do painel para fluxos administrativos completos.
 - Testes de carga reais em volume de producao continuam recomendados antes de deploy publico.
+- Definir dominio, HTTPS, storage e monitoramento do ambiente de producao.
 - Executar homologacao offline e de producao.

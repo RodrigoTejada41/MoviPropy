@@ -11,5 +11,9 @@ describe("LoginPage", () => {
 
     expect(screen.getByLabelText("Email")).toHaveValue("");
     expect(screen.getByLabelText("Senha")).toHaveValue("");
+    expect(screen.getByRole("img", { name: "MoviProgy Tecnologia" })).toHaveAttribute(
+      "src",
+      "/moviprogy-brand.webp"
+    );
   });
 });

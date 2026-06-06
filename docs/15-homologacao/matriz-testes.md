@@ -32,11 +32,15 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Confirmacao sincronizacao | Sim | Sim | Sim | Sim | Pendente | Implementado parcial |
 | Google Drive especificacao | Nao | Nao | Revisao documental | Revisao documental | Nao | Documentado |
 | Google Drive implementacao inicial | Sim | Sim | Parcial | Sim | Pendente | Implementado parcial |
-| Google Drive OAuth real | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente credenciais Google |
-| Frontend login | Parcial | Pendente | Parcial | Pendente | Pendente | Implementado parcial |
-| Frontend dashboard/listagens | Parcial | Pendente | Sim | Pendente | Pendente | Implementado parcial |
-| Frontend playlists | Parcial | Pendente | Sim | Pendente | Pendente | Implementado parcial |
-| Frontend sincronizacoes/configuracoes | Parcial | Pendente | Sim | Pendente | Pendente | Implementado parcial |
+| Google Drive OAuth real | Sim | Sim | Sim | Sim | Pendente | Homologado local |
+| Frontend login | Sim | Sim | Sim | Sim | Pendente | Implementado |
+| Frontend dashboard/listagens | Sim | Sim | Sim | Parcial | Pendente | Implementado |
+| Frontend playlists | Sim | Sim | Sim | Parcial | Pendente | Implementado |
+| Frontend sincronizacoes/configuracoes | Sim | Sim | Sim | Parcial | Pendente | Implementado |
+| Player PWA ativacao | Sim | Sim | Sim | Sim | Pendente | Implementado |
+| Player PWA IndexedDB | Sim | Sim | Sim | Sim | Pendente | Implementado |
+| Player PWA offline | Sim | Sim | Sim | Sim | Pendente | Homologado local |
+| Player PWA telemetria | Sim | Sim | Sim | Sim | Pendente | Implementado |
 
 ## Regras
 

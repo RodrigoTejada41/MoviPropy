@@ -1,0 +1,18 @@
+{
+  "name": "MoviProgy Player",
+  "short_name": "MoviProgy",
+  "description": "Player offline-first de midia indoor",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111318",
+  "theme_color": "#111318",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "/moviprogy-brand.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ]
+}
