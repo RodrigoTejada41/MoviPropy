@@ -17,6 +17,8 @@ backups/
 .env
 .env.*
 !.env.example
+!deploy/env/.env.development.example
+!deploy/env/.env.production.example
 logs/*.log
 runtime/data/*
 runtime/media/*

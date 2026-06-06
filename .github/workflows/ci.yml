@@ -80,3 +80,48 @@ jobs:
         run: npm test
       - name: Build player
         run: npm run build
+
+  deploy-dev:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    needs:
+      - backend
+      - frontend
+      - player
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Configure SSH
+        env:
+          DEV_SSH_PRIVATE_KEY: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+          DEV_HOST: ${{ secrets.DEV_HOST }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEV_SSH_PRIVATE_KEY" > ~/.ssh/moviprogy
+          chmod 600 ~/.ssh/moviprogy
+          ssh-keyscan -H "$DEV_HOST" >> ~/.ssh/known_hosts
+      - name: Package release
+        run: |
+          RELEASE="$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA::12}"
+          echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
+          git archive --format=tar.gz --output="/tmp/$RELEASE.tar.gz" "$GITHUB_SHA"
+      - name: Deploy DEV
+        env:
+          DEV_HOST: ${{ secrets.DEV_HOST }}
+          DEV_USER: ${{ secrets.DEV_USER }}
+        run: |
+          REMOTE_ROOT="/opt/moviprogy/dev"
+          ssh -i ~/.ssh/moviprogy "$DEV_USER@$DEV_HOST" \
+            "mkdir -p '$REMOTE_ROOT/incoming' '$REMOTE_ROOT/releases/$RELEASE'"
+          scp -i ~/.ssh/moviprogy "/tmp/$RELEASE.tar.gz" \
+            "$DEV_USER@$DEV_HOST:$REMOTE_ROOT/incoming/$RELEASE.tar.gz"
+          ssh -i ~/.ssh/moviprogy "$DEV_USER@$DEV_HOST" "
+            set -e
+            tar -xzf '$REMOTE_ROOT/incoming/$RELEASE.tar.gz' -C '$REMOTE_ROOT/releases/$RELEASE'
+            chmod +x '$REMOTE_ROOT/releases/$RELEASE/deploy/scripts/'*.sh
+            '$REMOTE_ROOT/releases/$RELEASE/deploy/scripts/deploy.sh' development '$REMOTE_ROOT/releases/$RELEASE'
+            '$REMOTE_ROOT/releases/$RELEASE/deploy/scripts/smoke_remote.sh' development
+            rm -f '$REMOTE_ROOT/incoming/$RELEASE.tar.gz'
+          "

@@ -323,6 +323,17 @@ Motivo:
 - Nao substituir conhecimento historico; adicionar nova entrada com contexto.
 - Se uma decisao mudar, registrar motivo e impacto.
 
+## Ambientes e publicacao
+
+- `develop` representa DEV e dispara deploy automatico apos CI.
+- `main` representa PROD.
+- Feature e bugfix devem entrar por branch temporaria e pull request.
+- DEV e PROD usam projetos Compose, bancos, diretorios, logs e segredos distintos.
+- O arquivo `.env` real de cada ambiente fica somente no servidor.
+- PROD exige tag de release, confirmacao manual, aprovacao GitHub e `PRODUCTION_APPROVED=true`.
+- A VPS atual possui aproximadamente 1 GB de RAM; build deve ser serial.
+- Executar DEV e PROD simultaneamente requer ampliacao de capacidade.
+
 ## Observabilidade HTTP
 
 - Logger: `moviprogy.request`.

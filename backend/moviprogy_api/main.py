@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from moviprogy_api.database import get_database_url
 from moviprogy_api.domain.devices import DeviceRegistry
@@ -35,8 +36,25 @@ def _max_upload_bytes() -> int:
     return int(os.getenv("MOVIPROGY_MAX_UPLOAD_BYTES", str(512 * 1024 * 1024)))
 
 
+def _environment() -> str:
+    return os.getenv("MOVIPROGY_ENVIRONMENT", "development").lower()
+
+
+def _allowed_hosts() -> list[str]:
+    raw_hosts = os.getenv("MOVIPROGY_ALLOWED_HOSTS", "*")
+    return [host.strip() for host in raw_hosts.split(",") if host.strip()]
+
+
 def create_app() -> FastAPI:
-    app = FastAPI(title="MoviProgy API", version="0.1.0")
+    production = _environment() == "production"
+    app = FastAPI(
+        title="MoviProgy API",
+        version="0.1.0",
+        docs_url=None if production else "/docs",
+        redoc_url=None if production else "/redoc",
+        openapi_url=None if production else "/openapi.json",
+    )
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=_allowed_hosts())
     app.add_middleware(StructuredRequestLoggingMiddleware)
     app.state.media_dir = _media_dir()
     app.state.tmp_dir = _tmp_dir()
