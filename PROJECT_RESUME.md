@@ -90,6 +90,9 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Upload local de midia, criacao/publicacao de playlists e criacao/inativacao de usuarios foram conectados no frontend.
 - Gestao de usuarios permite consultar e criar vinculos com clientes e conceder permissoes por recurso, acao e escopo.
 - Infraestrutura de testes do frontend criada com Vitest e Testing Library.
+- Frontend empacotado em container Nginx com proxy para a API e health check proprio.
+- Compose integrado publica o painel em `http://127.0.0.1:8080`.
+- Credenciais de desenvolvimento foram removidas dos valores iniciais da tela de login.
 - Manifesto do player inclui `media_id`, tipo e duracao para permitir download e reproducao pelo player real.
 - Design aprovado do player PWA offline-first registrado em `docs/superpowers/specs/2026-06-06-player-pwa-design.md`.
 
@@ -133,7 +136,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Codigo de ativacao demo `MOVI-DEMO-001` funciona apenas sem repository/banco.
 - Hash do token do dispositivo e persistido no PostgreSQL quando `DATABASE_URL` esta configurado.
 - JSON local permanece apenas como fallback sem banco.
-- Docker atual sobe backend e PostgreSQL.
+- Docker atual sobe frontend, backend e PostgreSQL.
 - Docker Desktop ainda pode usar armazenamento global fora do projeto para imagens/cache.
 - Simulacao atual cobre ativacao e consulta de manifesto.
 - Rotas administrativas atuais exigem sessao de usuario admin quando `auth_repository` esta disponivel.

@@ -48,8 +48,11 @@ Parar:
 docker compose down
 ```
 
-Limite atual:
-- Compose executa backend e PostgreSQL.
+Estado atual:
+- Compose executa frontend, backend e PostgreSQL.
+- Frontend fica disponivel em `http://127.0.0.1:8080`.
+- Frontend encaminha `/api` e `/health` para o backend pela rede interna.
+- Os tres servicos possuem health check.
 - Banco persiste em `runtime/postgres/data`.
 - Sessoes demo ficam na tabela `device_sessions`.
 - Manifestos demo ficam em memoria.

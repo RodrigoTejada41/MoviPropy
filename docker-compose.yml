@@ -65,3 +65,25 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  moviprogy-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: moviprogy-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      moviprogy-api:
+        condition: service_healthy
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health-ui"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

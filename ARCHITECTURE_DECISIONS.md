@@ -999,6 +999,29 @@ Consequencias:
 
 ---
 
+### ADR-036 - Frontend integrado por Nginx no Compose
+
+Status: Aprovada
+
+Data: 2026-06-06
+
+Contexto:
+- O Compose publicava apenas API e PostgreSQL.
+- O fluxo documentado exige frontend e backend integrados.
+
+Decisao:
+- Construir o frontend em imagem Node e servir o artefato por Nginx.
+- Publicar localmente na porta `8080`.
+- Encaminhar `/api` e `/health` para `moviprogy-api`.
+- Criar health check independente em `/health-ui`.
+- Manter o container final somente leitura.
+
+Consequencias:
+- `docker compose up --build -d` entrega o painel completo.
+- HTTPS continua responsabilidade do proxy de borda no ambiente publicado.
+
+---
+
 ### ADR-034 - Implementacao inicial Google Drive controlada pelo backend
 
 Status: Aprovada

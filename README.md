@@ -35,6 +35,14 @@ Executar com Docker:
 docker compose up --build -d
 ```
 
+Painel integrado:
+
+```text
+http://127.0.0.1:8080
+```
+
+A porta `8080` publica o frontend e encaminha `/api` e `/health` para o backend.
+
 Pre-requisito:
 - Docker Desktop precisa estar aberto e com daemon ativo.
 

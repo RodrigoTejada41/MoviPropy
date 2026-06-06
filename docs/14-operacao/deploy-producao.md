@@ -6,7 +6,8 @@ Definir o processo de publicacao em ambiente produtivo.
 
 ## Estado atual
 
-- Docker local existe.
+- Docker local integrado existe para frontend, API e PostgreSQL.
+- Painel e publicado localmente em `http://127.0.0.1:8080`.
 - Deploy producao ainda nao foi implementado.
 
 ## Ambientes
@@ -85,9 +86,10 @@ Futuras:
 5. Subir containers.
 6. Validar `/health`.
 7. Validar `/health/ready`.
-8. Testar login admin.
-9. Testar ativacao player.
-10. Registrar resultado.
+8. Validar `/health-ui`.
+9. Testar login admin sem credenciais embutidas no HTML/JavaScript.
+10. Testar ativacao player.
+11. Registrar resultado.
 
 ## Rollback
 
@@ -106,4 +108,3 @@ Futuras:
 - Manifesto retorna.
 - Logs registram erros.
 - Backup existe antes do deploy.
-

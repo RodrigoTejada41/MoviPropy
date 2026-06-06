@@ -58,6 +58,28 @@ Status: Resolvido
 
 ---
 
+### ERR-005
+
+Data: 2026-06-06
+
+Descricao do Problema:
+- O build do frontend preenchia email e senha de desenvolvimento na tela de login.
+
+Causa Raiz:
+- Estados iniciais do formulario continham credenciais fixas para facilitar testes locais.
+
+Solucao Aplicada:
+- Iniciar email e senha vazios.
+- Adicionar teste automatizado de regressao.
+
+Como Evitar no Futuro:
+- Nunca embutir senha, token ou segredo em bundle frontend.
+- Dados de desenvolvimento devem ficar em documentacao local ou variaveis seguras.
+
+Status: Resolvido
+
+---
+
 ### ERR-004
 
 Data: 2026-06-06
