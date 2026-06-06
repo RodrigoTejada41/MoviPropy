@@ -89,6 +89,13 @@ cd frontend
 npm run build
 ```
 
+Testes automatizados do frontend:
+
+```powershell
+cd frontend
+npm test
+```
+
 Endpoints iniciais:
 
 - `GET /health`

@@ -22,6 +22,14 @@ docker compose down
 python -m pytest
 ```
 
+Frontend:
+
+```powershell
+cd frontend
+npm test
+npm run build
+```
+
 Com PostgreSQL:
 
 ```powershell
@@ -98,4 +106,3 @@ Verificar:
 - Sem dados sensiveis.
 - Sem runtime/logs versionados.
 - Sem violar ADRs.
-

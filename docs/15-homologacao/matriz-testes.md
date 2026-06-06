@@ -33,14 +33,15 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Google Drive especificacao | Nao | Nao | Revisao documental | Revisao documental | Nao | Documentado |
 | Google Drive implementacao inicial | Sim | Sim | Parcial | Sim | Pendente | Implementado parcial |
 | Google Drive OAuth real | Pendente | Pendente | Pendente | Pendente | Pendente | Pendente credenciais Google |
-| Frontend login | Build | Pendente | Parcial | Pendente | Pendente | Implementado parcial |
-| Frontend dashboard/listagens | Build | Pendente | Sim | Pendente | Pendente | Implementado parcial |
-| Frontend playlists | Build | Pendente | Sim | Pendente | Pendente | Implementado parcial |
-| Frontend sincronizacoes/configuracoes | Build | Pendente | Sim | Pendente | Pendente | Implementado parcial |
+| Frontend login | Parcial | Pendente | Parcial | Pendente | Pendente | Implementado parcial |
+| Frontend dashboard/listagens | Parcial | Pendente | Sim | Pendente | Pendente | Implementado parcial |
+| Frontend playlists | Parcial | Pendente | Sim | Pendente | Pendente | Implementado parcial |
+| Frontend sincronizacoes/configuracoes | Parcial | Pendente | Sim | Pendente | Pendente | Implementado parcial |
 
 ## Regras
 
 - Toda funcionalidade nova deve ter teste minimo.
 - Bug corrigido deve gerar teste de regressao.
 - Teste real de banco depende de `DATABASE_URL`.
+- Testes do frontend executam com `cd frontend; npm test`.
 - Teste offline do player e obrigatorio antes de homologacao.
