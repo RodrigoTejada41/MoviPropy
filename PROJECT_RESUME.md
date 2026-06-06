@@ -61,6 +61,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Escopo tecnico da integracao Google Drive documentado.
 - Especificacao Google Drive / Armazenamento consolidada com UX/UI, OAuth, endpoints futuros e checklist.
 - Implementacao inicial Google Drive criada com migrations, repository, OAuth, criptografia de tokens, pastas, importacao por metadados e tela administrativa.
+- Integracao Google Drive corrigida para salvar pasta raiz por criacao/localizacao automatica no Drive, validar acesso, exibir feedback visual, consultar quota, enviar/importar arquivos e ocultar campos tecnicos do usuario.
 - Especificacao completa do frontend documentada.
 - RBAC granular planejado e documentado.
 - Storage, upload e download controlado documentados.
@@ -135,6 +136,8 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Manifesto real depende de `dispositivos.playlist_atual_id`, playlist ativa e midias vinculadas.
 - Download controlado atual serve arquivo local de `MOVIPROGY_MEDIA_DIR`.
 - Google Drive possui implementacao inicial em `/api/integrations/google-drive`.
+- Pasta raiz do Google Drive e criada/localizada automaticamente pelo backend e validada antes de atualizar a interface.
+- Metadados tecnicos do Drive ficam ocultos no frontend e sao preenchidos pelo backend quando o arquivo e importado.
 - Fluxo real depende de `MOVIPROGY_GOOGLE_CLIENT_ID`, `MOVIPROGY_GOOGLE_CLIENT_SECRET`, `MOVIPROGY_GOOGLE_REDIRECT_URI` e `MOVIPROGY_GOOGLE_TOKEN_KEY`.
 - Sem credenciais Google, a tela opera com status e simulacao local controlada, mas nao autentica conta real.
 - Script `scripts/configure_google_oauth.ps1` cria `.env` local para OAuth real ou simulacao.

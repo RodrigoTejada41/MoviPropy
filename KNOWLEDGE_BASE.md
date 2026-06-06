@@ -48,7 +48,9 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 - Dados de runtime do container devem usar bind mounts em `runtime/` e `logs/` dentro do projeto.
 - Storage local inicial definido em `MOVIPROGY_MEDIA_DIR`.
 - Google Drive possui implementacao inicial de storage externo controlado pelo backend.
-- Google Drive / Armazenamento possui UX/UI, OAuth, endpoints, dados, seguranca e testes iniciais.
+- Google Drive / Armazenamento possui UX/UI, OAuth, endpoints, dados, seguranca, quota e testes iniciais.
+- Google Drive nao deve expor IDs, tokens, links internos, MIME, tamanho ou hash como campos manuais no frontend.
+- Pasta raiz do Google Drive deve ser criada/localizada automaticamente pela API Google Drive e persistida no banco pelo backend.
 - Player ainda nao definido.
 - Deploy ainda nao definido alem do container local.
 
@@ -98,7 +100,10 @@ Limite:
 
 - Documento principal: `docs/09-google-drive/integracao-google-drive.md`.
 - Namespace canonico: `/api/integrations/google-drive`.
-- Implementacao atual cobre status, connect, callback, disconnect, folders, root-folder, client-folder, files, import-media e validate-access.
+- Implementacao atual cobre status, connect, callback, disconnect, folders, root-folder, client-folder, files, import-media, upload-media e validate-access.
+- `POST /api/integrations/google-drive/root-folder` localiza ou cria a pasta raiz no Drive, salva o ID real no banco, valida acesso e registra operacao.
+- `POST /api/integrations/google-drive/import-media` busca metadados tecnicos do arquivo no backend; o frontend informa apenas cliente, tipo e arquivo selecionado.
+- `POST /api/integrations/google-drive/upload-media` envia arquivo ao Drive e salva metadados automaticamente sem limite manual no frontend.
 - OAuth real depende de variaveis Google Cloud.
 - `MOVIPROGY_GOOGLE_TOKEN_KEY` e obrigatoria para criptografar tokens no callback.
 - `MOVIPROGY_GOOGLE_OAUTH_SIMULATED=true` permite simulacao local de callback sem chamar Google.
@@ -147,7 +152,7 @@ Limite:
   - Logs/Auditoria.
   - Usuarios e permissoes.
   - Sincronizacoes com placeholder por falta de endpoint especifico.
-  - Google Drive / Armazenamento com status, OAuth, pastas e importacao por metadados.
+  - Google Drive / Armazenamento com status, OAuth, quota, pastas e importacao por arquivo selecionado.
   - Configuracoes com placeholder por falta de endpoints.
 - A tela de dispositivos nao deve inventar ultima comunicacao; enquanto a API nao retorna esse campo, mostrar `Nao informado`.
 - A tela de clientes nao deve inventar regiao, data de criacao ou ultimo sync; enquanto a API nao retorna esses campos, mostrar `Nao informado` ou deixar a acao desabilitada.

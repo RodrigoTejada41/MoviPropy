@@ -343,6 +343,8 @@ Funcionalidades:
 - Listar arquivos.
 - Importar midia.
 - Fazer upload.
+- Exibir quota usada, disponivel e total quando a API retornar.
+- Ocultar IDs, tokens, links internos, MIME type, tamanho e hash como campos de entrada manual.
 
 Layout:
 - Card de status da integracao.
@@ -381,7 +383,8 @@ APIs atuais:
 Implementacao atual:
 - Tela consome os endpoints acima.
 - Conexao real exige configuracao Google no backend.
-- Importacao exige metadados manuais do arquivo enquanto a API Google Drive real nao busca os arquivos.
+- Pasta raiz e salva por criacao/localizacao automatica no backend.
+- Importacao usa arquivo selecionado; metadados tecnicos sao preenchidos pelo backend via Google Drive.
 
 Documento principal:
 - `docs/09-google-drive/integracao-google-drive.md`.

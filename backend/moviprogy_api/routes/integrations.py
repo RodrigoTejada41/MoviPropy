@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, timezone
+import hashlib
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
 
 from moviprogy_api.domain.core import Midia
 from moviprogy_api.domain.google_drive import (
@@ -44,7 +45,11 @@ def get_google_drive_status(
     _admin=Depends(require_admin_user),
 ) -> GoogleDriveStatus:
     require_admin_permission(request, "integrations", "ler")
-    return _with_oauth_config(_google_repository(request).get_status())
+    repository = _google_repository(request)
+    payload = repository.get_status()
+    if payload.connected:
+        payload = repository.validate_access()
+    return _with_oauth_config(payload)
 
 
 @router.post("/connect", response_model=GoogleDriveAuthorizationUrl)
@@ -152,25 +157,40 @@ def set_google_drive_root_folder(
     _admin=Depends(require_admin_user),
 ) -> GoogleDriveFolder:
     require_admin_permission(request, "integrations", "administrar")
-    folder_id = payload.folder_id
-    if folder_id is None and payload.create_if_missing:
-        folder_id = generated_folder_id("gdrive-root")
-    if folder_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="folder_id obrigatorio",
+    repository = _google_repository(request)
+    if not repository.get_status().connected:
+        repository.record_operation(
+            operation="root-folder",
+            status="erro",
+            user_id=_user_id(request),
+            message="google drive desconectado",
         )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="google drive desconectado")
     try:
-        folder = _google_repository(request).save_root_folder(
-            folder_id,
-            payload.folder_name,
+        if payload.folder_id:
+            folder = GoogleDriveFolder(id=payload.folder_id, name=payload.folder_name, status="ok")
+        else:
+            folder = repository.find_or_create_root_folder(payload.folder_name)
+        saved = repository.save_root_folder(folder.id, folder.name)
+        repository.validate_access()
+        repository.record_operation(
+            operation="root-folder",
+            status="ok",
+            user_id=_user_id(request),
+            message=saved.name,
         )
     except RuntimeError as exc:
+        repository.record_operation(
+            operation="root-folder",
+            status="erro",
+            user_id=_user_id(request),
+            message=str(exc),
+        )
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
-    return folder
+    return saved
 
 
 @router.post("/client-folder", response_model=GoogleDriveFolder)
@@ -234,26 +254,45 @@ def import_google_drive_media(
         )
     require_admin_permission(request, "midias", "criar", payload.cliente_id)
     if not google_repository.get_status().connected:
+        google_repository.record_operation(
+            operation="import-media",
+            status="erro",
+            user_id=_user_id(request),
+            cliente_id=payload.cliente_id,
+            message="google drive desconectado",
+        )
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="google drive desconectado",
         )
+    try:
+        metadata = google_repository.get_file_metadata(payload.file_id)
+    except RuntimeError as exc:
+        google_repository.record_operation(
+            operation="import-media",
+            status="erro",
+            user_id=_user_id(request),
+            cliente_id=payload.cliente_id,
+            message=str(exc),
+        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     midia = Midia(
         id=f"midia-{uuid4().hex}",
         cliente_id=payload.cliente_id,
-        nome=payload.nome,
+        nome=payload.nome or metadata.name,
         tipo=payload.tipo,
         caminho=f"google_drive/{payload.file_id}",
-        tamanho=payload.tamanho,
-        sha256=payload.sha256,
+        tamanho=payload.tamanho if payload.tamanho is not None else metadata.size or 0,
+        sha256=payload.sha256 or metadata.sha256 or "0" * 64,
     )
     core_repository.save_midia(midia)
     google_repository.save_imported_media_metadata(
         midia_id=midia.id,
         file_id=payload.file_id,
-        folder_id=payload.folder_id,
-        mime_type=payload.google_drive_mime_type,
-        web_view_link=payload.google_drive_web_view_link,
+        folder_id=payload.folder_id or metadata.folder_id,
+        mime_type=payload.google_drive_mime_type or metadata.mime_type,
+        web_view_link=payload.google_drive_web_view_link or metadata.web_view_link,
+        download_link=payload.google_drive_download_link or metadata.download_link,
     )
     google_repository.record_operation(
         operation="import-media",
@@ -262,6 +301,86 @@ def import_google_drive_media(
         cliente_id=payload.cliente_id,
         midia_id=midia.id,
         message=payload.file_id,
+    )
+    return midia
+
+
+@router.post("/upload-media", response_model=Midia, status_code=status.HTTP_201_CREATED)
+async def upload_google_drive_media(
+    request: Request,
+    cliente_id: str = Form(min_length=1),
+    tipo: str = Form(min_length=1),
+    arquivo: UploadFile = File(...),
+    _admin=Depends(require_admin_user),
+) -> Midia:
+    core_repository = _core_repository(request)
+    google_repository = _google_repository(request)
+    if core_repository.get_cliente(cliente_id) is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="cliente_id invalido")
+    require_admin_permission(request, "midias", "criar", cliente_id)
+    drive_status = google_repository.get_status()
+    if not drive_status.connected:
+        google_repository.record_operation(
+            operation="upload-media",
+            status="erro",
+            user_id=_user_id(request),
+            cliente_id=cliente_id,
+            message="google drive desconectado",
+        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="google drive desconectado")
+    if not drive_status.root_folder_id:
+        google_repository.record_operation(
+            operation="upload-media",
+            status="erro",
+            user_id=_user_id(request),
+            cliente_id=cliente_id,
+            message="pasta raiz nao definida",
+        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="pasta raiz nao definida")
+    content = await arquivo.read()
+    filename = arquivo.filename or f"arquivo-{uuid4().hex}"
+    mime_type = arquivo.content_type or "application/octet-stream"
+    try:
+        metadata = google_repository.upload_file(
+            drive_status.root_folder_id,
+            filename,
+            mime_type,
+            content,
+        )
+    except RuntimeError as exc:
+        google_repository.record_operation(
+            operation="upload-media",
+            status="erro",
+            user_id=_user_id(request),
+            cliente_id=cliente_id,
+            message=str(exc),
+        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    midia = Midia(
+        id=f"midia-{uuid4().hex}",
+        cliente_id=cliente_id,
+        nome=metadata.name,
+        tipo=tipo,
+        caminho=f"google_drive/{metadata.id}",
+        tamanho=metadata.size or len(content),
+        sha256=metadata.sha256 or hashlib.sha256(content).hexdigest(),
+    )
+    core_repository.save_midia(midia)
+    google_repository.save_imported_media_metadata(
+        midia_id=midia.id,
+        file_id=metadata.id,
+        folder_id=metadata.folder_id or drive_status.root_folder_id,
+        mime_type=metadata.mime_type,
+        web_view_link=metadata.web_view_link,
+        download_link=metadata.download_link,
+    )
+    google_repository.record_operation(
+        operation="upload-media",
+        status="ok",
+        user_id=_user_id(request),
+        cliente_id=cliente_id,
+        midia_id=midia.id,
+        message=metadata.name,
     )
     return midia
 

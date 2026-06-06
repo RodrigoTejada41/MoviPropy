@@ -59,6 +59,7 @@ ALTER TABLE midias
     ADD COLUMN IF NOT EXISTS google_drive_folder_id TEXT,
     ADD COLUMN IF NOT EXISTS google_drive_mime_type TEXT,
     ADD COLUMN IF NOT EXISTS google_drive_web_view_link TEXT,
+    ADD COLUMN IF NOT EXISTS google_drive_download_link TEXT,
     ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'disponivel',
     ADD COLUMN IF NOT EXISTS imported_at TIMESTAMPTZ;
 

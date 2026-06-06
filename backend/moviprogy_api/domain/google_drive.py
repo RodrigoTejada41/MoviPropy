@@ -14,6 +14,10 @@ class GoogleDriveStatus(BaseModel):
     oauth_configured: bool = False
     oauth_simulated: bool = False
     missing_config: list[str] = []
+    storage_used_bytes: int | None = None
+    storage_limit_bytes: int | None = None
+    storage_available_bytes: int | None = None
+    file_count: int | None = None
 
 
 class GoogleDriveAuthorizationUrl(BaseModel):
@@ -24,7 +28,7 @@ class GoogleDriveAuthorizationUrl(BaseModel):
 class GoogleDriveRootFolderRequest(BaseModel):
     folder_id: str | None = None
     folder_name: str = Field(default="MoviProgy_Midias", min_length=1)
-    create_if_missing: bool = False
+    create_if_missing: bool = True
 
 
 class GoogleDriveClientFolderRequest(BaseModel):
@@ -51,8 +55,11 @@ class GoogleDriveFile(BaseModel):
     size: int | None = Field(default=None, ge=0)
     modified_at: datetime | None = None
     web_view_link: str | None = None
+    download_link: str | None = None
+    sha256: str | None = None
     import_status: str = "importado"
     cliente_id: str | None = None
+    folder_id: str | None = None
 
 
 class GoogleDriveFileList(BaseModel):
@@ -63,12 +70,13 @@ class GoogleDriveImportMediaRequest(BaseModel):
     cliente_id: str = Field(min_length=1)
     file_id: str = Field(min_length=1)
     tipo: str = Field(min_length=1)
-    nome: str = Field(min_length=1)
-    tamanho: int = Field(ge=0)
-    sha256: str = Field(min_length=64, max_length=64)
+    nome: str | None = None
+    tamanho: int | None = Field(default=None, ge=0)
+    sha256: str | None = Field(default=None, min_length=64, max_length=64)
     folder_id: str | None = None
     google_drive_mime_type: str | None = None
     google_drive_web_view_link: str | None = None
+    google_drive_download_link: str | None = None
 
 
 class GoogleDriveValidationRequest(BaseModel):

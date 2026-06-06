@@ -27,6 +27,37 @@ Status:
 
 ## Licoes registradas
 
+### ERR-015
+
+Data: 2026-06-05
+
+Descricao do Problema:
+- Tela Google Drive exigia campos tecnicos manuais e nao dava feedback claro ao salvar pasta raiz.
+- Backend reutilizava ID local salvo no banco sem confirmar a existencia real da pasta no Google Drive.
+
+Causa Raiz:
+- Implementacao inicial usava simulacao local e metadados informados pelo painel.
+- O fluxo nao validava o ID salvo contra a API real do Google Drive antes de reutilizar a pasta raiz.
+
+Solucao Aplicada:
+- Pasta raiz passou a ser localizada/criada automaticamente no Google Drive.
+- Backend valida acesso, atualiza status, registra operacao e salva o ID real retornado pelo Drive.
+- Frontend ocultou IDs, links, MIME, tamanho e hash manuais, exibindo apenas status, pasta, quota, pastas e arquivos.
+
+Como Evitar no Futuro:
+- Campos tecnicos de storage externo devem vir da API do provider, nao do usuario.
+- IDs salvos para provider externo devem ser validados contra o provider antes de reutilizacao.
+- Acoes administrativas devem exibir sucesso ou erro visivel.
+
+Arquivos Afetados:
+- `backend/moviprogy_api/routes/integrations.py`
+- `backend/moviprogy_api/repositories/postgres_google_drive.py`
+- `frontend/src/pages/ListPages.tsx`
+
+Status: Resolvido
+
+---
+
 ### ERR-014
 
 Data: 2026-06-04

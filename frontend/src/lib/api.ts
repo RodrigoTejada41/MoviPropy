@@ -106,11 +106,14 @@ export const api = {
   googleDriveFolders() {
     return request<{ items: GoogleDriveFolder[] }>("/api/integrations/google-drive/folders");
   },
-  googleDriveFiles(clienteId?: string) {
-    const query = clienteId ? `?cliente_id=${encodeURIComponent(clienteId)}` : "";
+  googleDriveFiles(filters: { clienteId?: string; folderId?: string } = {}) {
+    const params = new URLSearchParams();
+    if (filters.clienteId) params.set("cliente_id", filters.clienteId);
+    if (filters.folderId) params.set("folder_id", filters.folderId);
+    const query = params.toString() ? `?${params.toString()}` : "";
     return request<{ items: GoogleDriveFile[] }>(`/api/integrations/google-drive/files${query}`);
   },
-  googleDriveRootFolder(payload: { folder_id?: string | null; folder_name: string; create_if_missing: boolean }) {
+  googleDriveRootFolder(payload: { folder_name: string }) {
     return request<GoogleDriveFolder>("/api/integrations/google-drive/root-folder", {
       method: "POST",
       body: JSON.stringify(payload)
@@ -126,16 +129,20 @@ export const api = {
     cliente_id: string;
     file_id: string;
     tipo: string;
-    nome: string;
-    tamanho: number;
-    sha256: string;
-    folder_id?: string | null;
-    google_drive_mime_type?: string | null;
-    google_drive_web_view_link?: string | null;
   }) {
     return request<Midia>("/api/integrations/google-drive/import-media", {
       method: "POST",
       body: JSON.stringify(payload)
+    });
+  },
+  googleDriveUploadMedia(payload: { cliente_id: string; tipo: string; arquivo: File }) {
+    const formData = new FormData();
+    formData.set("cliente_id", payload.cliente_id);
+    formData.set("tipo", payload.tipo);
+    formData.set("arquivo", payload.arquivo);
+    return request<Midia>("/api/integrations/google-drive/upload-media", {
+      method: "POST",
+      body: formData
     });
   }
 };

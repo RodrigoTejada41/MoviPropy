@@ -33,8 +33,8 @@ Backend:
 - OAuth URL e callback.
 - Criptografia de tokens com `MOVIPROGY_GOOGLE_TOKEN_KEY`.
 - Persistencia de pasta raiz e pasta por cliente.
-- Importacao de midia por metadados conhecidos.
-- Listagem de arquivos ja importados.
+- Importacao de midia por arquivo selecionado, com metadados obtidos pelo backend na API Google Drive.
+- Listagem de arquivos encontrados na pasta raiz e arquivos ja importados.
 
 Frontend:
 - Tela Google Drive / Armazenamento.
@@ -43,9 +43,9 @@ Frontend:
 - Formularios de pasta raiz, pasta de cliente e importacao.
 
 Limites:
-- Ainda nao lista pastas reais do Google Drive por API externa.
-- Ainda nao busca metadados reais do arquivo no Drive.
-- Importacao exige `nome`, `tamanho` e `sha256` informados pelo painel.
+- Lista arquivos reais do Google Drive quando a conta esta conectada e a pasta raiz foi salva.
+- Busca metadados reais do arquivo no Drive durante importacao.
+- O painel nao deve solicitar `folder_id`, `file_id`, links, MIME type, tamanho ou hash como campos manuais.
 - Homologacao real exige credenciais Google Cloud.
 
 ## Configuracao OAuth local
@@ -372,12 +372,14 @@ Query: `parent_folder_id` opcional.
 ### POST /api/integrations/google-drive/root-folder
 
 Finalidade: definir pasta raiz.
-Payload: `folder_id` ou solicitacao para criar `MoviProgy_Midias`.
+Payload: `folder_name`.
+Regra: backend deve localizar ou criar a pasta no Drive, salvar o ID real, validar acesso e registrar operacao.
 
 ### POST /api/integrations/google-drive/client-folder
 
 Finalidade: criar ou vincular pasta do cliente.
-Payload: `cliente_id`, `folder_id` opcional, `folder_name` opcional.
+Payload: `cliente_id`.
+Regra: backend define nome e ID da pasta automaticamente.
 
 ### GET /api/integrations/google-drive/files
 
@@ -388,6 +390,13 @@ Query: `cliente_id`, `folder_id`, `mime_type` opcional.
 
 Finalidade: importar arquivo do Drive para o cadastro de midias.
 Payload: `cliente_id`, `file_id`, `tipo`.
+Regra: `nome`, `tamanho`, MIME type, links e pasta sao preenchidos pelo backend usando metadados do Drive.
+
+### POST /api/integrations/google-drive/upload-media
+
+Finalidade: enviar arquivo para o Drive e cadastrar midia.
+Payload multipart: `cliente_id`, `tipo`, `arquivo`.
+Regra: backend valida conexao, usa pasta raiz salva, envia ao Drive, captura metadados retornados e registra operacao.
 
 ### POST /api/integrations/google-drive/validate-access
 

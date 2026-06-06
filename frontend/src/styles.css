@@ -698,6 +698,11 @@ th {
   color: #9f1d1d;
 }
 
+.stateSuccess {
+  border-color: #9bd8b7;
+  color: #16643f;
+}
+
 .overviewPage {
   gap: 30px;
   margin: 0 auto;
@@ -1390,6 +1395,33 @@ th {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.driveQuotaGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.driveQuotaGrid div {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid #dce3ea;
+  border-radius: 12px;
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+}
+
+.driveQuotaGrid span {
+  color: #5d6978;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.driveQuotaGrid strong {
+  color: #191c1e;
+  font-size: 22px;
 }
 
 .driveStatusCard,

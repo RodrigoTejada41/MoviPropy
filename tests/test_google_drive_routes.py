@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 
 from moviprogy_api.domain.core import Cliente
-from moviprogy_api.domain.google_drive import GoogleDriveFolder, GoogleDriveStatus
+from moviprogy_api.domain.google_drive import GoogleDriveFile, GoogleDriveFolder, GoogleDriveStatus
 from moviprogy_api.main import create_app
 from test_admin_routes import ADMIN_HEADERS, FakeAuthRepository, FakeCoreRepository
 
@@ -18,6 +18,8 @@ class FakeGoogleDriveRepository:
         self.access_token_encrypted = ""
         self.refresh_token_encrypted = ""
         self.metadata: dict[str, dict] = {}
+        self.root_lookup_count = 0
+        self.uploads = []
 
     def save_oauth_state(self, state: str, user_id: str, expires_at: datetime) -> None:
         self.states[state] = (user_id, expires_at, False)
@@ -65,6 +67,17 @@ class FakeGoogleDriveRepository:
         self.status.root_folder_name = folder_name
         return folder
 
+    def find_or_create_root_folder(self, folder_name: str):
+        self.root_lookup_count += 1
+        if not self.status.connected:
+            raise RuntimeError("google drive desconectado")
+        existing = next((item for item in self.folders if item.name == folder_name and item.cliente_id is None), None)
+        if existing is not None:
+            return existing
+        folder = GoogleDriveFolder(id=f"drive-folder-{folder_name}", name=folder_name, status="ok")
+        self.folders.insert(0, folder)
+        return folder
+
     def save_client_folder(self, cliente_id: str, folder_id: str, folder_name: str):
         folder = GoogleDriveFolder(
             id=folder_id,
@@ -86,6 +99,30 @@ class FakeGoogleDriveRepository:
             and (folder_id is None or item.id == folder_id)
         ]
 
+    def get_file_metadata(self, file_id):
+        return GoogleDriveFile(
+            id=file_id,
+            name="midia-drive.png",
+            mime_type="image/png",
+            size=2048,
+            modified_at=datetime.now(timezone.utc),
+            web_view_link=f"https://drive.google.com/file/d/{file_id}/view",
+            cliente_id="cliente-001",
+        )
+
+    def upload_file(self, folder_id, name, mime_type, content):
+        self.uploads.append((folder_id, name, mime_type, content))
+        return GoogleDriveFile(
+            id="uploaded-file-001",
+            name=name,
+            mime_type=mime_type,
+            size=len(content),
+            web_view_link="https://drive.google.com/file/d/uploaded-file-001/view",
+            download_link="https://drive.google.com/uc?id=uploaded-file-001&export=download",
+            folder_id=folder_id,
+            sha256="b" * 64,
+        )
+
     def save_imported_media_metadata(
         self,
         midia_id,
@@ -93,12 +130,14 @@ class FakeGoogleDriveRepository:
         folder_id,
         mime_type,
         web_view_link,
+        download_link=None,
     ):
         self.metadata[midia_id] = {
             "file_id": file_id,
             "folder_id": folder_id,
             "mime_type": mime_type,
             "web_view_link": web_view_link,
+            "download_link": download_link,
         }
 
     def validate_access(self):
@@ -217,6 +256,32 @@ def test_google_drive_root_and_client_folder_flow(monkeypatch):
     assert client_response.json()["cliente_id"] == "cliente-001"
 
 
+def test_google_drive_root_folder_auto_creates_validates_and_logs():
+    app = _create_test_app()
+    app.state.google_drive_repository.status = GoogleDriveStatus(
+        connected=True,
+        status="connected",
+        email="drive@moviprogy.local",
+    )
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/integrations/google-drive/root-folder",
+        headers=ADMIN_HEADERS,
+        json={"folder_name": "MoviProgy_Midias"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["id"] == "drive-folder-MoviProgy_Midias"
+    assert app.state.google_drive_repository.status.root_folder_id == "drive-folder-MoviProgy_Midias"
+    assert app.state.google_drive_repository.status.last_validation_at is not None
+    assert app.state.google_drive_repository.root_lookup_count == 1
+    assert any(
+        item["operation"] == "root-folder" and item["status"] == "ok"
+        for item in app.state.google_drive_repository.operations
+    )
+
+
 def test_google_drive_import_media_creates_midia_metadata():
     app = _create_test_app()
     app.state.google_drive_repository.status = GoogleDriveStatus(
@@ -247,3 +312,61 @@ def test_google_drive_import_media_creates_midia_metadata():
     payload = response.json()
     assert payload["caminho"] == "google_drive/drive-file-001"
     assert app.state.google_drive_repository.metadata[payload["id"]]["file_id"] == "drive-file-001"
+
+
+def test_google_drive_import_media_uses_drive_metadata():
+    app = _create_test_app()
+    app.state.google_drive_repository.status = GoogleDriveStatus(
+        connected=True,
+        status="connected",
+        email="drive@moviprogy.local",
+        root_folder_id="root-001",
+        root_folder_name="MoviProgy_Midias",
+    )
+    app.state.core_repository.save_cliente(Cliente(id="cliente-001", nome="Cliente Um"))
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/integrations/google-drive/import-media",
+        headers=ADMIN_HEADERS,
+        json={
+            "cliente_id": "cliente-001",
+            "file_id": "drive-file-002",
+            "tipo": "imagem",
+        },
+    )
+
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["nome"] == "midia-drive.png"
+    assert payload["tamanho"] == 2048
+    assert payload["sha256"] == "0" * 64
+    assert app.state.google_drive_repository.metadata[payload["id"]]["mime_type"] == "image/png"
+
+
+def test_google_drive_upload_media_sends_file_to_root_folder_and_saves_metadata():
+    app = _create_test_app()
+    app.state.google_drive_repository.status = GoogleDriveStatus(
+        connected=True,
+        status="connected",
+        email="drive@moviprogy.local",
+        root_folder_id="root-001",
+        root_folder_name="MoviProgy_Midias",
+    )
+    app.state.core_repository.save_cliente(Cliente(id="cliente-001", nome="Cliente Um"))
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/integrations/google-drive/upload-media",
+        headers=ADMIN_HEADERS,
+        data={"cliente_id": "cliente-001", "tipo": "imagem"},
+        files={"arquivo": ("logo.png", b"fake-image", "image/png")},
+    )
+
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["nome"] == "logo.png"
+    assert payload["tamanho"] == 10
+    assert payload["sha256"] == "b" * 64
+    assert app.state.google_drive_repository.uploads[0][0] == "root-001"
+    assert app.state.google_drive_repository.metadata[payload["id"]]["file_id"] == "uploaded-file-001"

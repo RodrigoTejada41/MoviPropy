@@ -77,6 +77,10 @@ export type GoogleDriveStatus = {
   oauth_configured: boolean;
   oauth_simulated: boolean;
   missing_config: string[];
+  storage_used_bytes?: number | null;
+  storage_limit_bytes?: number | null;
+  storage_available_bytes?: number | null;
+  file_count?: number | null;
 };
 
 export type GoogleDriveFolder = {
@@ -93,6 +97,9 @@ export type GoogleDriveFile = {
   size?: number | null;
   modified_at?: string | null;
   web_view_link?: string | null;
+  download_link?: string | null;
+  folder_id?: string | null;
+  sha256?: string | null;
   import_status: string;
   cliente_id?: string | null;
 };
