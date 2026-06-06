@@ -8,7 +8,10 @@ Definir eventos, metricas e logs necessarios para operar o sistema.
 
 - Health check existe.
 - Readiness com banco existe.
-- Logs estruturados ainda nao foram implementados.
+- Middleware de logs estruturados HTTP implementado.
+- Cada resposta recebe `X-Request-ID`.
+- Logs HTTP registram evento, request ID, metodo, rota, status e duracao.
+- Headers e corpos nao sao registrados.
 
 ## Health checks
 
@@ -25,6 +28,7 @@ Regras:
 
 ### API
 
+- Requisicoes HTTP estruturadas.
 - Startup.
 - Erro de migration.
 - Erro de banco.
@@ -102,3 +106,8 @@ Campos:
 - Health e readiness sao monitoraveis.
 - Eventos de auditoria sao rastreaveis por usuario/cliente.
 
+## Formato atual
+
+```json
+{"event":"http_request","request_id":"...","method":"GET","path":"/health","status_code":200,"duration_ms":1.2}
+```

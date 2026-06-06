@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from moviprogy_api.database import get_database_url
 from moviprogy_api.domain.devices import DeviceRegistry
+from moviprogy_api.observability import StructuredRequestLoggingMiddleware
 from moviprogy_api.repositories.postgres_auth import PostgresAuthRepository
 from moviprogy_api.repositories.postgres_core import PostgresCoreRepository
 from moviprogy_api.repositories.postgres_devices import (
@@ -36,6 +37,7 @@ def _max_upload_bytes() -> int:
 
 def create_app() -> FastAPI:
     app = FastAPI(title="MoviProgy API", version="0.1.0")
+    app.add_middleware(StructuredRequestLoggingMiddleware)
     app.state.media_dir = _media_dir()
     app.state.tmp_dir = _tmp_dir()
     app.state.max_upload_bytes = _max_upload_bytes()

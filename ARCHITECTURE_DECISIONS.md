@@ -1022,6 +1022,27 @@ Consequencias:
 
 ---
 
+### ADR-037 - Log HTTP estruturado sem dados sensiveis
+
+Status: Aprovada
+
+Data: 2026-06-06
+
+Contexto:
+- Health checks existem, mas os logs HTTP nao tinham formato correlacionavel.
+- Headers e corpos podem conter tokens, senhas e dados pessoais.
+
+Decisao:
+- Registrar cada requisicao em JSON com request ID, metodo, path, status e duracao.
+- Retornar `X-Request-ID` ao cliente.
+- Nao registrar headers, query, corpo ou credenciais.
+
+Consequencias:
+- Operacao pode correlacionar erro do cliente com logs do backend.
+- Eventos de dominio continuam nas tabelas de auditoria e telemetria existentes.
+
+---
+
 ### ADR-034 - Implementacao inicial Google Drive controlada pelo backend
 
 Status: Aprovada

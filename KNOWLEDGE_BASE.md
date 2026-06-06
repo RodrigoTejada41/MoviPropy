@@ -309,3 +309,11 @@ Motivo:
 - Atualizar este arquivo sempre que uma escolha tecnica for aprovada.
 - Nao substituir conhecimento historico; adicionar nova entrada com contexto.
 - Se uma decisao mudar, registrar motivo e impacto.
+
+## Observabilidade HTTP
+
+- Logger: `moviprogy.request`.
+- Formato JSON em uma linha.
+- Campos: `event`, `request_id`, `method`, `path`, `status_code`, `duration_ms`.
+- Resposta inclui `X-Request-ID`.
+- Nao registrar Authorization, cookies, corpo ou query sensivel.
