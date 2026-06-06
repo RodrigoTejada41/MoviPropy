@@ -14,7 +14,8 @@ O player deve baixar as midias, armazenar localmente e continuar exibindo conteu
 - PostgreSQL, API, frontend e player integrados por Docker Compose.
 - Testes automatizados de backend, frontend e player executados por CI.
 - Player PWA offline-first implementado com IndexedDB, service worker e telemetria.
-- Deploy publico depende da definicao de provedor, dominio, HTTPS e storage.
+- Pipeline DEV/PROD implementado; DEV usa `develop` e PROD usa `main` com release aprovada.
+- Deploy PROD permanece bloqueado ate dominio, HTTPS e aprovacao.
 
 ## Backend
 
@@ -240,6 +241,7 @@ $headers = @{ Authorization = "Bearer $($login.access_token)" }
 - `docs/12-storage/upload-download.md`
 - `docs/13-player/especificacao-player.md`
 - `docs/14-operacao/deploy-producao.md`
+- `docs/14-operacao/ambientes-dev-prod.md`
 - `docs/14-operacao/backup-restore.md`
 - `docs/14-operacao/observabilidade-logs.md`
 - `docs/15-homologacao/checklist-homologacao.md`

@@ -1,0 +1,131 @@
+services:
+  moviprogy-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB obrigatorio}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER obrigatorio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD obrigatorio}
+    volumes:
+      - ${DATA_ROOT:?DATA_ROOT obrigatorio}/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+  moviprogy-api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?ADMIN_API_TOKEN obrigatorio}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@moviprogy-db:5432/${POSTGRES_DB}
+      MOVIPROGY_ADMIN_EMAIL: ${MOVIPROGY_ADMIN_EMAIL:?MOVIPROGY_ADMIN_EMAIL obrigatorio}
+      MOVIPROGY_ADMIN_PASSWORD: ${MOVIPROGY_ADMIN_PASSWORD:?MOVIPROGY_ADMIN_PASSWORD obrigatorio}
+      MOVIPROGY_ALLOWED_HOSTS: ${MOVIPROGY_ALLOWED_HOSTS:?MOVIPROGY_ALLOWED_HOSTS obrigatorio}
+      MOVIPROGY_DATA_DIR: /app/runtime/data
+      MOVIPROGY_ENVIRONMENT: ${MOVIPROGY_ENVIRONMENT:?MOVIPROGY_ENVIRONMENT obrigatorio}
+      MOVIPROGY_GOOGLE_CLIENT_ID: ${MOVIPROGY_GOOGLE_CLIENT_ID:-}
+      MOVIPROGY_GOOGLE_CLIENT_SECRET: ${MOVIPROGY_GOOGLE_CLIENT_SECRET:-}
+      MOVIPROGY_GOOGLE_CONNECTED_EMAIL: ${MOVIPROGY_GOOGLE_CONNECTED_EMAIL:-}
+      MOVIPROGY_GOOGLE_OAUTH_SIMULATED: ${MOVIPROGY_GOOGLE_OAUTH_SIMULATED:-false}
+      MOVIPROGY_GOOGLE_REDIRECT_URI: ${MOVIPROGY_GOOGLE_REDIRECT_URI:-}
+      MOVIPROGY_GOOGLE_SIMULATED_EMAIL: ${MOVIPROGY_GOOGLE_SIMULATED_EMAIL:-simulado@moviprogy.local}
+      MOVIPROGY_GOOGLE_TOKEN_KEY: ${MOVIPROGY_GOOGLE_TOKEN_KEY:?MOVIPROGY_GOOGLE_TOKEN_KEY obrigatorio}
+      MOVIPROGY_MEDIA_DIR: /app/runtime/media
+      MOVIPROGY_MAX_UPLOAD_BYTES: ${MOVIPROGY_MAX_UPLOAD_BYTES:-536870912}
+      MOVIPROGY_TMP_DIR: /app/runtime/tmp
+    ports:
+      - "${API_BIND_IP:-127.0.0.1}:${API_PORT:-8000}:8000"
+    volumes:
+      - ${DATA_ROOT}/data:/app/runtime/data
+      - ${DATA_ROOT}/media:/app/runtime/media
+      - ${DATA_ROOT}/tmp:/app/runtime/tmp
+      - ${LOG_ROOT:?LOG_ROOT obrigatorio}/api:/app/logs
+    read_only: true
+    tmpfs:
+      - /tmp
+    depends_on:
+      moviprogy-db:
+        condition: service_healthy
+    restart: unless-stopped
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  moviprogy-frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:?FRONTEND_PORT obrigatorio}:80"
+    depends_on:
+      moviprogy-api:
+        condition: service_healthy
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health-ui"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  moviprogy-player:
+    build:
+      context: ../player
+      dockerfile: Dockerfile
+    ports:
+      - "${PLAYER_PORT:?PLAYER_PORT obrigatorio}:80"
+    depends_on:
+      moviprogy-api:
+        condition: service_healthy
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 64m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health-player"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

@@ -100,6 +100,12 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Backup automatizado gera dump PostgreSQL, copia midias e cria manifesto com checksum.
 - Restore automatizado foi validado em banco temporario isolado.
 - CI criado para backend com PostgreSQL real e frontend com testes/build.
+- Estrategia de ambientes criada com dados, banco, logs, storage, configuracoes e Compose isolados para DEV e PROD.
+- Branch `develop` definida para deploy automatico DEV apos CI.
+- Branch `main` definida para PROD com tag, confirmacao e aprovacao.
+- Scripts remotos de deploy, smoke, backup e rollback criados.
+- VPS preparada com Docker, Compose, usuario de deploy, firewall e fail2ban.
+- API desabilita documentacao publica em PROD e valida hosts permitidos.
 - Manifesto do player inclui `media_id`, tipo e duracao para permitir download e reproducao pelo player real.
 - Design do player PWA offline-first registrado e implementado conforme `docs/superpowers/specs/2026-06-06-player-pwa-design.md`.
 
@@ -136,6 +142,9 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 ## Pendencias externas
 
 - Credenciais reais Google Drive para nova homologacao externa, se a conta configurada for alterada.
+- Dominio e certificados HTTPS para producao.
+- Aprovacao explicita para ativar `PRODUCTION_APPROVED=true`.
+- Ampliacao da VPS antes de executar DEV e PROD simultaneamente.
 
 ## Limitacoes atuais
 
@@ -175,5 +184,6 @@ Backend administrativo e frontend operacional consolidados.
 Pendencias prioritarias:
 - Ampliar cobertura E2E do painel para fluxos administrativos completos.
 - Testes de carga reais em volume de producao continuam recomendados antes de deploy publico.
-- Definir dominio, HTTPS, storage e monitoramento do ambiente de producao.
-- Executar homologacao offline e de producao.
+- Homologar o ambiente DEV publicado.
+- Definir dominio, HTTPS e monitoramento do ambiente de producao.
+- Executar homologacao de producao somente apos aprovacao.

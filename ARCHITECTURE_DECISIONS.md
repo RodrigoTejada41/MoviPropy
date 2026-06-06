@@ -1145,3 +1145,31 @@ Consequencias:
 - Navegador precisa suportar IndexedDB, Web Crypto e service worker.
 - Operacao kiosk nativa por sistema operacional continua sendo configuracao de deploy.
 - Wrapper Electron ou Android nativo permanece pos-MVP.
+
+---
+
+### ADR-040 - Ambientes DEV e PROD isolados
+
+Status: Aprovada
+
+Data: 2026-06-06
+
+Contexto:
+- Alteracoes nao podem chegar diretamente ao ambiente usado por clientes.
+- Banco, storage, logs e credenciais compartilhados permitiriam contaminacao entre testes e producao.
+
+Decisao:
+- Usar `develop` para DEV e `main` para PROD.
+- Usar projetos Docker Compose e diretorios persistentes independentes.
+- Executar deploy DEV automaticamente somente apos CI.
+- Executar PROD manualmente, a partir de tag em `main`, com aprovacao e bloqueio adicional no servidor.
+- Manter arquivos `.env` reais fora do Git.
+
+Motivo:
+- Garantir rastreabilidade, isolamento e rollback.
+- Impedir publicacao acidental ou uso de dados PROD em DEV.
+
+Consequencias:
+- Toda mudanca passa por DEV e homologacao.
+- PROD depende de dominio, HTTPS, capacidade e aprovacao.
+- A VPS atual precisa ser ampliada antes de manter os dois ambientes ativos simultaneamente.

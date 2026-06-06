@@ -6,9 +6,11 @@ Definir o processo de publicacao em ambiente produtivo.
 
 ## Estado atual
 
-- Docker local integrado existe para frontend, API e PostgreSQL.
-- Painel e publicado localmente em `http://127.0.0.1:8080`.
-- Deploy producao ainda nao foi implementado.
+- Compose independente para DEV e PROD implementado em `deploy/compose.yml`.
+- Deploy automatico DEV configurado para a branch `develop`.
+- Deploy PROD configurado como manual, versionado e protegido.
+- PROD permanece bloqueado ate dominio, HTTPS, capacidade e aprovacao.
+- Detalhes: `docs/14-operacao/ambientes-dev-prod.md`.
 
 ## Ambientes
 

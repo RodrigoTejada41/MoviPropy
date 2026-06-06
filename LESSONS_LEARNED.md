@@ -27,6 +27,33 @@ Status:
 
 ## Licoes registradas
 
+### ERR-018
+
+Data: 2026-06-06
+
+Descricao do Problema:
+- O backend passava localmente, mas falhava no GitHub Actions ao importar `TestClient`.
+
+Causa Raiz:
+- `httpx` existia no ambiente local, mas nao estava declarado no extra de dependencias de teste.
+
+Solucao Aplicada:
+- Adicionar `httpx` ao extra `dev`.
+- Fazer CI e validacao PROD instalarem `.[dev]`.
+
+Como Evitar no Futuro:
+- Toda dependencia usada por testes deve estar declarada no `pyproject.toml`.
+- Validar a suite em ambiente limpo pelo CI antes do merge.
+
+Arquivos Afetados:
+- `pyproject.toml`
+- `.github/workflows/ci.yml`
+- `.github/workflows/deploy-production.yml`
+
+Status: Resolvido
+
+---
+
 ### ERR-017
 
 Data: 2026-06-06

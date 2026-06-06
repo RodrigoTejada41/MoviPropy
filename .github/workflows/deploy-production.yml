@@ -1,0 +1,108 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Tag da release aprovada, por exemplo v1.0.0
+        required: true
+        type: string
+      confirmation:
+        description: Digite PUBLICAR-PRODUCAO para confirmar
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'PUBLICAR-PRODUCAO'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.release_tag }}
+      - name: Validate release tag
+        run: |
+          git fetch origin main --tags
+          git tag --points-at HEAD | grep -Fx "${{ inputs.release_tag }}"
+          git merge-base --is-ancestor HEAD origin/main
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Test backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pytest -q
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            player/package-lock.json
+      - name: Test frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Test player
+        working-directory: player
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.release_tag }}
+      - name: Configure SSH
+        env:
+          PROD_SSH_PRIVATE_KEY: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$PROD_SSH_PRIVATE_KEY" > ~/.ssh/moviprogy
+          chmod 600 ~/.ssh/moviprogy
+          ssh-keyscan -H "$PROD_HOST" >> ~/.ssh/known_hosts
+      - name: Package release
+        run: |
+          RELEASE="${{ inputs.release_tag }}-${GITHUB_SHA::12}"
+          echo "RELEASE=$RELEASE" >> "$GITHUB_ENV"
+          git archive --format=tar.gz --output="/tmp/$RELEASE.tar.gz" "$GITHUB_SHA"
+      - name: Deploy PROD
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_USER: ${{ secrets.PROD_USER }}
+          PRODUCTION_BASE_URL: ${{ secrets.PRODUCTION_BASE_URL }}
+          PRODUCTION_PLAYER_URL: ${{ secrets.PRODUCTION_PLAYER_URL }}
+        run: |
+          REMOTE_ROOT="/opt/moviprogy/prod"
+          ssh -i ~/.ssh/moviprogy "$PROD_USER@$PROD_HOST" \
+            "mkdir -p '$REMOTE_ROOT/incoming' '$REMOTE_ROOT/releases/$RELEASE'"
+          scp -i ~/.ssh/moviprogy "/tmp/$RELEASE.tar.gz" \
+            "$PROD_USER@$PROD_HOST:$REMOTE_ROOT/incoming/$RELEASE.tar.gz"
+          ssh -i ~/.ssh/moviprogy "$PROD_USER@$PROD_HOST" "
+            set -e
+            tar -xzf '$REMOTE_ROOT/incoming/$RELEASE.tar.gz' -C '$REMOTE_ROOT/releases/$RELEASE'
+            chmod +x '$REMOTE_ROOT/releases/$RELEASE/deploy/scripts/'*.sh
+            '$REMOTE_ROOT/releases/$RELEASE/deploy/scripts/deploy.sh' production '$REMOTE_ROOT/releases/$RELEASE'
+            PRODUCTION_BASE_URL='$PRODUCTION_BASE_URL' PRODUCTION_PLAYER_URL='$PRODUCTION_PLAYER_URL' \
+              '$REMOTE_ROOT/releases/$RELEASE/deploy/scripts/smoke_remote.sh' production
+            rm -f '$REMOTE_ROOT/incoming/$RELEASE.tar.gz'
+          "
