@@ -97,6 +97,8 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Proxy do frontend encaminha `/health` e `/health/ready` para a API.
 - Middleware de observabilidade registra requisicoes HTTP em JSON e retorna `X-Request-ID`.
 - Logs estruturados nao incluem Authorization, corpo ou credenciais.
+- Backup automatizado gera dump PostgreSQL, copia midias e cria manifesto com checksum.
+- Restore automatizado foi validado em banco temporario isolado.
 - Manifesto do player inclui `media_id`, tipo e duracao para permitir download e reproducao pelo player real.
 - Design aprovado do player PWA offline-first registrado em `docs/superpowers/specs/2026-06-06-player-pwa-design.md`.
 

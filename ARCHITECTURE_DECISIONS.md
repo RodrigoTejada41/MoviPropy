@@ -1043,6 +1043,28 @@ Consequencias:
 
 ---
 
+### ADR-038 - Backup com restore isolado verificavel
+
+Status: Aprovada
+
+Data: 2026-06-06
+
+Contexto:
+- O procedimento manual nao verificava checksum nem restauracao.
+- Testar restore diretamente no banco operacional e inseguro.
+
+Decisao:
+- Gerar dump PostgreSQL custom, copia de midias e manifesto SHA-256.
+- Excluir `backups/` do versionamento.
+- Testar restauracao em banco temporario criado com nome aleatorio.
+- Remover banco temporario ao final.
+
+Consequencias:
+- Backup local passa a ser verificavel e repetivel.
+- Segredos de `.env` nao entram no pacote de backup.
+
+---
+
 ### ADR-034 - Implementacao inicial Google Drive controlada pelo backend
 
 Status: Aprovada

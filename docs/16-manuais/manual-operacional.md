@@ -40,6 +40,18 @@ Stack integrado:
 
 O resultado deve confirmar frontend, health, readiness, login, rota protegida e logout.
 
+## Backup e restore
+
+```powershell
+.\scripts\backup_stack.ps1
+$backup = Get-ChildItem backups -Directory |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
+.\scripts\test_restore.ps1 -BackupPath $backup.FullName
+```
+
+O teste de restore usa banco temporario e nao altera o banco operacional.
+
 Com PostgreSQL:
 
 ```powershell

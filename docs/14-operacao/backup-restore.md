@@ -14,22 +14,34 @@ Definir como proteger e restaurar dados criticos.
 
 ## Banco PostgreSQL
 
-Backup local:
+Backup local automatizado:
 
 ```powershell
-docker exec moviprogy-db pg_dump -U moviprogy moviprogy > backups/moviprogy.sql
+.\scripts\backup_stack.ps1
 ```
 
-Restore local:
+O script:
+- Gera dump PostgreSQL no formato custom.
+- Copia `runtime/media`.
+- Cria `manifest.json` com SHA-256, tamanhos e quantidade de arquivos.
+- Nao inclui `.env` ou segredos.
+
+Teste de restore isolado:
 
 ```powershell
-Get-Content backups/moviprogy.sql | docker exec -i moviprogy-db psql -U moviprogy moviprogy
+$backup = Get-ChildItem backups -Directory |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
+.\scripts\test_restore.ps1 -BackupPath $backup.FullName
 ```
+
+O teste cria banco temporario, restaura o dump, valida tabelas e remove o banco.
 
 Regra:
 - Criar pasta `backups/` fora do versionamento.
 - Nunca commitar dump de banco.
 - Validar restore em ambiente separado.
+- Nunca executar restore destrutivo no banco operacional como teste.
 
 ## Storage local
 
@@ -75,4 +87,3 @@ Criterios:
 - Login funciona.
 - Playlist e midias existem.
 - Player consegue consultar manifesto.
-

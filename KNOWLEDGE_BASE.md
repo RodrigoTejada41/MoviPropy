@@ -317,3 +317,10 @@ Motivo:
 - Campos: `event`, `request_id`, `method`, `path`, `status_code`, `duration_ms`.
 - Resposta inclui `X-Request-ID`.
 - Nao registrar Authorization, cookies, corpo ou query sensivel.
+
+## Backup local
+
+- Criar com `scripts/backup_stack.ps1`.
+- Validar com `scripts/test_restore.ps1`.
+- Dumps e midias ficam em `backups/`, fora do Git.
+- O teste de restore usa banco temporario e nunca sobrescreve `moviprogy`.

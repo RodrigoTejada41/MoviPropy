@@ -32,6 +32,8 @@ Definir criterios para aprovar uma versao.
 
 ## Banco
 
+- Backup gera dump e manifesto com checksum.
+- Restore e validado em banco temporario.
 - Migrations executam.
 - Dados persistem apos restart.
 - Queries usam parametros.
