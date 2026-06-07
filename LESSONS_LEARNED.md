@@ -54,6 +54,29 @@ Status: Resolvido
 
 ---
 
+### ERR-019
+
+Data: 2026-06-06
+
+Descricao do Problema:
+- O Vitest tentou executar o arquivo E2E do Playwright durante `npm test`.
+
+Causa Raiz:
+- O diretorio `frontend/e2e` nao estava excluido da descoberta do Vitest.
+
+Solucao Aplicada:
+- Excluir `e2e/**` na configuracao do Vitest.
+- Manter comando separado `npm run test:e2e`.
+- Ignorar `test-results` e `playwright-report` no Git.
+
+Como Evitar no Futuro:
+- Separar testes unitarios e E2E por runner e diretorio.
+- Validar no ambiente local a mesma sequencia executada pelo CI.
+
+Status: Resolvido
+
+---
+
 ### ERR-017
 
 Data: 2026-06-06

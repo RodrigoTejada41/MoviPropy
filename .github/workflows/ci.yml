@@ -59,6 +59,10 @@ jobs:
         run: npm ci
       - name: Test frontend
         run: npm test
+      - name: Install E2E browser
+        run: npx playwright install --with-deps chromium
+      - name: Test frontend E2E
+        run: npm run test:e2e
       - name: Build frontend
         run: npm run build
 

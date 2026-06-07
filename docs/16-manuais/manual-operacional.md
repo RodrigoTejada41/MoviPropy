@@ -73,7 +73,10 @@ $login = Invoke-RestMethod `
   -Method Post `
   -Uri "http://127.0.0.1:8000/api/auth/login" `
   -ContentType "application/json" `
-  -Body '{"email":"admin@moviprogy.local","senha":"moviprogy_admin_dev_password"}'
+  -Body (@{
+    email = $env:MOVIPROGY_ADMIN_EMAIL
+    senha = $env:MOVIPROGY_ADMIN_PASSWORD
+  } | ConvertTo-Json)
 $headers = @{ Authorization = "Bearer $($login.access_token)" }
 ```
 

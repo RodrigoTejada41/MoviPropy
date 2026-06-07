@@ -54,6 +54,8 @@ jobs:
         run: |
           npm ci
           npm test
+          npx playwright install --with-deps chromium
+          npm run test:e2e
           npm run build
       - name: Test player
         working-directory: player

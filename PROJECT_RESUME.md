@@ -90,6 +90,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Upload local de midia, criacao/publicacao de playlists e criacao/inativacao de usuarios foram conectados no frontend.
 - Gestao de usuarios permite consultar e criar vinculos com clientes e conceder permissoes por recurso, acao e escopo.
 - Infraestrutura de testes do frontend criada com Vitest e Testing Library.
+- E2E do painel criado com Playwright para login, dashboard, navegacao e logout.
 - Frontend empacotado em container Nginx com proxy para a API e health check proprio.
 - Compose integrado publica o painel em `http://127.0.0.1:8080`.
 - Credenciais de desenvolvimento foram removidas dos valores iniciais da tela de login.
@@ -186,8 +187,6 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 Backend administrativo e frontend operacional consolidados.
 
 Pendencias prioritarias:
-- Ampliar cobertura E2E do painel para fluxos administrativos completos.
 - Testes de carga reais em volume de producao continuam recomendados antes de deploy publico.
-- Homologar o ambiente DEV publicado.
 - Definir dominio, HTTPS e monitoramento do ambiente de producao.
 - Executar homologacao de producao somente apos aprovacao.
