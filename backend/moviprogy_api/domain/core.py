@@ -30,6 +30,15 @@ class Dispositivo(BaseModel):
     playlist_atual_id: str | None = None
 
 
+class DispositivoCreateRequest(BaseModel):
+    id: str | None = Field(default=None, min_length=1)
+    cliente_id: str = Field(min_length=1)
+    nome: str = Field(min_length=1)
+    codigo_ativacao: str | None = Field(default=None, min_length=1)
+    bloqueado: bool = False
+    playlist_atual_id: str | None = None
+
+
 class DispositivoListResponse(BaseModel):
     items: list[Dispositivo]
     limit: int = Field(ge=1)

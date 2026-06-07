@@ -1,5 +1,8 @@
 import hashlib
+import re
+import secrets
 import shutil
+import unicodedata
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from uuid import uuid4
@@ -21,6 +24,7 @@ from moviprogy_api.domain.core import (
     ClienteListResponse,
     ClienteUpdateRequest,
     Dispositivo,
+    DispositivoCreateRequest,
     DispositivoListResponse,
     DispositivoUpdateRequest,
     Midia,
@@ -72,6 +76,45 @@ _ALLOWED_UPLOADS = {
         ".webp": "image/webp",
     },
 }
+
+_DEVICE_ID_RE = re.compile(r"[^A-Z0-9]+")
+
+
+def _device_id_base(name: str) -> str:
+    normalized = unicodedata.normalize("NFKD", name)
+    ascii_name = normalized.encode("ascii", "ignore").decode("ascii")
+    base = _DEVICE_ID_RE.sub("_", ascii_name.upper()).strip("_")
+    return base or "DISPOSITIVO"
+
+
+def _next_device_id(repository: object, name: str) -> str:
+    base = _device_id_base(name)
+    for sequence in range(1, 10000):
+        candidate = f"{base}{sequence:02d}"
+        if repository.get_dispositivo(candidate) is None:
+            return candidate
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="limite de IDs automaticos atingido para este nome",
+    )
+
+
+def _activation_code_exists(repository: object, code: str) -> bool:
+    getter = getattr(repository, "get_dispositivo_by_activation_code", None)
+    if getter is None:
+        return False
+    return getter(code) is not None
+
+
+def _new_activation_code(repository: object) -> str:
+    for _ in range(20):
+        code = f"MOVI-{secrets.token_hex(3).upper()}-{secrets.token_hex(3).upper()}"
+        if not _activation_code_exists(repository, code):
+            return code
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="nao foi possivel gerar codigo de ativacao unico",
+    )
 
 
 @router.get("/configuracoes", response_model=OperationalConfiguration)
@@ -392,9 +435,9 @@ def update_cliente(
     response_model=Dispositivo,
     status_code=status.HTTP_201_CREATED,
 )
-def create_dispositivo(dispositivo: Dispositivo, request: Request) -> Dispositivo:
+def create_dispositivo(payload: DispositivoCreateRequest, request: Request) -> Dispositivo:
     repository = _core_repository(request)
-    if repository.get_cliente(dispositivo.cliente_id) is None:
+    if repository.get_cliente(payload.cliente_id) is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="cliente_id invalido",
@@ -403,7 +446,19 @@ def create_dispositivo(dispositivo: Dispositivo, request: Request) -> Dispositiv
         request,
         "dispositivos",
         "criar",
-        dispositivo.cliente_id,
+        payload.cliente_id,
+    )
+    dispositivo = Dispositivo(
+        id=payload.id.strip() if payload.id else _next_device_id(repository, payload.nome),
+        cliente_id=payload.cliente_id,
+        nome=payload.nome,
+        codigo_ativacao=(
+            payload.codigo_ativacao.strip()
+            if payload.codigo_ativacao
+            else _new_activation_code(repository)
+        ),
+        bloqueado=payload.bloqueado,
+        playlist_atual_id=payload.playlist_atual_id,
     )
     repository.save_dispositivo(dispositivo)
     return dispositivo

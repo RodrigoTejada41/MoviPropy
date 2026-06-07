@@ -41,6 +41,9 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 - Banco definido para ambiente Docker local: PostgreSQL.
 - Contratos iniciais do player persistem sessoes no PostgreSQL quando `DATABASE_URL` existe.
 - Contratos do player consultam dispositivo e manifesto real no PostgreSQL quando `core_repository` existe.
+- Dispositivo criado pelo painel nao deve exigir ID nem codigo de ativacao manual.
+- ID automatico do dispositivo usa nome normalizado em caixa alta com sequencia: `JECA TV` -> `JECA_TV01`.
+- Codigo de ativacao automatico usa formato `MOVI-XXXXXX-XXXXXX`.
 - Login administrativo persiste sessoes no PostgreSQL quando `DATABASE_URL` existe.
 - Refresh/logout administrativo invalidam tokens antigos em `admin_sessions`.
 - Docker Compose executa o backend em `moviprogy-api`.

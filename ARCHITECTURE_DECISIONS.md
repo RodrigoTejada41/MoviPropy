@@ -1216,3 +1216,26 @@ Decisao:
 Consequencias:
 - Regressao grosseira de latencia pode ser detectada localmente.
 - Teste com volume, rede e hardware de producao continua obrigatorio antes de escala publica.
+
+---
+
+### ADR-043 - Geracao automatica de ID e codigo de ativacao de dispositivo
+
+Status: Aprovada
+
+Data: 2026-06-07
+
+Contexto:
+- O cadastro de dispositivo pedia ID e codigo de ativacao manualmente.
+- Isso criava erro operacional e duplicidade desnecessaria.
+
+Decisao:
+- Backend gera ID quando ausente usando nome normalizado e sequencia.
+- Backend gera codigo de ativacao unico quando ausente.
+- Frontend exibe apenas cliente, nome, ID sugerido e aviso de codigo automatico.
+- API mantem compatibilidade com payloads antigos que enviam ID e codigo.
+
+Consequencias:
+- Operador cadastra dispositivo com menos campos.
+- Backend permanece fonte autoritativa da sequencia.
+- Teste de regressao valida `JECA_TV01` e `JECA_TV02`.

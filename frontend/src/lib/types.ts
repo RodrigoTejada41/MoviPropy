@@ -50,6 +50,15 @@ export type Dispositivo = {
   playlist_atual_id?: string | null;
 };
 
+export type DispositivoCreate = {
+  id?: string | null;
+  cliente_id: string;
+  nome: string;
+  codigo_ativacao?: string | null;
+  bloqueado?: boolean;
+  playlist_atual_id?: string | null;
+};
+
 export type Midia = {
   id: string;
   cliente_id: string;

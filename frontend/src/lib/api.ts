@@ -3,6 +3,7 @@ import type {
   AdminAudit,
   Cliente,
   Dispositivo,
+  DispositivoCreate,
   GoogleDriveFile,
   GoogleDriveFolder,
   GoogleDriveStatus,
@@ -81,7 +82,7 @@ export const api = {
   dispositivos() {
     return request<PageResult<Dispositivo>>("/api/admin/dispositivos?limit=50&offset=0");
   },
-  criarDispositivo(payload: Dispositivo) {
+  criarDispositivo(payload: DispositivoCreate) {
     return request<Dispositivo>("/api/admin/dispositivos", {
       method: "POST",
       body: JSON.stringify(payload)

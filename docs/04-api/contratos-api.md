@@ -150,7 +150,10 @@ Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 
 Finalidade: cadastrar dispositivo administrativo vinculado a cliente.
 Quem usa: painel administrativo.
-Parametros: id, cliente_id, nome, codigo_ativacao, bloqueado, playlist_atual_id.
+Parametros obrigatorios: cliente_id, nome.
+Parametros opcionais: id, codigo_ativacao, bloqueado, playlist_atual_id.
+Regra: quando `id` nao for informado, o backend gera automaticamente pelo nome normalizado com sequencia de dois digitos. Exemplo: `JECA TV` gera `JECA_TV01`; o proximo gera `JECA_TV02`.
+Regra: quando `codigo_ativacao` nao for informado, o backend gera codigo unico no formato `MOVI-XXXXXX-XXXXXX`.
 Resposta: dispositivo criado.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 

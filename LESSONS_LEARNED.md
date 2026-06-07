@@ -101,6 +101,30 @@ Status: Resolvido
 
 ---
 
+### ERR-021
+
+Data: 2026-06-07
+
+Descricao do Problema:
+- O formulario de novo dispositivo exigia digitacao manual de ID e codigo de ativacao.
+
+Causa Raiz:
+- O contrato inicial tratava `id` e `codigo_ativacao` como campos obrigatorios informados pelo operador.
+
+Solucao Aplicada:
+- Criado payload de cadastro com ID e codigo opcionais.
+- Backend gera ID sequencial por nome.
+- Backend gera codigo de ativacao unico.
+- Frontend remove campos manuais e mostra apenas ID sugerido.
+
+Como Evitar no Futuro:
+- Campos tecnicos e codigos operacionais devem ser gerados pelo backend.
+- Frontend pode sugerir valores, mas nao deve ser a fonte autoritativa.
+
+Status: Resolvido
+
+---
+
 ### ERR-017
 
 Data: 2026-06-06

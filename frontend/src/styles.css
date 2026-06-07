@@ -1696,6 +1696,11 @@ th {
   margin: 0;
 }
 
+.readonlyInput {
+  background: #f2f4f6;
+  color: #565e74;
+}
+
 .fleetTableCard {
   background: rgba(255, 255, 255, 0.84);
   border: 1px solid #dce3ea;

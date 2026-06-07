@@ -163,6 +163,7 @@ Objetivo:
 Funcionalidades:
 - Listar dispositivos.
 - Criar dispositivo.
+- Gerar ID automatico por nome e sequencia.
 - Buscar localmente por id, nome, cliente, codigo ou playlist.
 - Exibir indicadores de total, ativos, bloqueados e sem playlist.
 - Ver codigo de ativacao.
@@ -189,7 +190,10 @@ Campos ainda nao disponiveis:
 
 Criterios de aceite:
 - Nao permitir dispositivo sem cliente.
-- Exibir codigo de ativacao apos cadastro.
+- Nao exigir digitacao manual de ID.
+- Nao exigir digitacao manual de codigo de ativacao.
+- Exibir ID sugerido antes do cadastro.
+- Exibir codigo de ativacao gerado apos cadastro.
 - Avisar se nao houver playlist vinculada.
 - Nao inventar ultima comunicacao se a API nao retornar esse dado.
 - Acoes sem contrato backend devem aparecer desabilitadas.

@@ -259,21 +259,30 @@ function ClientStat({ icon, label, value, tone }: { icon: ReactNode; label: stri
 
 export function DispositivosPage() {
   const list = useList(api.dispositivos);
-  const [form, setForm] = useState({ id: "", cliente_id: "", nome: "", codigo_ativacao: "" });
+  const clientes = useList(api.clientes);
+  const [form, setForm] = useState({ cliente_id: "", nome: "" });
   const [message, setMessage] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setMessage(null);
-    if (!form.id.trim() || !form.cliente_id.trim() || !form.nome.trim() || !form.codigo_ativacao.trim()) {
-      setMessage("Id, cliente, nome e codigo sao obrigatorios.");
+    setSuccess(null);
+    if (!form.cliente_id.trim() || !form.nome.trim()) {
+      setMessage("Cliente e nome sao obrigatorios.");
       return;
     }
     try {
-      await api.criarDispositivo({ ...form, bloqueado: false, playlist_atual_id: null });
-      setForm({ id: "", cliente_id: "", nome: "", codigo_ativacao: "" });
+      const created = await api.criarDispositivo({
+        cliente_id: form.cliente_id.trim(),
+        nome: form.nome.trim(),
+        bloqueado: false,
+        playlist_atual_id: null
+      });
+      setForm({ cliente_id: "", nome: "" });
       await list.reload();
+      setSuccess(`Dispositivo criado: ${created.id}. Codigo: ${created.codigo_ativacao}.`);
     } catch (err) {
       setMessage(err instanceof ApiError ? err.message : "Falha ao criar dispositivo.");
     }
@@ -289,6 +298,7 @@ export function DispositivosPage() {
   const active = list.rows.length - blocked;
   const withPlaylist = list.rows.filter((item) => item.playlist_atual_id).length;
   const withoutPlaylist = list.rows.length - withPlaylist;
+  const suggestedId = nextDeviceId(form.nome, list.rows);
 
   async function toggleBloqueio(item: Dispositivo) {
     setMessage(null);
@@ -329,15 +339,18 @@ export function DispositivosPage() {
       <form className="fleetForm" id="novo-dispositivo" onSubmit={submit}>
         <div>
           <h2>Novo dispositivo</h2>
-          <p>Use codigo unico de ativacao gerado para o player.</p>
+          <p>ID e codigo de ativacao sao gerados automaticamente.</p>
         </div>
-        <input placeholder="id" value={form.id} onChange={(event) => setForm({ ...form, id: event.target.value })} />
-        <input placeholder="cliente_id" value={form.cliente_id} onChange={(event) => setForm({ ...form, cliente_id: event.target.value })} />
+        <select value={form.cliente_id} onChange={(event) => setForm({ ...form, cliente_id: event.target.value })}>
+          <option value="">Cliente</option>
+          {clientes.rows.map((cliente) => <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>)}
+        </select>
         <input placeholder="nome" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} />
-        <input placeholder="codigo_ativacao" value={form.codigo_ativacao} onChange={(event) => setForm({ ...form, codigo_ativacao: event.target.value })} />
+        <input className="readonlyInput" value={suggestedId} readOnly aria-label="ID automatico" />
+        <input className="readonlyInput" value="Codigo gerado ao criar" readOnly aria-label="Codigo de ativacao automatico" />
         <button className="primaryButton"><Plus size={16} />Criar</button>
       </form>
-      {message && <Status error={message} />}
+      <Status error={message} success={success} />
 
       <div className="fleetTableCard">
         <div className="fleetTableHeader">
@@ -435,6 +448,20 @@ function FleetStat({ label, value, tone }: { label: string; value: number; tone:
       <strong>{value}</strong>
     </div>
   );
+}
+
+function deviceIdBase(name: string) {
+  const normalized = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return normalized.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "DISPOSITIVO";
+}
+
+function nextDeviceId(name: string, rows: Dispositivo[]) {
+  const base = deviceIdBase(name);
+  let sequence = 1;
+  while (rows.some((item) => item.id === `${base}${String(sequence).padStart(2, "0")}`)) {
+    sequence += 1;
+  }
+  return `${base}${String(sequence).padStart(2, "0")}`;
 }
 
 export function MidiasPage() {

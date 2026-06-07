@@ -1040,6 +1040,35 @@ def test_admin_creates_and_gets_dispositivo():
     assert get_response.json()["nome"] == "TV Entrada"
 
 
+def test_admin_generates_dispositivo_id_and_activation_code():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+
+    first_response = client.post(
+        "/api/admin/dispositivos",
+        headers=ADMIN_HEADERS,
+        json={"cliente_id": "cliente-001", "nome": "JECA TV"},
+    )
+    second_response = client.post(
+        "/api/admin/dispositivos",
+        headers=ADMIN_HEADERS,
+        json={"cliente_id": "cliente-001", "nome": "JECA TV"},
+    )
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 201
+    assert first_response.json()["id"] == "JECA_TV01"
+    assert second_response.json()["id"] == "JECA_TV02"
+    assert first_response.json()["codigo_ativacao"].startswith("MOVI-")
+    assert second_response.json()["codigo_ativacao"].startswith("MOVI-")
+    assert first_response.json()["codigo_ativacao"] != second_response.json()["codigo_ativacao"]
+
+
 def test_admin_lists_dispositivos():
     app = _create_test_app()
     client = TestClient(app)
