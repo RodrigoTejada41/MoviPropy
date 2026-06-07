@@ -44,7 +44,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!response.ok) {
     const detail = await response.json().catch(() => null);
     const message = detail?.detail ?? `Erro HTTP ${response.status}`;
-    if (response.status === 401) {
+    if (isSessionError(response.status, message)) {
       clearSession();
       window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
     }
@@ -52,6 +52,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
+}
+
+function isSessionError(status: number, message: string) {
+  const normalized = message.toLowerCase();
+  return (
+    status === 401 ||
+    (status === 403 && (normalized.includes("token invalido") || normalized.includes("token ausente")))
+  );
 }
 
 export const api = {
