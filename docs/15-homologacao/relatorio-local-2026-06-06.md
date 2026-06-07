@@ -13,8 +13,9 @@ Data: 2026-06-06
 
 ## Resultados
 
-- Backend: 89 testes aprovados e 10 testes PostgreSQL condicionais ignorados sem ambiente dedicado.
+- Backend: 101 testes aprovados com PostgreSQL real.
 - Frontend: 10 testes aprovados e build aprovado.
+- Frontend E2E: login, dashboard, navegacao e logout aprovados no Chromium.
 - Player: 15 testes aprovados e build aprovado.
 - Smoke integrado: frontend, player, API, banco, login, rota protegida e logout aprovados.
 - Backup e restore: dump com checksum restaurado em banco temporario com 19 tabelas.

@@ -38,7 +38,9 @@ Validacoes:
 - Suite completa `pytest`.
 - Frontend Node 22 com `npm ci`.
 - Testes Vitest.
+- E2E Playwright em Chromium.
 - Build Vite/TypeScript.
+- Player Node 22 com Vitest e build Vite/TypeScript.
 
 ## Execucao local com Docker
 
@@ -61,10 +63,11 @@ docker compose down
 ```
 
 Estado atual:
-- Compose executa frontend, backend e PostgreSQL.
+- Compose executa frontend, player, backend e PostgreSQL.
 - Frontend fica disponivel em `http://127.0.0.1:8080`.
+- Player fica disponivel em `http://127.0.0.1:8091`.
 - Frontend encaminha `/api` e `/health` para o backend pela rede interna.
-- Os tres servicos possuem health check.
+- Os quatro servicos possuem health check.
 - Banco persiste em `runtime/postgres/data`.
 - Sessoes demo ficam na tabela `device_sessions`.
 - Manifestos demo ficam em memoria.
@@ -92,7 +95,7 @@ Limite:
 
 ## Pontos pendentes
 
-- Definir provedor.
 - Definir dominio.
-- Definir estrategia de storage.
-- Definir CD do ambiente escolhido.
+- Configurar HTTPS.
+- Definir storage definitivo de producao.
+- Aprovar e executar o deploy PROD.

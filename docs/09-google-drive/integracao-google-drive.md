@@ -1,6 +1,6 @@
 # Integracao Google Drive
 
-Status: implementacao inicial.
+Status: implementado e homologado localmente.
 
 Decisao atual:
 - O MVP usa storage local em `MOVIPROGY_MEDIA_DIR` e download controlado pelo backend.
@@ -8,8 +8,8 @@ Decisao atual:
 
 ## Status
 
-Implementado parcialmente.
-Este documento define escopo tecnico, riscos, limites atuais e plano de evolucao.
+Fluxos de OAuth, pasta raiz, pasta de cliente, quota, listagem, importacao e upload foram homologados localmente.
+Este documento tambem registra riscos, limites operacionais e evolucao para producao.
 
 ## Objetivo
 

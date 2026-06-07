@@ -1173,3 +1173,25 @@ Consequencias:
 - Toda mudanca passa por DEV e homologacao.
 - PROD depende de dominio, HTTPS, capacidade e aprovacao.
 - A VPS atual precisa ser ampliada antes de manter os dois ambientes ativos simultaneamente.
+
+---
+
+### ADR-041 - E2E do painel com Playwright e API controlada
+
+Status: Aprovada
+
+Data: 2026-06-06
+
+Contexto:
+- Testes de componentes nao comprovavam o fluxo completo de autenticacao e navegacao.
+- E2E dependente do banco tornaria o CI sensivel a dados mutaveis.
+
+Decisao:
+- Usar Playwright com Chromium para validar login, dashboard, navegacao e logout.
+- Interceptar contratos da API no navegador com respostas deterministicas.
+- Manter E2E em `frontend/e2e` e excluir esse diretorio do Vitest.
+- Executar E2E no CI e antes do deploy de producao.
+
+Consequencias:
+- Regressao de fluxo e integracao entre componentes passa a bloquear releases.
+- Contratos backend continuam cobertos separadamente pelos testes Python com PostgreSQL real.

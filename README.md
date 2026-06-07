@@ -122,6 +122,7 @@ npm run dev
 
 - Painel: `http://127.0.0.1:5173`
 - API local esperada: `http://127.0.0.1:8000`
+- E2E usa Playwright com API controlada e valida login, navegacao e logout.
 
 Build:
 
@@ -135,6 +136,7 @@ Testes automatizados do frontend:
 ```powershell
 cd frontend
 npm test
+npm run test:e2e
 ```
 
 Endpoints iniciais:

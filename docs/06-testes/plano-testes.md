@@ -24,6 +24,7 @@
 ## Testes funcionais
 
 - Fluxo completo do painel.
+- Playwright valida login, dashboard, navegacao para clientes e logout com API controlada.
 - Upload de midia.
 - Criacao de playlist.
 - Ativacao de campanha.

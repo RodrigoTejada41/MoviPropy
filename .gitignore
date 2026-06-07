@@ -11,6 +11,8 @@ node_modules/
 frontend/dist/
 frontend/node_modules/
 frontend/*.tsbuildinfo
+frontend/playwright-report/
+frontend/test-results/
 player/*.tsbuildinfo
 *.egg-info/
 backups/
