@@ -1,4 +1,4 @@
-import { getToken } from "./session";
+import { clearSession, getToken } from "./session";
 import type {
   AdminAudit,
   Cliente,
@@ -21,6 +21,7 @@ import type {
 } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+export const SESSION_EXPIRED_EVENT = "moviprogy:session-expired";
 
 export class ApiError extends Error {
   constructor(
@@ -43,6 +44,10 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!response.ok) {
     const detail = await response.json().catch(() => null);
     const message = detail?.detail ?? `Erro HTTP ${response.status}`;
+    if (response.status === 401) {
+      clearSession();
+      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
+    }
     throw new ApiError(message, response.status);
   }
   if (response.status === 204) return undefined as T;

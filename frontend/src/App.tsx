@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Shell, type ViewKey } from "./components/Shell";
-import { api } from "./lib/api";
+import { api, SESSION_EXPIRED_EVENT } from "./lib/api";
 import { clearSession, getUser } from "./lib/session";
 import type { User } from "./lib/types";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -21,6 +21,15 @@ import {
 export function App() {
   const [user, setUser] = useState<User | null>(() => getUser());
   const [view, setView] = useState<ViewKey>("dashboard");
+
+  useEffect(() => {
+    function expireSession() {
+      setUser(null);
+      setView("dashboard");
+    }
+    window.addEventListener(SESSION_EXPIRED_EVENT, expireSession);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, expireSession);
+  }, []);
 
   async function logout() {
     await api.logout().catch(() => undefined);
