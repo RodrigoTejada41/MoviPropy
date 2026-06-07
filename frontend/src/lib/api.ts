@@ -2,6 +2,7 @@ import { getToken } from "./session";
 import type {
   AdminAudit,
   Cliente,
+  ClienteCreate,
   Dispositivo,
   DispositivoCreate,
   GoogleDriveFile,
@@ -67,7 +68,7 @@ export const api = {
   clientes() {
     return request<PageResult<Cliente>>("/api/admin/clientes?limit=50&offset=0");
   },
-  criarCliente(payload: Cliente) {
+  criarCliente(payload: ClienteCreate) {
     return request<Cliente>("/api/admin/clientes", {
       method: "POST",
       body: JSON.stringify(payload)

@@ -33,6 +33,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Listagens administrativas criadas para clientes, dispositivos, midias e playlists.
 - Listagens administrativas possuem `limit`, `offset` e filtros iniciais por status/cliente.
 - Listagens administrativas retornam envelope paginado com `items`, `limit`, `offset` e `total`.
+- Cadastro de cliente gera ID sequencial automaticamente pelo nome e nao exige documento na tela simples.
 - Consulta administrativa de eventos do player criada por dispositivo.
 - Vinculo administrativo de midia em playlist criado.
 - Upload fisico local de midias criado em `POST /api/admin/midias/upload`.

@@ -119,7 +119,7 @@ Objetivo:
 
 Funcionalidades:
 - Listar clientes.
-- Criar cliente.
+- Criar cliente preenchendo apenas nome; id e gerado automaticamente pela API.
 - Buscar localmente por id, nome ou documento.
 - Filtrar localmente por status ativo/inativo.
 - Exibir quantidade de dispositivos vinculados por cliente.
@@ -133,6 +133,12 @@ Campos:
 - Documento.
 - Ativo.
 - Quantidade de dispositivos calculada por `GET /api/admin/dispositivos`.
+
+Cadastro simples:
+- Usuario informa somente nome.
+- Frontend nao exibe campo manual de documento.
+- Frontend nao permite digitacao manual de id.
+- Frontend pode exibir previsao do id automatico.
 - Sincronizacao: exibir `Nao informado` enquanto a API nao retornar ultimo sync.
 
 API atual:

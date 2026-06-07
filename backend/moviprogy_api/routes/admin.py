@@ -21,6 +21,7 @@ from fastapi import (
 
 from moviprogy_api.domain.core import (
     Cliente,
+    ClienteCreateRequest,
     ClienteListResponse,
     ClienteUpdateRequest,
     Dispositivo,
@@ -96,6 +97,18 @@ def _next_device_id(repository: object, name: str) -> str:
     raise HTTPException(
         status_code=status.HTTP_409_CONFLICT,
         detail="limite de IDs automaticos atingido para este nome",
+    )
+
+
+def _next_cliente_id(repository: object, name: str) -> str:
+    base = _device_id_base(name)
+    for sequence in range(1, 10000):
+        candidate = f"{base}{sequence:02d}"
+        if repository.get_cliente(candidate) is None:
+            return candidate
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="limite de IDs automaticos atingido para este cliente",
     )
 
 
@@ -367,9 +380,15 @@ def execute_audit_retention(
     response_model=Cliente,
     status_code=status.HTTP_201_CREATED,
 )
-def create_cliente(cliente: Cliente, request: Request) -> Cliente:
+def create_cliente(payload: ClienteCreateRequest, request: Request) -> Cliente:
     repository = _core_repository(request)
     require_admin_permission(request, "clientes", "criar")
+    cliente = Cliente(
+        id=payload.id.strip() if payload.id else _next_cliente_id(repository, payload.nome),
+        nome=payload.nome,
+        documento=payload.documento,
+        ativo=payload.ativo,
+    )
     repository.save_cliente(cliente)
     return cliente
 

@@ -20,11 +20,11 @@ Problemas:
 Criar cliente:
 1. Abrir Clientes.
 2. Clicar em Novo.
-3. Informar nome e documento.
+3. Informar nome.
 4. Salvar.
 
 Boas praticas:
-- Nao reutilizar id de cliente.
+- Usar nome claro; o id e gerado automaticamente.
 - Inativar cliente em vez de excluir.
 
 ## Dispositivos
@@ -85,4 +85,3 @@ Tela sem conteudo:
 2. Verificar se playlist esta ativa.
 3. Verificar se playlist tem midias.
 4. Verificar se player baixou arquivos.
-

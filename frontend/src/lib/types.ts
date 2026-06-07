@@ -41,6 +41,13 @@ export type Cliente = {
   ativo: boolean;
 };
 
+export type ClienteCreate = {
+  id?: string | null;
+  nome: string;
+  documento?: string | null;
+  ativo?: boolean;
+};
+
 export type Dispositivo = {
   id: string;
   cliente_id: string;

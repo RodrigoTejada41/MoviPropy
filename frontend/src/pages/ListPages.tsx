@@ -57,23 +57,26 @@ function useList<T>(loader: () => Promise<PageResult<T>>) {
 export function ClientesPage() {
   const list = useList(api.clientes);
   const devices = useList(api.dispositivos);
-  const [form, setForm] = useState({ id: "", nome: "", documento: "" });
+  const [form, setForm] = useState({ nome: "" });
   const [message, setMessage] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setMessage(null);
-    if (!form.id.trim() || !form.nome.trim()) {
-      setMessage("Id e nome sao obrigatorios.");
+    setSuccess(null);
+    if (!form.nome.trim()) {
+      setMessage("Nome e obrigatorio.");
       return;
     }
     try {
-      await api.criarCliente({ id: form.id.trim(), nome: form.nome.trim(), documento: form.documento || null, ativo: true });
-      setForm({ id: "", nome: "", documento: "" });
+      const created = await api.criarCliente({ nome: form.nome.trim(), ativo: true });
+      setForm({ nome: "" });
       await list.reload();
       await devices.reload();
+      setSuccess(`Cliente criado: ${created.id}.`);
     } catch (err) {
       setMessage(err instanceof ApiError ? err.message : "Falha ao criar cliente.");
     }
@@ -144,14 +147,13 @@ export function ClientesPage() {
       <form className="clientForm" id="novo-cliente" onSubmit={submit}>
         <div>
           <h2>Novo cliente</h2>
-          <p>Cadastre o identificador usado nas rotas administrativas e no isolamento de dados.</p>
+          <p>ID gerado automaticamente a partir do nome.</p>
         </div>
-        <input placeholder="id" value={form.id} onChange={(event) => setForm({ ...form, id: event.target.value })} />
         <input placeholder="nome" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} />
-        <input placeholder="documento" value={form.documento} onChange={(event) => setForm({ ...form, documento: event.target.value })} />
+        <input className="readonlyInput" value={nextClienteId(form.nome, list.rows)} readOnly aria-label="ID automatico do cliente" />
         <button className="primaryButton"><Plus size={16} />Criar</button>
       </form>
-      {message && <Status error={message} />}
+      <Status error={message} success={success} />
 
       <div className="clientTableCard">
         <div className="clientTableHeader">
@@ -255,6 +257,15 @@ function ClientStat({ icon, label, value, tone }: { icon: ReactNode; label: stri
       <strong>{value}</strong>
     </div>
   );
+}
+
+function nextClienteId(name: string, rows: Cliente[]) {
+  const base = deviceIdBase(name);
+  let sequence = 1;
+  while (rows.some((item) => item.id === `${base}${String(sequence).padStart(2, "0")}`)) {
+    sequence += 1;
+  }
+  return `${base}${String(sequence).padStart(2, "0")}`;
 }
 
 export function DispositivosPage() {

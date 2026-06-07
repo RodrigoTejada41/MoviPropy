@@ -27,6 +27,34 @@ Status:
 
 ## Licoes registradas
 
+### ERR-022
+
+Data: 2026-06-07
+
+Descricao do Problema:
+- Cadastro de cliente expunha ID e documento como campos manuais na tela principal.
+
+Causa Raiz:
+- Frontend reutilizava o modelo completo do banco como formulario operacional.
+
+Solucao Aplicada:
+- Criar payload de cadastro com nome obrigatorio e ID/documento opcionais.
+- Gerar ID automaticamente no backend quando ausente.
+- Remover campos manuais de ID e documento do cadastro simples.
+
+Como Evitar no Futuro:
+- Nao expor campos tecnicos ou administrativos no fluxo operacional simples.
+- Backend deve ser fonte autoritativa para identificadores sequenciais.
+
+Arquivos Afetados:
+- `backend/moviprogy_api/domain/core.py`
+- `backend/moviprogy_api/routes/admin.py`
+- `frontend/src/pages/ListPages.tsx`
+
+Status: Resolvido
+
+---
+
 ### ERR-018
 
 Data: 2026-06-06

@@ -1239,3 +1239,25 @@ Consequencias:
 - Operador cadastra dispositivo com menos campos.
 - Backend permanece fonte autoritativa da sequencia.
 - Teste de regressao valida `JECA_TV01` e `JECA_TV02`.
+
+---
+
+### ADR-044 - Geracao automatica de ID de cliente
+
+Status: Aprovada
+
+Data: 2026-06-07
+
+Contexto:
+- O cadastro de cliente pedia ID e documento na tela principal.
+- O operador deve preencher apenas o nome no fluxo simples.
+
+Decisao:
+- Backend gera ID do cliente quando ausente usando nome normalizado e sequencia.
+- Frontend remove digitacao manual de ID e documento no cadastro simples.
+- API mantem compatibilidade com payloads antigos que enviam ID/documento.
+
+Consequencias:
+- Menos erro operacional no cadastro.
+- Backend permanece fonte autoritativa da sequencia.
+- Documento fica reservado para fluxo administrativo avancado/banco.
