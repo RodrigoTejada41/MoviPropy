@@ -95,6 +95,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Compose integrado publica o painel em `http://127.0.0.1:8080`.
 - Credenciais de desenvolvimento foram removidas dos valores iniciais da tela de login.
 - Smoke test integrado criado para frontend, health, readiness, login, rota protegida e logout.
+- Smoke de carga local criado para frontend, player, health, readiness e listagem autenticada.
 - Proxy do frontend encaminha `/health` e `/health/ready` para a API.
 - Middleware de observabilidade registra requisicoes HTTP em JSON e retorna `X-Request-ID`.
 - Logs estruturados nao incluem Authorization, corpo ou credenciais.

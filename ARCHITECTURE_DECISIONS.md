@@ -1195,3 +1195,24 @@ Decisao:
 Consequencias:
 - Regressao de fluxo e integracao entre componentes passa a bloquear releases.
 - Contratos backend continuam cobertos separadamente pelos testes Python com PostgreSQL real.
+
+---
+
+### ADR-042 - Baseline de desempenho local sem dependencia externa
+
+Status: Aprovada
+
+Data: 2026-06-06
+
+Contexto:
+- A homologacao funcional nao media latencia sob concorrencia.
+- Ferramentas externas de carga aumentariam dependencias operacionais do projeto.
+
+Decisao:
+- Manter `scripts/load_smoke.py` com biblioteca padrao Python.
+- Medir frontend, player, health, readiness e listagem autenticada.
+- Exigir erro zero e p95 abaixo do limite configurado.
+
+Consequencias:
+- Regressao grosseira de latencia pode ser detectada localmente.
+- Teste com volume, rede e hardware de producao continua obrigatorio antes de escala publica.

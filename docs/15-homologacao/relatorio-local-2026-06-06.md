@@ -23,6 +23,20 @@ Data: 2026-06-06
 - Player online: ativacao, manifesto, download, hash, reproducao e telemetria aprovados.
 - Player offline: recarga sem API preservou e reproduziu a playlist do IndexedDB.
 - Responsividade: 1920x1080 e 390x844 sem overflow.
+- Smoke de carga: 500 requisicoes, erro zero e todos os alvos com p95 abaixo de 1000 ms.
+
+## Baseline de carga local
+
+| Alvo | Requisicoes | Concorrencia | P95 |
+|---|---:|---:|---:|
+| Frontend | 100 | 10 | 5,86 ms |
+| Player | 100 | 10 | 6,82 ms |
+| Health | 100 | 10 | 26,24 ms |
+| Readiness | 100 | 10 | 179,71 ms |
+| Clientes autenticado | 100 | 10 | 674,91 ms |
+
+Limite:
+- Baseline local; nao substitui teste de carga com volume real de producao.
 
 ## Evidencias operacionais
 

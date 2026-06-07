@@ -61,6 +61,14 @@ Smoke test integrado:
   -Password $env:MOVIPROGY_ADMIN_PASSWORD
 ```
 
+Smoke de carga local:
+
+```powershell
+py -3 scripts\load_smoke.py --requests 100 --concurrency 10
+```
+
+Requer `MOVIPROGY_ADMIN_EMAIL` e `MOVIPROGY_ADMIN_PASSWORD`.
+
 Pre-requisito:
 - Docker Desktop precisa estar aberto e com daemon ativo.
 

@@ -77,6 +77,30 @@ Status: Resolvido
 
 ---
 
+### ERR-020
+
+Data: 2026-06-06
+
+Descricao do Problema:
+- O CI Linux nao encontrou `scripts.load_smoke` e alertou sobre opcao desconhecida do pytest.
+
+Causa Raiz:
+- `pythonpath` incluia apenas `backend`.
+- A configuracao referenciava `pytest-asyncio`, dependente presente apenas no ambiente local.
+
+Solucao Aplicada:
+- Incluir a raiz do repositorio e `backend` no `pythonpath`.
+- Remover configuracao de plugin que nao faz parte das dependencias do projeto.
+
+Como Evitar no Futuro:
+- Executar testes com dependencias declaradas pelo projeto.
+- Nao depender de plugins instalados globalmente.
+- Validar imports em ambiente Linux pelo CI.
+
+Status: Resolvido
+
+---
+
 ### ERR-017
 
 Data: 2026-06-06
