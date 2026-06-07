@@ -56,6 +56,8 @@
 
 ## Testes de performance
 
+- Baseline local automatizado por `scripts/load_smoke.py`.
+- Executar 100 requisicoes por alvo com concorrencia 10, erro zero e p95 menor que 1000 ms.
 - Listagem paginada.
 - Upload de midia grande.
 - Download simultaneo por varios players.

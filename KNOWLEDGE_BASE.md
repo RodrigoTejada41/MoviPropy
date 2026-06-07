@@ -159,6 +159,19 @@ Limite:
 - A tela de clientes nao deve inventar regiao, data de criacao ou ultimo sync; enquanto a API nao retorna esses campos, mostrar `Nao informado` ou deixar a acao desabilitada.
 - O dashboard nao deve inventar numeros de infraestrutura; deve calcular indicadores a partir de clientes, dispositivos, midias, playlists e auditoria.
 
+## Baseline de desempenho local
+
+- Script: `scripts/load_smoke.py`.
+- Cobre frontend, player, health, readiness e listagem administrativa autenticada.
+- Regra padrao: zero erros e p95 abaixo de 1000 ms.
+- Baseline de 2026-06-06 com 100 requisicoes por alvo e concorrencia 10:
+  - Frontend p95: 5,86 ms.
+  - Player p95: 6,82 ms.
+  - Health p95: 26,24 ms.
+  - Readiness p95: 179,71 ms.
+  - Clientes p95: 674,91 ms.
+- Esse resultado e local e nao substitui teste de carga com volume e latencia de producao.
+
 ## Contratos atuais do player
 
 - `POST /api/player/ativar`: ativa dispositivo por codigo e retorna token.

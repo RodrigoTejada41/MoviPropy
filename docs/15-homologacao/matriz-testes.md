@@ -6,8 +6,8 @@ Mapear funcionalidades, tipos de teste e status esperado.
 
 | Funcionalidade | Unitario | Integracao | Funcional | Seguranca | Performance | Status |
 |---|---|---|---|---|---|---|
-| Health | Sim | Sim | Sim | Nao | Sim | Implementado |
-| Readiness | Sim | Sim | Sim | Nao | Sim | Implementado |
+| Health | Sim | Sim | Sim | Nao | Sim | Implementado e carga local aprovada |
+| Readiness | Sim | Sim | Sim | Nao | Sim | Implementado e carga local aprovada |
 | Login admin | Sim | Sim | Sim | Sim | Pendente | Implementado e testado |
 | Refresh/logout admin | Sim | Sim | Sim | Sim | Pendente | Implementado e testado |
 | Gestao usuarios/permissoes | Sim | Sim | Sim | Sim | Pendente | Implementado |
@@ -20,7 +20,7 @@ Mapear funcionalidades, tipos de teste e status esperado.
 | Dispositivos | Sim | Sim | Sim | Sim | Pendente | Implementado |
 | Midias metadados | Sim | Sim | Sim | Sim | Pendente | Implementado |
 | Playlists | Sim | Sim | Sim | Sim | Pendente | Implementado |
-| Listagens admin com total | Sim | Sim | Sim | Sim | Parcial | Implementado e testado |
+| Listagens admin com total | Sim | Sim | Sim | Sim | Sim | Implementado e carga local aprovada |
 | Eventos player admin | Sim | Sim | Sim | Sim | Pendente | Implementado e testado |
 | Vinculo playlist/midia | Sim | Sim | Sim | Sim | Pendente | Implementado |
 | Manifesto player | Sim | Sim | Sim | Sim | Pendente | Implementado |
@@ -49,4 +49,5 @@ Mapear funcionalidades, tipos de teste e status esperado.
 - Teste real de banco depende de `DATABASE_URL`.
 - Testes do frontend executam com `cd frontend; npm test`.
 - E2E do frontend executa com `cd frontend; npm run test:e2e`.
+- Smoke de carga executa com `py -3 scripts/load_smoke.py --requests 100 --concurrency 10`.
 - Teste offline do player e obrigatorio antes de homologacao.
