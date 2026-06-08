@@ -85,4 +85,23 @@ describe("api client", () => {
     expect(headers.has("Content-Type")).toBe(false);
     expect(request?.body).toBeInstanceOf(FormData);
   });
+
+  it("updates the current playlist of a device", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ id: "device-1", playlist_atual_id: "playlist-1" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      })
+    );
+
+    await api.atualizarDispositivo("device-1", { playlist_atual_id: "playlist-1" });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/admin/dispositivos/device-1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ playlist_atual_id: "playlist-1" })
+      })
+    );
+  });
 });

@@ -662,6 +662,22 @@ nav {
   gap: 8px;
 }
 
+.playlistAssign {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 18px minmax(180px, 1fr);
+}
+
+.playlistAssign svg {
+  color: #2f6f73;
+}
+
+.playlistAssign select {
+  min-width: 180px;
+  width: 100%;
+}
+
 .editorSection {
   background: #ffffff;
   border: 1px solid #dce3ea;
