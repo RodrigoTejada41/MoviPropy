@@ -245,9 +245,15 @@ export function App() {
             loop={(manifest?.files.length ?? 0) === 1}
             muted
             playsInline
-            onEnded={() => setCurrentIndex((index) =>
-              nextMediaIndex(index, manifest?.files.length ?? 0)
-            )}
+            onEnded={(event) => {
+              const total = manifest?.files.length ?? 0;
+              if (total <= 1) {
+                event.currentTarget.currentTime = 0;
+                void event.currentTarget.play();
+                return;
+              }
+              setCurrentIndex((index) => nextMediaIndex(index, total));
+            }}
             onError={() => setCurrentIndex((index) =>
               nextMediaIndex(index, manifest?.files.length ?? 0)
             )}

@@ -106,7 +106,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Restore automatizado foi validado em banco temporario isolado.
 - CI criado para backend com PostgreSQL real e frontend com testes/build.
 - Estrategia de ambientes criada com dados, banco, logs, storage, configuracoes e Compose isolados para DEV e PROD.
-- Branch `develop` definida para deploy automatico DEV apos CI.
+- Branch `develop` definida para deploy automatico DEV apos CI, somente depois de testes locais completos.
 - Branch `main` definida para PROD com tag, confirmacao e aprovacao.
 - Scripts remotos de deploy, smoke, backup e rollback criados.
 - VPS preparada com Docker, Compose, usuario de deploy, firewall e fail2ban.
@@ -182,7 +182,8 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Player persiste dispositivo, manifesto, midias e telemetria em IndexedDB.
 - Player valida tamanho e SHA-256 antes de promover uma playlist.
 - Player preserva a playlist ativa quando API ou download falham.
-- Player reproduz playlist em loop continuo; video unico usa loop nativo do navegador.
+- Player reproduz playlist em loop continuo; video unico reinicia manualmente no fim para nao depender apenas do loop nativo do navegador.
+- Deploy DEV fica bloqueado ate a execucao local dos testes obrigatorios da area alterada.
 - Service worker mantém o shell do player disponível offline.
 - Container `moviprogy-player` publicado localmente em `http://127.0.0.1:8091`.
 - Homologacao real executada com ativacao, download, reproducao, reinicio sem API e recuperacao.

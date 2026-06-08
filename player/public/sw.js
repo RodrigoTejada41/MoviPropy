@@ -1,4 +1,4 @@
-const CACHE = "moviprogy-player-v1";
+const CACHE = "moviprogy-player-v2";
 const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/moviprogy-brand.webp"];
 
 self.addEventListener("install", (event) => {
