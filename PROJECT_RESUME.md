@@ -82,6 +82,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Tela de Clientes redesenhada como gestao operacional com KPIs reais, busca local, filtro por status, cadastro e dispositivos vinculados.
 - Tela de Dispositivos redesenhada como gestao de frota com KPIs, busca local, cadastro e tabela detalhada.
 - Cadastro de dispositivo gera ID sequencial por nome e codigo de ativacao automaticamente.
+- Tela de Dispositivos permite vincular playlist publicada como playlist atual do player.
 - Telas iniciais criadas para Dashboard, Clientes, Dispositivos, Midias, Playlists, Logs/Auditoria, Usuarios, Sincronizacoes, Google Drive e Configuracoes.
 - Listagens iniciais consomem endpoints paginados do backend.
 - Edicao administrativa criada para clientes, dispositivos, midias e playlists.
@@ -181,6 +182,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Player persiste dispositivo, manifesto, midias e telemetria em IndexedDB.
 - Player valida tamanho e SHA-256 antes de promover uma playlist.
 - Player preserva a playlist ativa quando API ou download falham.
+- Player reproduz playlist em loop continuo; video unico usa loop nativo do navegador.
 - Service worker mantém o shell do player disponível offline.
 - Container `moviprogy-player` publicado localmente em `http://127.0.0.1:8091`.
 - Homologacao real executada com ativacao, download, reproducao, reinicio sem API e recuperacao.

@@ -242,6 +242,7 @@ export function App() {
             key={mediaUrl}
             src={mediaUrl}
             autoPlay
+            loop={(manifest?.files.length ?? 0) === 1}
             muted
             playsInline
             onEnded={() => setCurrentIndex((index) =>

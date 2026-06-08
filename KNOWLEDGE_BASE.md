@@ -353,6 +353,13 @@ Motivo:
 - A VPS atual possui aproximadamente 1 GB de RAM; build deve ser serial.
 - Executar DEV e PROD simultaneamente requer ampliacao de capacidade.
 
+## Fluxo operacional de midia
+
+- Midia enviada so chega ao player quando estiver vinculada a uma playlist publicada.
+- O dispositivo recebe conteudo pela propriedade `playlist_atual_id`.
+- A tela `Dispositivos` e a fonte operacional para vincular ou remover a playlist atual.
+- O player sempre reproduz em loop: um unico video repete continuamente; varios videos rodam em sequencia e retornam ao primeiro.
+
 ## Observabilidade HTTP
 
 - Logger: `moviprogy.request`.

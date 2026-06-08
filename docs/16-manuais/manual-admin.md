@@ -34,8 +34,9 @@ Criar dispositivo:
 2. Clicar em Novo.
 3. Selecionar cliente.
 4. Informar nome.
-5. Gerar ou informar codigo de ativacao.
-6. Vincular playlist atual quando existir.
+5. Salvar.
+6. Copiar o codigo de ativacao.
+7. Vincular playlist publicada no campo `Playlist atual`.
 
 Ativacao:
 - Informar o codigo no player.
@@ -61,6 +62,10 @@ Criar playlist:
 5. Ordenar midias.
 6. Ativar playlist.
 7. Vincular playlist ao dispositivo.
+
+Loop:
+- Uma playlist com um unico video roda o mesmo video em loop continuo.
+- Uma playlist com varios videos reproduz em sequencia e retorna ao primeiro automaticamente.
 
 ## Monitoramento
 

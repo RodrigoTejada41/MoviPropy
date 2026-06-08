@@ -271,6 +271,7 @@ function nextClienteId(name: string, rows: Cliente[]) {
 export function DispositivosPage() {
   const list = useList(api.dispositivos);
   const clientes = useList(api.clientes);
+  const playlists = useList(api.playlists);
   const [form, setForm] = useState({ cliente_id: "", nome: "" });
   const [message, setMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -313,12 +314,34 @@ export function DispositivosPage() {
 
   async function toggleBloqueio(item: Dispositivo) {
     setMessage(null);
+    setSuccess(null);
     try {
       await api.atualizarDispositivo(item.id, { bloqueado: !item.bloqueado });
       await list.reload();
     } catch (err) {
       setMessage(err instanceof ApiError ? err.message : "Falha ao atualizar dispositivo.");
     }
+  }
+
+  async function assignPlaylist(item: Dispositivo, playlistId: string) {
+    setMessage(null);
+    setSuccess(null);
+    try {
+      await api.atualizarDispositivo(item.id, {
+        playlist_atual_id: playlistId || null
+      });
+      await list.reload();
+      setSuccess(playlistId ? "Playlist vinculada ao dispositivo." : "Playlist removida do dispositivo.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao vincular playlist.");
+    }
+  }
+
+  function playlistsForDevice(item: Dispositivo) {
+    return playlists.rows.filter((playlist) =>
+      playlist.cliente_id === item.cliente_id &&
+      (playlist.ativa || playlist.id === item.playlist_atual_id)
+    );
   }
 
   return (
@@ -377,8 +400,12 @@ export function DispositivosPage() {
             onChange={(event) => setSearch(event.target.value)}
           />
         </div>
-        <Status loading={list.loading} error={list.error} empty={!list.loading && !list.error && filteredRows.length === 0} />
-        {!list.loading && !list.error && filteredRows.length > 0 && (
+        <Status
+          loading={list.loading || playlists.loading}
+          error={list.error ?? playlists.error}
+          empty={!list.loading && !playlists.loading && !list.error && !playlists.error && filteredRows.length === 0}
+        />
+        {!list.loading && !playlists.loading && !list.error && !playlists.error && filteredRows.length > 0 && (
           <div className="fleetTableWrap">
             <table className="fleetTable">
               <thead>
@@ -409,11 +436,21 @@ export function DispositivosPage() {
                     <td>{item.cliente_id}</td>
                     <td><code>{item.codigo_ativacao}</code></td>
                     <td>
-                      {item.playlist_atual_id ? (
-                        <span className="playlistPill"><PlayCircle size={17} />{item.playlist_atual_id}</span>
-                      ) : (
-                        <span className="mutedCell">Sem playlist</span>
-                      )}
+                      <label className="playlistAssign">
+                        <PlayCircle size={17} />
+                        <select
+                          aria-label={`Playlist atual de ${item.nome}`}
+                          value={item.playlist_atual_id ?? ""}
+                          onChange={(event) => assignPlaylist(item, event.target.value)}
+                        >
+                          <option value="">Sem playlist</option>
+                          {playlistsForDevice(item).map((playlist) => (
+                            <option key={playlist.id} value={playlist.id}>
+                              {playlist.nome}{playlist.ativa ? "" : " (inativa)"}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
                     </td>
                     <td><span className="mutedCell">Nao informado</span></td>
                     <td>
