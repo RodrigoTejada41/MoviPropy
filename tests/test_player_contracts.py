@@ -77,6 +77,20 @@ class FakeCoreRepository:
         self.sync_confirmations.append(confirmation)
 
 
+class FakeGoogleDriveRepository:
+    def __init__(self) -> None:
+        self.downloads = []
+
+    def get_media_drive_metadata(self, midia_id: str):
+        if midia_id != "midia-real-001":
+            return None
+        return type("GoogleDriveMetadata", (), {"id": "drive-file-001"})()
+
+    def download_file(self, file_id: str):
+        self.downloads.append(file_id)
+        return [b"drive-video-content"]
+
+
 def test_player_activation_returns_device_token(monkeypatch):
     monkeypatch.delenv("DATABASE_URL", raising=False)
     client = TestClient(create_app())
@@ -352,6 +366,35 @@ def test_player_media_download_returns_file_for_current_playlist(tmp_path):
     assert response.status_code == 200
     assert response.content == b"video-content"
     assert response.headers["content-length"] == str(len(b"video-content"))
+
+
+def test_player_media_download_streams_google_drive_without_local_file(tmp_path):
+    app = create_app()
+    repository = FakeCoreRepository()
+    repository.midias["midia-real-001"] = repository.midias["midia-real-001"].model_copy(
+        update={"caminho": "google_drive/drive-file-001"}
+    )
+    app.state.core_repository = repository
+    app.state.google_drive_repository = FakeGoogleDriveRepository()
+    app.state.media_dir = tmp_path
+    client = TestClient(app)
+    activation = client.post(
+        "/api/player/ativar",
+        json={
+            "activation_code": "REAL-CODE-001",
+            "hardware_id": "BOX-001",
+            "player_version": "0.1.0",
+        },
+    ).json()
+
+    response = client.get(
+        "/api/player/midias/midia-real-001/download",
+        headers={"Authorization": f"Bearer {activation['token']}"},
+    )
+
+    assert response.status_code == 200
+    assert response.content == b"drive-video-content"
+    assert app.state.google_drive_repository.downloads == ["drive-file-001"]
 
 
 def test_player_status_requires_bearer_token():

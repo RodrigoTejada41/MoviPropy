@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from fastapi.testclient import TestClient
 
-from moviprogy_api.domain.core import Cliente
+from moviprogy_api.domain.core import Cliente, Midia
 from moviprogy_api.domain.google_drive import GoogleDriveFile, GoogleDriveFolder, GoogleDriveStatus
 from moviprogy_api.main import create_app
 from test_admin_routes import ADMIN_HEADERS, FakeAuthRepository, FakeCoreRepository
@@ -88,6 +88,28 @@ class FakeGoogleDriveRepository:
         self.folders.append(folder)
         return folder
 
+    def find_or_create_client_structure(self, cliente_id: str, cliente_nome: str):
+        root_id = f"folder-{cliente_id}"
+        folders = [
+            self.save_client_folder(cliente_id, root_id, cliente_nome),
+            self.save_client_folder(cliente_id, f"{root_id}-Videos", "Videos"),
+            self.save_client_folder(cliente_id, f"{root_id}-Imagens", "Imagens"),
+            self.save_client_folder(cliente_id, f"{root_id}-Playlists", "Playlists"),
+        ]
+        return folders
+
+    def get_client_folder(self, cliente_id: str, folder_type: str = "root"):
+        names = {"root": None, "videos": "Videos", "imagens": "Imagens", "playlists": "Playlists"}
+        expected = names[folder_type]
+        return next(
+            (
+                folder
+                for folder in self.folders
+                if folder.cliente_id == cliente_id and (expected is None or folder.name == expected)
+            ),
+            None,
+        )
+
     def list_folders(self):
         return self.folders
 
@@ -99,6 +121,25 @@ class FakeGoogleDriveRepository:
             and (folder_id is None or item.id == folder_id)
         ]
 
+    def file_belongs_to_client(self, cliente_id, folder_id):
+        return any(folder.cliente_id == cliente_id and folder.id == folder_id for folder in self.folders)
+
+    def get_media_drive_metadata(self, midia_id):
+        item = self.metadata.get(midia_id)
+        if item is None:
+            return None
+        return GoogleDriveFile(
+            id=item["file_id"],
+            name="midia-drive",
+            folder_id=item["folder_id"],
+            mime_type=item["mime_type"],
+            web_view_link=item["web_view_link"],
+            download_link=item["download_link"],
+        )
+
+    def delete_file(self, file_id):
+        self.deleted_file_id = file_id
+
     def get_file_metadata(self, file_id):
         return GoogleDriveFile(
             id=file_id,
@@ -108,6 +149,7 @@ class FakeGoogleDriveRepository:
             modified_at=datetime.now(timezone.utc),
             web_view_link=f"https://drive.google.com/file/d/{file_id}/view",
             cliente_id="cliente-001",
+            folder_id="folder-cliente-001-Videos",
         )
 
     def upload_file(self, folder_id, name, mime_type, content):
@@ -254,6 +296,12 @@ def test_google_drive_root_and_client_folder_flow(monkeypatch):
     assert root_response.json()["name"] == "MoviProgy_Midias"
     assert client_response.status_code == 200
     assert client_response.json()["cliente_id"] == "cliente-001"
+    assert {item.name for item in app.state.google_drive_repository.folders if item.cliente_id == "cliente-001"} >= {
+        "Cliente_001",
+        "Videos",
+        "Imagens",
+        "Playlists",
+    }
 
 
 def test_google_drive_root_folder_auto_creates_validates_and_logs():
@@ -290,6 +338,7 @@ def test_google_drive_import_media_creates_midia_metadata():
         email="drive@moviprogy.local",
     )
     app.state.core_repository.save_cliente(Cliente(id="cliente-001", nome="Cliente Um"))
+    app.state.google_drive_repository.find_or_create_client_structure("cliente-001", "Cliente Um")
     client = TestClient(app)
 
     response = client.post(
@@ -302,7 +351,7 @@ def test_google_drive_import_media_creates_midia_metadata():
             "nome": "video.mp4",
             "tamanho": 12,
             "sha256": "a" * 64,
-            "folder_id": "folder-001",
+            "folder_id": "folder-cliente-001-Videos",
             "google_drive_mime_type": "video/mp4",
             "google_drive_web_view_link": "https://drive.google.com/file/d/drive-file-001",
         },
@@ -324,6 +373,7 @@ def test_google_drive_import_media_uses_drive_metadata():
         root_folder_name="MoviProgy_Midias",
     )
     app.state.core_repository.save_cliente(Cliente(id="cliente-001", nome="Cliente Um"))
+    app.state.google_drive_repository.find_or_create_client_structure("cliente-001", "Cliente Um")
     client = TestClient(app)
 
     response = client.post(
@@ -344,7 +394,7 @@ def test_google_drive_import_media_uses_drive_metadata():
     assert app.state.google_drive_repository.metadata[payload["id"]]["mime_type"] == "image/png"
 
 
-def test_google_drive_upload_media_sends_file_to_root_folder_and_saves_metadata():
+def test_google_drive_upload_media_sends_file_to_client_media_folder_and_saves_metadata():
     app = _create_test_app()
     app.state.google_drive_repository.status = GoogleDriveStatus(
         connected=True,
@@ -368,5 +418,72 @@ def test_google_drive_upload_media_sends_file_to_root_folder_and_saves_metadata(
     assert payload["nome"] == "logo.png"
     assert payload["tamanho"] == 10
     assert payload["sha256"] == "b" * 64
-    assert app.state.google_drive_repository.uploads[0][0] == "root-001"
+    assert app.state.google_drive_repository.uploads[0][0] == "folder-cliente-001-Imagens"
     assert app.state.google_drive_repository.metadata[payload["id"]]["file_id"] == "uploaded-file-001"
+
+
+def test_google_drive_import_media_rejects_file_outside_client_folder():
+    app = _create_test_app()
+    app.state.google_drive_repository.status = GoogleDriveStatus(
+        connected=True,
+        status="connected",
+        email="drive@moviprogy.local",
+    )
+    app.state.core_repository.save_cliente(Cliente(id="cliente-001", nome="Cliente Um"))
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/integrations/google-drive/import-media",
+        headers=ADMIN_HEADERS,
+        json={"cliente_id": "cliente-001", "file_id": "drive-file-002", "tipo": "imagem"},
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {"detail": "arquivo fora da pasta do cliente"}
+
+
+def test_google_drive_delete_media_requires_confirmation_and_deletes_file():
+    app = _create_test_app()
+    app.state.google_drive_repository.status = GoogleDriveStatus(
+        connected=True,
+        status="connected",
+        email="drive@moviprogy.local",
+    )
+    app.state.core_repository.save_cliente(Cliente(id="cliente-001", nome="Cliente Um"))
+    app.state.core_repository.save_midia(
+        Midia(
+            id="midia-drive-001",
+            cliente_id="cliente-001",
+            nome="video.mp4",
+            tipo="video",
+            caminho="google_drive/drive-file-001",
+            tamanho=10,
+            sha256="a" * 64,
+        )
+    )
+    app.state.google_drive_repository.metadata["midia-drive-001"] = {
+        "file_id": "drive-file-001",
+        "folder_id": "folder-cliente-001-Videos",
+        "mime_type": "video/mp4",
+        "web_view_link": "https://drive.google.com/file/d/drive-file-001/view",
+        "download_link": None,
+    }
+    client = TestClient(app)
+
+    blocked = client.request(
+        "DELETE",
+        "/api/integrations/google-drive/media/midia-drive-001",
+        headers=ADMIN_HEADERS,
+        json={"confirmacao": "NAO"},
+    )
+    response = client.request(
+        "DELETE",
+        "/api/integrations/google-drive/media/midia-drive-001",
+        headers=ADMIN_HEADERS,
+        json={"confirmacao": "APAGAR"},
+    )
+
+    assert blocked.status_code == 400
+    assert response.status_code == 200
+    assert app.state.google_drive_repository.deleted_file_id == "drive-file-001"
+    assert app.state.core_repository.midias["midia-drive-001"].ativo is False

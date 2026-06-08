@@ -50,6 +50,7 @@ class GoogleDriveFolderList(BaseModel):
 
 class GoogleDriveFile(BaseModel):
     id: str
+    media_id: str | None = None
     name: str
     mime_type: str | None = None
     size: int | None = Field(default=None, ge=0)
@@ -83,6 +84,10 @@ class GoogleDriveValidationRequest(BaseModel):
     cliente_id: str | None = None
     folder_id: str | None = None
     file_id: str | None = None
+
+
+class GoogleDriveDeleteMediaRequest(BaseModel):
+    confirmacao: str = Field(min_length=1)
 
 
 class GoogleDriveOperationResult(BaseModel):

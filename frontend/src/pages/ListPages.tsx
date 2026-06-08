@@ -1015,7 +1015,11 @@ export function GoogleDrivePage() {
       const statusResult = await api.googleDriveStatus();
       const [folderResult, fileResult] = await Promise.all([
         api.googleDriveFolders().catch(() => ({ items: [] })),
-        api.googleDriveFiles({ folderId: statusResult.root_folder_id ?? undefined }).catch(() => ({ items: [] }))
+        api.googleDriveFiles(
+          importForm.cliente_id
+            ? { clienteId: importForm.cliente_id }
+            : { folderId: statusResult.root_folder_id ?? undefined }
+        ).catch(() => ({ items: [] }))
       ]);
       setStatusData(statusResult);
       setFolders(folderResult.items);
@@ -1151,6 +1155,20 @@ export function GoogleDrivePage() {
     }
   }
 
+  async function deleteMedia(midiaId: string) {
+    const confirmed = window.confirm("Apagar definitivamente este arquivo do Google Drive?");
+    if (!confirmed) return;
+    setMessage(null);
+    setSuccess(null);
+    try {
+      await api.googleDriveDeleteMedia(midiaId, "APAGAR");
+      await load();
+      setSuccess("Arquivo apagado definitivamente do Google Drive.");
+    } catch (err) {
+      setMessage(err instanceof ApiError ? err.message : "Falha ao apagar arquivo.");
+    }
+  }
+
   const connected = statusData?.connected === true;
   const rootFolderId = statusData?.root_folder_id ?? undefined;
 
@@ -1164,7 +1182,7 @@ export function GoogleDrivePage() {
             <strong>Google Drive</strong>
           </div>
           <h1>Google Drive / Armazenamento</h1>
-          <p>Conecte uma conta Google, organize pastas por cliente e importe arquivos para midias.</p>
+          <p>Use o Google Drive do cliente como armazenamento principal das midias.</p>
         </div>
         <div className="driveActions">
           <button className="secondaryButton" type="button" onClick={validate} disabled={!connected || loading}><RefreshCw size={17} />Validar</button>
@@ -1230,7 +1248,7 @@ export function GoogleDrivePage() {
             <option value="">Cliente</option>
             {clientes.rows.map((cliente) => <option key={cliente.id} value={cliente.id}>{cliente.nome}</option>)}
           </select>
-          <p className="mutedCell">Nome e ID da pasta sao definidos automaticamente pelo backend.</p>
+          <p className="mutedCell">O backend cria Cliente, Videos, Imagens e Playlists automaticamente.</p>
           <button className="primaryButton" disabled={!connected || loading}><Folder size={16} />Salvar pasta</button>
         </form>
       </div>
@@ -1301,6 +1319,11 @@ export function GoogleDrivePage() {
                         <button className="tableIconButton" type="button" onClick={() => importMedia(file.id)} disabled={!connected || !importForm.cliente_id} title="Importar arquivo">
                           <UploadCloud size={18} />
                         </button>
+                        {file.media_id ? (
+                          <button className="tableIconButton danger" type="button" onClick={() => deleteMedia(file.media_id!)} title="Apagar definitivamente do Google Drive">
+                            <Trash2 size={18} />
+                          </button>
+                        ) : null}
                       </td>
                     </tr>
                   ))}

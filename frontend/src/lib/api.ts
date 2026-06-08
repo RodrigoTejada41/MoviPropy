@@ -254,5 +254,11 @@ export const api = {
       method: "POST",
       body: formData
     });
+  },
+  googleDriveDeleteMedia(midiaId: string, confirmacao: string) {
+    return request<{ status: string; message: string }>(`/api/integrations/google-drive/media/${encodeURIComponent(midiaId)}`, {
+      method: "DELETE",
+      body: JSON.stringify({ confirmacao })
+    });
   }
 };

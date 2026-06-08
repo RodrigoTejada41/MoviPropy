@@ -146,6 +146,7 @@ export type GoogleDriveFolder = {
 
 export type GoogleDriveFile = {
   id: string;
+  media_id?: string | null;
   name: string;
   mime_type?: string | null;
   size?: number | null;

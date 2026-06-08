@@ -1204,6 +1204,40 @@ Consequencias:
 
 ---
 
+### ADR-046 - Google Drive como storage principal SaaS
+
+Status: Aprovada
+
+Data: 2026-06-08
+
+Contexto:
+- O sistema sera SaaS hospedado na web.
+- O servidor nao deve armazenar grandes volumes de videos e midias.
+- Cada cliente pode possuir sua propria conta Google Drive.
+- O player precisa continuar offline-first e nao pode reproduzir diretamente do Drive.
+
+Decisao:
+- Usar Google Drive como armazenamento principal das midias dos clientes.
+- O servidor MoviProgy armazena metadados, configuracoes, playlists, clientes, dispositivos e sincronizacao.
+- Arquivos fisicos ficam no Google Drive do cliente.
+- Cada cliente possui pasta propria com subpastas `Videos`, `Imagens` e `Playlists`.
+- O player baixa midias pela API MoviProgy e reproduz localmente.
+- O endpoint do player permanece `GET /api/player/midias/{midia_id}/download` como fachada unica.
+
+Motivo:
+- Reduz consumo de disco da VPS.
+- Mantem controle centralizado pelo MoviProgy.
+- Preserva isolamento por cliente.
+- Mantem compatibilidade com player offline-first.
+
+Consequencias:
+- Storage local fica apenas como fallback tecnico/local.
+- Backend precisa controlar OAuth, refresh token, metadados, upload, importacao, exclusao e download.
+- Exclusao definitiva no Drive exige confirmacao explicita e auditoria.
+- Nenhum token Google ou link sensivel pode chegar ao player.
+
+---
+
 ### ADR-041 - E2E do painel com Playwright e API controlada
 
 Status: Aprovada

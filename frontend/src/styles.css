@@ -1906,6 +1906,10 @@ th {
   opacity: 0.58;
 }
 
+.tableIconButton.danger {
+  color: #c2410c;
+}
+
 .fleetHelpGrid {
   display: grid;
   gap: 18px;

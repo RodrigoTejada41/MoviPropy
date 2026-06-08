@@ -9,6 +9,7 @@ from moviprogy_api.domain.google_drive import GoogleDriveFile, GoogleDriveFolder
 from moviprogy_api.google_drive import (
     decrypt_secret,
     drive_api_request,
+    drive_download_chunks,
     drive_upload_request,
     encrypt_secret,
     google_oauth_simulated,
@@ -209,6 +210,63 @@ class PostgresGoogleDriveRepository:
         )
         return GoogleDriveFolder(id=str(created["id"]), name=str(created["name"]), status="ok")
 
+    def find_or_create_client_structure(
+        self,
+        cliente_id: str,
+        cliente_nome: str,
+    ) -> list[GoogleDriveFolder]:
+        status = self.get_status()
+        if not status.connected:
+            raise RuntimeError("google drive desconectado")
+        if not status.root_folder_id:
+            raise RuntimeError("pasta raiz nao definida")
+
+        client_folder = self._find_or_create_folder(
+            _folder_safe_name(cliente_nome or cliente_id),
+            status.root_folder_id,
+        )
+        saved = [self.save_client_folder(cliente_id, client_folder.id, client_folder.name, "root")]
+        for folder_type, folder_name in [
+            ("videos", "Videos"),
+            ("imagens", "Imagens"),
+            ("playlists", "Playlists"),
+        ]:
+            child = self._find_or_create_folder(folder_name, client_folder.id)
+            saved.append(self.save_client_folder(cliente_id, child.id, child.name, folder_type))
+        return saved
+
+    def _find_or_create_folder(self, folder_name: str, parent_folder_id: str) -> GoogleDriveFolder:
+        if google_oauth_simulated():
+            return GoogleDriveFolder(
+                id=f"{parent_folder_id}-{_folder_safe_name(folder_name)}",
+                name=folder_name,
+                status="ok",
+            )
+        token = self._valid_access_token()
+        escaped_name = folder_name.replace("'", "\\'")
+        query = quote(
+            "mimeType = 'application/vnd.google-apps.folder' "
+            f"and name = '{escaped_name}' "
+            f"and '{parent_folder_id}' in parents "
+            "and trashed = false"
+        )
+        result = drive_api_request(token, f"/files?q={query}&fields=files(id,name)")
+        files = result.get("files") or []
+        if files:
+            first = files[0]
+            return GoogleDriveFolder(id=str(first["id"]), name=str(first["name"]), status="ok")
+        created = drive_api_request(
+            token,
+            "/files?fields=id,name",
+            method="POST",
+            payload={
+                "name": folder_name,
+                "mimeType": "application/vnd.google-apps.folder",
+                "parents": [parent_folder_id],
+            },
+        )
+        return GoogleDriveFolder(id=str(created["id"]), name=str(created["name"]), status="ok")
+
     def _drive_folder_by_id(self, token: str, folder_id: str) -> GoogleDriveFolder | None:
         try:
             payload = drive_api_request(
@@ -228,6 +286,7 @@ class PostgresGoogleDriveRepository:
         cliente_id: str,
         folder_id: str,
         folder_name: str,
+        folder_type: str = "root",
     ) -> GoogleDriveFolder:
         with psycopg.connect(self._database_url) as connection:
             connection.execute(
@@ -238,17 +297,24 @@ class PostgresGoogleDriveRepository:
                     provider,
                     folder_id,
                     folder_name,
+                    folder_type,
                     status
                 )
-                VALUES (%s, %s, 'google_drive', %s, %s, 'ok')
-                ON CONFLICT (cliente_id, provider)
+                VALUES (%s, %s, 'google_drive', %s, %s, %s, 'ok')
+                ON CONFLICT (cliente_id, provider, folder_type)
                 DO UPDATE SET
                     folder_id = EXCLUDED.folder_id,
                     folder_name = EXCLUDED.folder_name,
                     status = 'ok',
                     updated_at = NOW()
                 """,
-                (f"gdrive-folder-{cliente_id}", cliente_id, folder_id, folder_name),
+                (
+                    f"gdrive-folder-{cliente_id}-{folder_type}",
+                    cliente_id,
+                    folder_id,
+                    folder_name,
+                    folder_type,
+                ),
             )
             connection.commit()
         return GoogleDriveFolder(
@@ -257,6 +323,39 @@ class PostgresGoogleDriveRepository:
             status="ok",
             cliente_id=cliente_id,
         )
+
+    def get_client_folder(self, cliente_id: str, folder_type: str = "root") -> GoogleDriveFolder | None:
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                """
+                SELECT folder_id, folder_name, status
+                FROM client_storage_folders
+                WHERE provider = 'google_drive'
+                  AND cliente_id = %s
+                  AND folder_type = %s
+                """,
+                (cliente_id, folder_type),
+            ).fetchone()
+        if row is None:
+            return None
+        return GoogleDriveFolder(id=row[0], name=row[1], status=row[2], cliente_id=cliente_id)
+
+    def list_client_folders(self, cliente_id: str) -> list[GoogleDriveFolder]:
+        with psycopg.connect(self._database_url) as connection:
+            rows = connection.execute(
+                """
+                SELECT folder_id, folder_name, status
+                FROM client_storage_folders
+                WHERE provider = 'google_drive'
+                  AND cliente_id = %s
+                ORDER BY folder_type ASC
+                """,
+                (cliente_id,),
+            ).fetchall()
+        return [
+            GoogleDriveFolder(id=row[0], name=row[1], status=row[2], cliente_id=cliente_id)
+            for row in rows
+        ]
 
     def list_folders(self) -> list[GoogleDriveFolder]:
         with psycopg.connect(self._database_url) as connection:
@@ -309,6 +408,7 @@ class PostgresGoogleDriveRepository:
             rows = connection.execute(
                 f"""
                 SELECT
+                    id,
                     google_drive_file_id,
                     nome,
                     google_drive_mime_type,
@@ -328,21 +428,76 @@ class PostgresGoogleDriveRepository:
             ).fetchall()
         return [
             GoogleDriveFile(
-                id=row[0],
-                name=row[1],
-                mime_type=row[2],
-                size=row[3],
-                modified_at=row[4],
-                web_view_link=row[5],
-                download_link=row[6],
-                import_status=row[7],
-                cliente_id=row[8],
-                folder_id=row[9],
-                sha256=row[10],
+                id=row[1],
+                media_id=row[0],
+                name=row[2],
+                mime_type=row[3],
+                size=row[4],
+                modified_at=row[5],
+                web_view_link=row[6],
+                download_link=row[7],
+                import_status=row[8],
+                cliente_id=row[9],
+                folder_id=row[10],
+                sha256=row[11],
             )
             for row in rows
-            if row[0] is not None
+            if row[1] is not None
         ]
+
+    def file_belongs_to_client(self, cliente_id: str, folder_id: str | None) -> bool:
+        if folder_id is None:
+            return False
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                """
+                SELECT 1
+                FROM client_storage_folders
+                WHERE provider = 'google_drive'
+                  AND cliente_id = %s
+                  AND folder_id = %s
+                """,
+                (cliente_id, folder_id),
+            ).fetchone()
+        return row is not None
+
+    def get_media_drive_metadata(self, midia_id: str) -> GoogleDriveFile | None:
+        with psycopg.connect(self._database_url) as connection:
+            row = connection.execute(
+                """
+                SELECT
+                    google_drive_file_id,
+                    nome,
+                    google_drive_mime_type,
+                    tamanho,
+                    google_drive_modified_at,
+                    google_drive_web_view_link,
+                    google_drive_download_link,
+                    status,
+                    cliente_id,
+                    google_drive_folder_id,
+                    sha256
+                FROM midias
+                WHERE id = %s
+                  AND origem_armazenamento = 'google_drive'
+                """,
+                (midia_id,),
+            ).fetchone()
+        if row is None or row[0] is None:
+            return None
+        return GoogleDriveFile(
+            id=row[0],
+            name=row[1],
+            mime_type=row[2],
+            size=row[3],
+            modified_at=row[4],
+            web_view_link=row[5],
+            download_link=row[6],
+            import_status=row[7],
+            cliente_id=row[8],
+            folder_id=row[9],
+            sha256=row[10],
+        )
 
     def _list_drive_files(self, folder_id: str) -> list[GoogleDriveFile]:
         token = self._valid_access_token()
@@ -389,6 +544,7 @@ class PostgresGoogleDriveRepository:
                     google_drive_mime_type = %s,
                     google_drive_web_view_link = %s,
                     google_drive_download_link = %s,
+                    google_drive_modified_at = NOW(),
                     status = 'disponivel',
                     imported_at = NOW(),
                     updated_at = NOW()
@@ -472,6 +628,20 @@ class PostgresGoogleDriveRepository:
             web_view_link=payload.get("webViewLink"),
             download_link=payload.get("webContentLink"),
             folder_id=str(parents[0]) if parents else folder_id,
+        )
+
+    def download_file(self, file_id: str):
+        if google_oauth_simulated():
+            return [f"simulated-google-drive-content:{file_id}".encode("utf-8")]
+        return drive_download_chunks(self._valid_access_token(), file_id)
+
+    def delete_file(self, file_id: str) -> None:
+        if google_oauth_simulated():
+            return
+        drive_api_request(
+            self._valid_access_token(),
+            f"/files/{file_id}",
+            method="DELETE",
         )
 
     def validate_access(self) -> GoogleDriveStatus:
@@ -591,6 +761,11 @@ class PostgresGoogleDriveRepository:
 
 def generated_folder_id(prefix: str = "gdrive-folder") -> str:
     return f"{prefix}-{uuid4().hex}"
+
+
+def _folder_safe_name(value: str) -> str:
+    normalized = "".join(char if char.isalnum() else "_" for char in value.strip())
+    return "_".join(part for part in normalized.split("_") if part) or "Cliente"
 
 
 def _parse_google_datetime(value: str | None) -> datetime | None:
