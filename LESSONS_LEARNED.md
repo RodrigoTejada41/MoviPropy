@@ -27,6 +27,33 @@ Status:
 
 ## Licoes registradas
 
+### ERR-023
+
+Data: 2026-06-07
+
+Descricao do Problema:
+- Player retornava `falha HTTP 502` ao ativar dispositivo.
+
+Causa Raiz:
+- Nginx do player havia resolvido `moviprogy-api` para um IP antigo.
+- A API foi recriada e o IP interno Docker mudou.
+
+Solucao Aplicada:
+- Configurar Nginx do player e do painel com resolver Docker `127.0.0.11`.
+- Usar upstream via variavel para reavaliar DNS durante execucao.
+
+Como Evitar no Futuro:
+- Proxies internos Docker nao devem depender de resolucao DNS estatica quando containers podem ser recriados.
+- Rebuild/restart de API deve ser validado pelo player e pelo painel.
+
+Arquivos Afetados:
+- `player/nginx.conf`
+- `frontend/nginx.conf`
+
+Status: Resolvido
+
+---
+
 ### ERR-022
 
 Data: 2026-06-07

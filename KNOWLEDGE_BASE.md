@@ -50,6 +50,7 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 - Refresh/logout administrativo invalidam tokens antigos em `admin_sessions`.
 - Docker Compose executa o backend em `moviprogy-api`.
 - Docker Compose executa PostgreSQL em `moviprogy-db`.
+- Nginx dos containers web deve resolver `moviprogy-api` via Docker DNS (`127.0.0.11`) com validade curta, pois recriar a API muda o IP interno.
 - Dados de runtime do container devem usar bind mounts em `runtime/` e `logs/` dentro do projeto.
 - Storage local inicial definido em `MOVIPROGY_MEDIA_DIR`.
 - Google Drive possui implementacao inicial de storage externo controlado pelo backend.
