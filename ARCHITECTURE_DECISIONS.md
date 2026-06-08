@@ -1176,6 +1176,34 @@ Consequencias:
 
 ---
 
+### ADR-045 - DEV somente apos testes locais
+
+Status: Aprovada
+
+Data: 2026-06-08
+
+Contexto:
+- DEV e ambiente de validacao compartilhado.
+- Deploy automatico em `develop` nao deve substituir validacao local.
+- Bugs de player e painel precisam ser barrados antes de atualizar o ambiente remoto.
+
+Decisao:
+- Toda alteracao deve executar testes locais obrigatorios antes de merge em `develop`.
+- `develop` continua disparando deploy DEV, mas somente apos testes locais e CI.
+- Falha ou ausencia de teste local bloqueia envio para DEV.
+
+Motivo:
+- Evita usar DEV como primeira linha de teste.
+- Reduz regressao visivel no ambiente de homologacao.
+- Mantem fluxo profissional local -> Git -> DEV -> homologacao.
+
+Consequencias:
+- Cada correcao deve registrar os testes locais executados.
+- PR para `develop` deve citar evidencia de teste.
+- Excecao so pode ocorrer com aprovacao explicita do cliente e registro documental.
+
+---
+
 ### ADR-041 - E2E do painel com Playwright e API controlada
 
 Status: Aprovada

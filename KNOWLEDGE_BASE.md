@@ -345,6 +345,8 @@ Motivo:
 ## Ambientes e publicacao
 
 - `develop` representa DEV e dispara deploy automatico apos CI.
+- Antes de enviar alteracao para `develop`/DEV, executar testes locais completos da area afetada.
+- Deploy DEV nao deve ser usado como primeira validacao de bug ou funcionalidade.
 - `main` representa PROD.
 - Feature e bugfix devem entrar por branch temporaria e pull request.
 - DEV e PROD usam projetos Compose, bancos, diretorios, logs e segredos distintos.
@@ -359,6 +361,7 @@ Motivo:
 - O dispositivo recebe conteudo pela propriedade `playlist_atual_id`.
 - A tela `Dispositivos` e a fonte operacional para vincular ou remover a playlist atual.
 - O player sempre reproduz em loop: um unico video repete continuamente; varios videos rodam em sequencia e retornam ao primeiro.
+- Video unico no player deve reiniciar no `onEnded` com `currentTime = 0` e `play()`, alem do atributo `loop`, porque playlist com 1 item nao muda `currentIndex`.
 
 ## Observabilidade HTTP
 

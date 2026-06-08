@@ -150,6 +150,8 @@ Se qualquer resposta for sim, bloquear a mudanca ate revisao.
 ## Processo de deploy
 
 - Deploy somente apos aprovacao.
+- DEV so pode receber deploy apos testes locais completos e aprovados.
+- Merge em `develop` deve ser bloqueado quando testes locais obrigatorios falharem ou nao forem executados.
 - Ambiente deve usar HTTPS.
 - Backups devem existir antes de migracoes.
 - Logs e health checks sao obrigatorios.

@@ -27,6 +27,34 @@ Status:
 
 ## Licoes registradas
 
+### ERR-024
+
+Data: 2026-06-08
+
+Descricao do Problema:
+- Video unico reproduzia uma vez no player e parava ao terminar.
+
+Causa Raiz:
+- O fluxo dependia principalmente do atributo `loop` do navegador.
+- Com playlist de 1 item, `currentIndex` nao muda e o React nao remonta o elemento de video.
+
+Solucao Aplicada:
+- No `onEnded`, quando a playlist tem zero ou um arquivo, voltar `currentTime` para `0` e chamar `play()`.
+- Atualizar cache do service worker do player para entregar a nova versao do shell.
+
+Como Evitar no Futuro:
+- Todo ajuste de player deve testar playlist com um unico video e playlist com varios videos.
+- Nao depender apenas de `loop` nativo quando o player precisa operar como kiosk continuo.
+- Bump de cache do service worker deve acompanhar correcao visivel no player.
+
+Arquivos Afetados:
+- `player/src/App.tsx`
+- `player/public/sw.js`
+
+Status: Resolvido
+
+---
+
 ### ERR-023
 
 Data: 2026-06-07
