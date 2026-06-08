@@ -148,14 +148,15 @@ Extensao planejada para Google Drive:
 - google_drive_folder_id
 - google_drive_mime_type
 - google_drive_web_view_link
+- google_drive_modified_at
 - hash_arquivo
 - status
 - atualizado_em
 - sincronizado_em
 
 Regra:
-- Player nao deve depender de `google_drive_file_id` para reproduzir midia.
-- Backend deve entregar manifesto com URL controlada e metadados de validacao.
+- Player nao recebe credenciais Google.
+- Backend deve entregar download controlado e metadados de validacao.
 
 ## playlists
 
@@ -245,7 +246,7 @@ Campos principais:
 - chave
 - valor
 
-## google_drive_integracoes
+## integrations / google_drive_settings
 
 Finalidade: armazenar configuracao OAuth e pasta raiz do Google Drive.
 
@@ -262,7 +263,29 @@ Campos principais:
 - atualizado_em
 
 Status:
-- Planejado.
+- Implementado em `006_google_drive.sql`.
+
+## client_storage_folders
+
+Finalidade: vincular clientes a pastas do Google Drive.
+
+Campos principais:
+- id
+- cliente_id
+- provider
+- folder_id
+- folder_name
+- folder_type
+- status
+- criado_em
+- atualizado_em
+
+Status:
+- Implementado em `006_google_drive.sql` e ampliado em `007_google_drive_client_structure.sql`.
+
+Regra:
+- `folder_type` identifica `root`, `videos`, `imagens` e `playlists`.
+- Cada cliente deve possuir estrutura isolada no Drive.
 
 ## google_drive_operacoes
 
@@ -279,4 +302,4 @@ Campos principais:
 - finalizado_em
 
 Status:
-- Planejado.
+- Implementado em `006_google_drive.sql`.

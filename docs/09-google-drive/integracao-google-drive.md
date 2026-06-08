@@ -1,10 +1,12 @@
 # Integracao Google Drive
 
-Status: implementado e homologado localmente.
+Status: storage principal SaaS aprovado; implementacao backend/painel em evolucao.
 
 Decisao atual:
-- O MVP usa storage local em `MOVIPROGY_MEDIA_DIR` e download controlado pelo backend.
-- A integracao Google Drive possui base inicial implementada para simulacao e preparacao de OAuth real.
+- Google Drive e o armazenamento principal das midias dos clientes.
+- O servidor armazena apenas metadados, configuracoes, playlists, clientes, dispositivos e sincronizacao.
+- Storage local em `MOVIPROGY_MEDIA_DIR` permanece apenas como fallback tecnico/local.
+- Player baixa pela API MoviProgy, valida e reproduz localmente.
 
 ## Status
 
@@ -13,13 +15,12 @@ Este documento tambem registra riscos, limites operacionais e evolucao para prod
 
 ## Objetivo
 
-Integrar o painel administrativo ao Google Drive para armazenar e importar midias de clientes.
+Integrar o painel administrativo ao Google Drive para armazenar e importar midias de clientes como storage principal SaaS.
 O backend deve controlar acesso, metadados, sincronizacao e links de download.
 O player nao deve acessar o Google Drive diretamente.
 
 ## Limite desta especificacao
 
-- Nao alterar o MVP atual de storage local.
 - A integracao inicial nao faz chamada real ao Google Drive sem credenciais configuradas.
 - A simulacao local pode ser ativada com `MOVIPROGY_GOOGLE_OAUTH_SIMULATED=true`.
 - Este documento define UX/UI, fluxo funcional, endpoints, regras de seguranca e especificacao tecnica.
@@ -33,8 +34,11 @@ Backend:
 - OAuth URL e callback.
 - Criptografia de tokens com `MOVIPROGY_GOOGLE_TOKEN_KEY`.
 - Persistencia de pasta raiz e pasta por cliente.
+- Criacao automatica da estrutura por cliente com `Videos`, `Imagens` e `Playlists`.
 - Importacao de midia por arquivo selecionado, com metadados obtidos pelo backend na API Google Drive.
 - Listagem de arquivos encontrados na pasta raiz e arquivos ja importados.
+- Upload direto para subpasta do cliente no Google Drive.
+- Exclusao definitiva com confirmacao explicita.
 
 Frontend:
 - Tela Google Drive / Armazenamento.
@@ -236,19 +240,20 @@ Regras:
 - Registrar auditoria de conexao, desconexao e falhas.
 - Permitir revogar integracao por cliente.
 
-## Estrutura de pastas no Google Drive
+## Estrutura obrigatoria de pastas no Google Drive
 
-Estrutura proposta:
+Estrutura obrigatoria:
 
 ```text
-MoviProgy/
-  clientes/
-    {cliente_id}-{nome_cliente}/
-      midias/
-        imagens/
-        videos/
-      importados/
-      lixeira-logica/
+MoviProgy_Midias/
+  Cliente_A/
+    Videos/
+    Imagens/
+    Playlists/
+  Cliente_B/
+    Videos/
+    Imagens/
+    Playlists/
 ```
 
 Regras:
@@ -257,6 +262,10 @@ Regras:
 - Arquivo de um cliente nao pode ser listado para outro cliente.
 - Exclusao no sistema deve ser logica por padrao.
 - Remocao fisica deve exigir permissao elevada e auditoria.
+- Upload de video deve ir para `Videos`.
+- Upload de imagem deve ir para `Imagens`.
+- Remover midia de playlist nao remove arquivo do Drive.
+- Apagar definitivamente do Drive exige confirmacao do usuario.
 
 ## Modelo de dados proposto
 
@@ -266,6 +275,7 @@ Extensao planejada para `midias`:
 - `google_drive_folder_id`.
 - `google_drive_mime_type`.
 - `google_drive_web_view_link`.
+- `google_drive_modified_at`.
 - `tamanho`.
 - `hash_arquivo`.
 - `status`: `pendente`, `processando`, `disponivel`, `erro`, `removido`.
@@ -313,6 +323,7 @@ Campos principais:
 - `provider`.
 - `folder_id`.
 - `folder_name`.
+- `folder_type`: `root`, `videos`, `imagens`, `playlists`.
 - `status`.
 
 ### google_drive_integracoes
@@ -379,7 +390,7 @@ Regra: backend deve localizar ou criar a pasta no Drive, salvar o ID real, valid
 
 Finalidade: criar ou vincular pasta do cliente.
 Payload: `cliente_id`.
-Regra: backend define nome e ID da pasta automaticamente.
+Regra: backend define nome e ID da pasta automaticamente e cria `Videos`, `Imagens` e `Playlists`.
 
 ### GET /api/integrations/google-drive/files
 
@@ -390,13 +401,19 @@ Query: `cliente_id`, `folder_id`, `mime_type` opcional.
 
 Finalidade: importar arquivo do Drive para o cadastro de midias.
 Payload: `cliente_id`, `file_id`, `tipo`.
-Regra: `nome`, `tamanho`, MIME type, links e pasta sao preenchidos pelo backend usando metadados do Drive.
+Regra: `nome`, `tamanho`, MIME type, links e pasta sao preenchidos pelo backend usando metadados do Drive. Arquivo precisa pertencer a pasta do cliente.
 
 ### POST /api/integrations/google-drive/upload-media
 
 Finalidade: enviar arquivo para o Drive e cadastrar midia.
 Payload multipart: `cliente_id`, `tipo`, `arquivo`.
-Regra: backend valida conexao, usa pasta raiz salva, envia ao Drive, captura metadados retornados e registra operacao.
+Regra: backend valida conexao, cria/usa pasta do cliente, envia videos para `Videos`, imagens para `Imagens`, captura metadados retornados e registra operacao.
+
+### DELETE /api/integrations/google-drive/media/{midia_id}
+
+Finalidade: apagar definitivamente arquivo no Google Drive.
+Payload: `confirmacao = APAGAR`.
+Regra: sem confirmacao exata, bloquear. Remover midia da playlist continua separado e nao apaga arquivo fisico.
 
 ### POST /api/integrations/google-drive/validate-access
 
@@ -409,8 +426,9 @@ Regra: nao expor credenciais Google nem `refresh_token`.
 
 ### Compatibilidade com endpoint atual de download
 
-- O MVP ja possui `GET /api/player/midias/{midia_id}/download` para storage local.
-- Na implementacao Google Drive, preferir manter esse endpoint como fachada unica do player.
+- O MVP ja possui `GET /api/player/midias/{midia_id}/download`.
+- Na implementacao Google Drive, manter esse endpoint como fachada unica do player.
+- Para midia Google Drive, a API baixa/retransmite do Drive ao player sem salvar copia permanente no servidor.
 - `GET /api/player/media-download-url` pode ser criado apenas se houver necessidade de contrato separado.
 
 ### Historico do rascunho anterior

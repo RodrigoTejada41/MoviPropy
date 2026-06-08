@@ -52,11 +52,15 @@ Sistema de midia indoor para administrar campanhas online e reproduzir conteudo 
 - Docker Compose executa PostgreSQL em `moviprogy-db`.
 - Nginx dos containers web deve resolver `moviprogy-api` via Docker DNS (`127.0.0.11`) com validade curta, pois recriar a API muda o IP interno.
 - Dados de runtime do container devem usar bind mounts em `runtime/` e `logs/` dentro do projeto.
-- Storage local inicial definido em `MOVIPROGY_MEDIA_DIR`.
-- Google Drive possui implementacao inicial de storage externo controlado pelo backend.
+- Google Drive e o storage principal SaaS para videos, imagens e demais midias.
+- Storage local em `MOVIPROGY_MEDIA_DIR` permanece apenas como fallback tecnico/local e nao deve ser usado para grandes volumes em producao SaaS.
+- Google Drive possui implementacao de storage externo controlado pelo backend.
 - Google Drive / Armazenamento possui UX/UI, OAuth, endpoints, dados, seguranca, quota e testes iniciais.
 - Google Drive nao deve expor IDs, tokens, links internos, MIME, tamanho ou hash como campos manuais no frontend.
 - Pasta raiz do Google Drive deve ser criada/localizada automaticamente pela API Google Drive e persistida no banco pelo backend.
+- Cada cliente deve possuir estrutura propria no Drive: pasta do cliente com subpastas `Videos`, `Imagens` e `Playlists`.
+- Upload pelo painel deve enviar videos para `Videos` e imagens para `Imagens` dentro da pasta do cliente.
+- Exclusao definitiva no Drive exige confirmacao explicita `APAGAR`; remover midia da playlist nao apaga o arquivo do Drive.
 - Player MVP implementado como PWA offline-first.
 - Player MVP definido e implementado como PWA React/TypeScript em `player/`.
 - Deploy ainda nao definido alem do container local.
@@ -109,8 +113,10 @@ Limite:
 - Namespace canonico: `/api/integrations/google-drive`.
 - Implementacao atual cobre status, connect, callback, disconnect, folders, root-folder, client-folder, files, import-media, upload-media e validate-access.
 - `POST /api/integrations/google-drive/root-folder` localiza ou cria a pasta raiz no Drive, salva o ID real no banco, valida acesso e registra operacao.
+- `POST /api/integrations/google-drive/client-folder` cria a estrutura obrigatoria do cliente com `Videos`, `Imagens` e `Playlists`.
 - `POST /api/integrations/google-drive/import-media` busca metadados tecnicos do arquivo no backend; o frontend informa apenas cliente, tipo e arquivo selecionado.
-- `POST /api/integrations/google-drive/upload-media` envia arquivo ao Drive e salva metadados automaticamente sem limite manual no frontend.
+- `POST /api/integrations/google-drive/upload-media` envia arquivo diretamente ao Drive na subpasta do cliente e salva metadados automaticamente sem limite manual no frontend.
+- `DELETE /api/integrations/google-drive/media/{midia_id}` apaga definitivamente o arquivo do Drive somente com confirmacao `APAGAR`.
 - OAuth real depende de variaveis Google Cloud.
 - `MOVIPROGY_GOOGLE_TOKEN_KEY` e obrigatoria para criptografar tokens no callback.
 - `MOVIPROGY_GOOGLE_OAUTH_SIMULATED=true` permite simulacao local de callback sem chamar Google.
@@ -119,6 +125,7 @@ Limite:
 - Player nao deve receber credenciais Google.
 - Backend deve gerar link controlado ou temporario de download.
 - Player deve baixar a midia, validar tamanho/hash e reproduzir localmente.
+- Player continua chamando `GET /api/player/midias/{midia_id}/download`; a API decide se a origem e local ou Google Drive.
 - OAuth 2.0 deve ser usado para conexao com Google Drive.
 - Refresh token deve ser protegido; nao pode ficar em texto puro.
 - Arquivos e pastas devem ser isolados por cliente.

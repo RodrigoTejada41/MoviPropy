@@ -134,7 +134,7 @@ def _new_activation_code(repository: object) -> str:
 def get_operational_configuration(request: Request) -> OperationalConfiguration:
     require_admin_permission(request, "configuracoes", "ler")
     return OperationalConfiguration(
-        storage_provider="local",
+        storage_provider="google_drive",
         max_upload_bytes=request.app.state.max_upload_bytes,
         offline_first=True,
     )

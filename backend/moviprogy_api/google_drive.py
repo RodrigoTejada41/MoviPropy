@@ -4,6 +4,7 @@ import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
+from collections.abc import Iterator
 from urllib.request import Request as UrlRequest, urlopen
 
 from cryptography.fernet import Fernet
@@ -185,6 +186,24 @@ def drive_upload_request(
     )
     with urlopen(request, timeout=60) as response:
         return json.loads(response.read().decode("utf-8"))
+
+
+def drive_download_chunks(
+    access_token: str,
+    file_id: str,
+    chunk_size: int = 1024 * 1024,
+) -> Iterator[bytes]:
+    request = UrlRequest(
+        f"{GOOGLE_DRIVE_API_URL}/files/{file_id}?alt=media",
+        headers={"Authorization": f"Bearer {access_token}"},
+        method="GET",
+    )
+    with urlopen(request, timeout=120) as response:
+        while True:
+            chunk = response.read(chunk_size)
+            if not chunk:
+                break
+            yield chunk
 
 
 def token_expiration(tokens: dict) -> datetime | None:

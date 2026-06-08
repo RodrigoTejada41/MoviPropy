@@ -8,6 +8,7 @@ from moviprogy_api.domain.core import Midia
 from moviprogy_api.domain.google_drive import (
     GoogleDriveAuthorizationUrl,
     GoogleDriveClientFolderRequest,
+    GoogleDriveDeleteMediaRequest,
     GoogleDriveFileList,
     GoogleDriveFolder,
     GoogleDriveFolderList,
@@ -29,7 +30,6 @@ from moviprogy_api.google_drive import (
     new_oauth_state,
     token_expiration,
 )
-from moviprogy_api.repositories.postgres_google_drive import generated_folder_id
 from moviprogy_api.security import require_admin_permission, require_admin_user
 
 
@@ -211,13 +211,20 @@ def set_google_drive_client_folder(
         "administrar",
         payload.cliente_id,
     )
-    folder_id = payload.folder_id or generated_folder_id("gdrive-client")
-    folder_name = payload.folder_name or f"Cliente_{payload.cliente_id}"
-    return _google_repository(request).save_client_folder(
+    google_repository = _google_repository(request)
+    cliente = core_repository.get_cliente(payload.cliente_id)
+    if payload.folder_id:
+        folder_name = payload.folder_name or f"Cliente_{payload.cliente_id}"
+        return google_repository.save_client_folder(
+            payload.cliente_id,
+            payload.folder_id,
+            folder_name,
+        )
+    folders = google_repository.find_or_create_client_structure(
         payload.cliente_id,
-        folder_id,
-        folder_name,
+        payload.folder_name or cliente.nome,
     )
+    return folders[0]
 
 
 @router.get("/files", response_model=GoogleDriveFileList)
@@ -276,6 +283,19 @@ def import_google_drive_media(
             message=str(exc),
         )
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    folder_id = payload.folder_id or metadata.folder_id
+    if not google_repository.file_belongs_to_client(payload.cliente_id, folder_id):
+        google_repository.record_operation(
+            operation="import-media",
+            status="erro",
+            user_id=_user_id(request),
+            cliente_id=payload.cliente_id,
+            message="arquivo fora da pasta do cliente",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="arquivo fora da pasta do cliente",
+        )
     midia = Midia(
         id=f"midia-{uuid4().hex}",
         cliente_id=payload.cliente_id,
@@ -289,7 +309,7 @@ def import_google_drive_media(
     google_repository.save_imported_media_metadata(
         midia_id=midia.id,
         file_id=payload.file_id,
-        folder_id=payload.folder_id or metadata.folder_id,
+        folder_id=folder_id,
         mime_type=payload.google_drive_mime_type or metadata.mime_type,
         web_view_link=payload.google_drive_web_view_link or metadata.web_view_link,
         download_link=payload.google_drive_download_link or metadata.download_link,
@@ -337,12 +357,21 @@ async def upload_google_drive_media(
             message="pasta raiz nao definida",
         )
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="pasta raiz nao definida")
+    cliente = core_repository.get_cliente(cliente_id)
+    folders = google_repository.find_or_create_client_structure(cliente_id, cliente.nome)
+    target_folder_type = "videos" if tipo == "video" else "imagens"
+    target_folder = google_repository.get_client_folder(cliente_id, target_folder_type)
+    if target_folder is None:
+        target_folder = next(
+            (folder for folder in folders if folder.name.lower() == target_folder_type),
+            folders[0],
+        )
     content = await arquivo.read()
     filename = arquivo.filename or f"arquivo-{uuid4().hex}"
     mime_type = arquivo.content_type or "application/octet-stream"
     try:
         metadata = google_repository.upload_file(
-            drive_status.root_folder_id,
+            target_folder.id,
             filename,
             mime_type,
             content,
@@ -369,7 +398,7 @@ async def upload_google_drive_media(
     google_repository.save_imported_media_metadata(
         midia_id=midia.id,
         file_id=metadata.id,
-        folder_id=metadata.folder_id or drive_status.root_folder_id,
+        folder_id=metadata.folder_id or target_folder.id,
         mime_type=metadata.mime_type,
         web_view_link=metadata.web_view_link,
         download_link=metadata.download_link,
@@ -383,6 +412,54 @@ async def upload_google_drive_media(
         message=metadata.name,
     )
     return midia
+
+
+@router.delete("/media/{midia_id}", response_model=GoogleDriveOperationResult)
+def delete_google_drive_media(
+    midia_id: str,
+    payload: GoogleDriveDeleteMediaRequest,
+    request: Request,
+    _admin=Depends(require_admin_user),
+) -> GoogleDriveOperationResult:
+    if payload.confirmacao != "APAGAR":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="confirmacao obrigatoria invalida",
+        )
+    core_repository = _core_repository(request)
+    google_repository = _google_repository(request)
+    midia = core_repository.get_midia(midia_id)
+    if midia is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="midia nao encontrada")
+    require_admin_permission(request, "midias", "excluir", midia.cliente_id)
+    metadata = google_repository.get_media_drive_metadata(midia_id)
+    if metadata is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="midia nao vinculada ao google drive",
+        )
+    try:
+        google_repository.delete_file(metadata.id)
+    except RuntimeError as exc:
+        google_repository.record_operation(
+            operation="delete-media",
+            status="erro",
+            user_id=_user_id(request),
+            cliente_id=midia.cliente_id,
+            midia_id=midia.id,
+            message=str(exc),
+        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    core_repository.save_midia(midia.model_copy(update={"ativo": False}))
+    google_repository.record_operation(
+        operation="delete-media",
+        status="ok",
+        user_id=_user_id(request),
+        cliente_id=midia.cliente_id,
+        midia_id=midia.id,
+        message=metadata.id,
+    )
+    return GoogleDriveOperationResult(status="ok", message="arquivo apagado do Google Drive")
 
 
 @router.post("/validate-access", response_model=GoogleDriveStatus)

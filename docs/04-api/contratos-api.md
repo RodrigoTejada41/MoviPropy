@@ -263,7 +263,7 @@ Parametros: cliente_id, tipo, duracao_segundos opcional, arquivo multipart.
 Resposta: midia criada.
 Seguranca atual: exige `Authorization: Bearer <access_token>` e permissao RBAC.
 Regra: cliente precisa existir; extensao, MIME type e tamanho sao validados.
-Storage: arquivo local sob `MOVIPROGY_MEDIA_DIR`.
+Storage: Google Drive como principal; arquivo local sob `MOVIPROGY_MEDIA_DIR` apenas fallback tecnico/local.
 
 ### GET /api/admin/midias/{midia_id}
 
@@ -394,7 +394,7 @@ Implementacao atual:
 
 ## Google Drive
 
-Status: implementacao inicial.
+Status: storage principal SaaS aprovado.
 
 Contrato canonico:
 - Namespace: `/api/integrations/google-drive`.
@@ -449,6 +449,7 @@ Payload: `folder_id` ou solicitacao de criacao da pasta padrao.
 Finalidade: criar ou vincular pasta de cliente.
 Quem usa: painel administrativo.
 Payload: `cliente_id`, `folder_id` opcional, `folder_name` opcional.
+Regra: sem `folder_id`, cria estrutura `Cliente/Videos`, `Cliente/Imagens` e `Cliente/Playlists`.
 
 ### GET /api/integrations/google-drive/files
 
@@ -462,7 +463,22 @@ Implementacao atual: lista midias ja importadas com origem Google Drive.
 Finalidade: importar arquivo do Drive como midia do sistema.
 Quem usa: painel administrativo.
 Payload: `cliente_id`, `file_id`, `tipo`.
-Implementacao atual: exige tambem `nome`, `tamanho` e `sha256` enquanto metadados reais do Drive nao sao consultados.
+Regra: arquivo precisa pertencer a pasta do cliente.
+Implementacao atual: backend consulta metadados reais do Drive quando OAuth real esta conectado.
+
+### POST /api/integrations/google-drive/upload-media
+
+Finalidade: enviar arquivo diretamente para o Google Drive e cadastrar midia.
+Quem usa: painel administrativo.
+Payload multipart: `cliente_id`, `tipo`, `arquivo`.
+Regra: videos vao para `Videos`; imagens vao para `Imagens` dentro da pasta do cliente.
+
+### DELETE /api/integrations/google-drive/media/{midia_id}
+
+Finalidade: apagar definitivamente arquivo do Google Drive.
+Quem usa: painel administrativo.
+Payload: `confirmacao = APAGAR`.
+Regra: remover midia da playlist nao apaga arquivo do Drive.
 
 ### POST /api/integrations/google-drive/validate-access
 

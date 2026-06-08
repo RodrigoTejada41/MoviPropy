@@ -63,6 +63,10 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Especificacao Google Drive / Armazenamento consolidada com UX/UI, OAuth, endpoints futuros e checklist.
 - Implementacao inicial Google Drive criada com migrations, repository, OAuth, criptografia de tokens, pastas, importacao por metadados e tela administrativa.
 - Integracao Google Drive corrigida para salvar pasta raiz por criacao/localizacao automatica no Drive, validar acesso, exibir feedback visual, consultar quota, enviar/importar arquivos e ocultar campos tecnicos do usuario.
+- Google Drive definido como armazenamento principal SaaS das midias dos clientes.
+- Upload Google Drive cria automaticamente estrutura por cliente com subpastas `Videos`, `Imagens` e `Playlists`.
+- Player baixa midias Google Drive pela API MoviProgy sem depender de copia permanente no servidor.
+- Exclusao definitiva de midia no Google Drive exige confirmacao explicita do usuario.
 - Especificacao completa do frontend documentada.
 - RBAC granular planejado e documentado.
 - Storage, upload e download controlado documentados.
@@ -171,7 +175,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Auditoria de acessos RBAC registra permissoes permitidas e negadas, sem gravar tokens.
 - Edicao de item de playlist ainda usa remocao e nova inclusao; endpoint `PATCH` do item nao foi criado.
 - Manifesto real depende de `dispositivos.playlist_atual_id`, playlist ativa e midias vinculadas.
-- Download controlado atual serve arquivo local de `MOVIPROGY_MEDIA_DIR`.
+- Download controlado serve arquivo local apenas para fallback; midias Google Drive sao retransmitidas pela API sem copia permanente no servidor.
 - Google Drive possui implementacao inicial em `/api/integrations/google-drive`.
 - Pasta raiz do Google Drive e criada/localizada automaticamente pelo backend e validada antes de atualizar a interface.
 - Metadados tecnicos do Drive ficam ocultos no frontend e sao preenchidos pelo backend quando o arquivo e importado.

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from fastapi import APIRouter, Header, HTTPException, Request, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response, StreamingResponse
 
 from moviprogy_api.domain.devices import ActivationRequest, ActivationResult
 from moviprogy_api.domain.player_events import (
@@ -119,7 +119,7 @@ def download_media(
     midia_id: str,
     request: Request,
     authorization: str | None = Header(default=None),
-) -> FileResponse:
+) -> Response:
     token = _extract_bearer_token(authorization)
     if token is None:
         raise HTTPException(
@@ -151,6 +151,9 @@ def download_media(
             detail="midia fora da playlist atual",
         )
 
+    if midia.caminho.startswith("google_drive/"):
+        return _download_google_drive_media(request, midia)
+
     media_dir = Path(request.app.state.media_dir)
     file_path = _safe_media_path(media_dir, midia.caminho)
     if file_path is None or not file_path.is_file():
@@ -163,6 +166,31 @@ def download_media(
         file_path,
         media_type=_media_type(midia.tipo),
         filename=Path(midia.caminho).name,
+    )
+
+
+def _download_google_drive_media(request: Request, midia) -> StreamingResponse:
+    google_repository = getattr(request.app.state, "google_drive_repository", None)
+    if google_repository is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="google drive indisponivel",
+        )
+    metadata = google_repository.get_media_drive_metadata(midia.id)
+    file_id = metadata.id if metadata is not None else midia.caminho.removeprefix("google_drive/")
+    try:
+        content = google_repository.download_file(file_id)
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+    return StreamingResponse(
+        content,
+        media_type=_media_type(midia.tipo),
+        headers={
+            "Content-Disposition": f'attachment; filename="{midia.nome}"',
+        },
     )
 
 

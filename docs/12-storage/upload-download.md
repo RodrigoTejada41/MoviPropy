@@ -7,9 +7,10 @@ Definir como arquivos de midia serao recebidos, armazenados, validados e entregu
 ## Estado atual
 
 - Metadados de midia existem no banco.
-- Upload fisico local existe para admin.
-- Download controlado local existe para o player.
-- Google Drive esta documentado como storage pos-MVP.
+- Google Drive e o storage principal SaaS das midias.
+- Upload Google Drive existe para admin.
+- Download controlado existe para o player.
+- Upload fisico local permanece apenas fallback tecnico/local.
 
 ## Principios
 
@@ -18,7 +19,27 @@ Definir como arquivos de midia serao recebidos, armazenados, validados e entregu
 - Backend deve validar permissao antes de liberar download.
 - Arquivo so entra na playlist se tamanho e hash forem validos.
 
-## Storage local planejado
+## Storage principal Google Drive
+
+Estrutura obrigatoria:
+
+```text
+MoviProgy_Midias/
+  {cliente}/
+    Videos/
+    Imagens/
+    Playlists/
+```
+
+Regras:
+- Servidor nao deve armazenar copia permanente dos videos.
+- Banco armazena metadados e referencias Google Drive.
+- Upload de video vai para `Videos`.
+- Upload de imagem vai para `Imagens`.
+- Remover midia de playlist nao apaga arquivo do Drive.
+- Apagar definitivamente exige confirmacao `APAGAR`.
+
+## Storage local fallback
 
 Pasta:
 - `runtime/media`
@@ -40,26 +61,24 @@ Regras:
 - Caminho nao deve vir direto do usuario.
 - Nao servir diretorio estatico aberto.
 
-## Upload
+## Upload Google Drive
 
 Endpoint implementado:
-- `POST /api/admin/midias/upload`
+- `POST /api/integrations/google-drive/upload-media`
 
 Campos:
 - cliente_id.
 - arquivo.
 - tipo.
-- duracao_segundos opcional.
 
 Validacoes:
 - Cliente existe.
 - Usuario pode acessar cliente.
-- Extensao permitida.
-- MIME type permitido.
-- Tamanho maximo.
-- Hash SHA-256 calculado pelo backend.
-- Arquivo salvo primeiro em pasta temporaria.
-- Caminho relativo gerado pelo servidor.
+- Google Drive conectado.
+- Pasta raiz definida.
+- Estrutura do cliente criada.
+- MIME type recebido do upload.
+- Metadados retornados pelo Drive registrados no banco.
 
 Tipos permitidos iniciais:
 - Video: `.mp4`
@@ -67,20 +86,15 @@ Tipos permitidos iniciais:
 
 Fluxo:
 1. Receber arquivo.
-2. Salvar em `runtime/tmp`.
-3. Validar tamanho.
-4. Validar tipo.
-5. Calcular SHA-256.
-6. Mover para `runtime/media`.
-7. Registrar midia no banco.
-8. Retornar metadados.
+2. Criar/localizar estrutura do cliente.
+3. Enviar arquivo ao Google Drive.
+4. Registrar metadados no banco.
+5. Retornar midia cadastrada.
 
 Implementacao atual:
-- Usa `MOVIPROGY_MEDIA_DIR`.
-- Usa `MOVIPROGY_TMP_DIR`.
-- Usa `MOVIPROGY_MAX_UPLOAD_BYTES`, default 512 MB.
+- Usa OAuth Google Drive.
+- Usa `google_drive_file_id`, `google_drive_folder_id`, MIME type e link de visualizacao.
 - Exige `Authorization: Bearer <access_token>` de usuario admin.
-- Salva em `clientes/{cliente_id}/midias/{midia_id}/original.ext`.
 - Retorna modelo `Midia`.
 
 ## Download controlado
@@ -96,7 +110,7 @@ Validacoes:
 - Dispositivo nao bloqueado.
 - Midia pertence a playlist atual do dispositivo.
 - Midia esta ativa.
-- Arquivo existe.
+- Arquivo existe na origem configurada.
 
 Resposta:
 - Arquivo como stream.
@@ -105,11 +119,13 @@ Resposta:
 - Cache controlado.
 
 Implementacao atual:
-- Usa `MOVIPROGY_MEDIA_DIR`.
+- Usa Google Drive como origem principal.
+- Usa `MOVIPROGY_MEDIA_DIR` apenas para fallback local.
 - Valida token do dispositivo.
 - Valida se midia pertence a playlist atual ativa do dispositivo.
 - Valida se midia esta ativa.
-- Resolve caminho dentro do diretorio base.
+- Para Google Drive, retransmite via API sem salvar copia permanente.
+- Para local, resolve caminho dentro do diretorio base.
 - Retorna 404 quando arquivo fisico nao existe.
 
 Regras:
@@ -117,13 +133,6 @@ Regras:
 - Nao expor caminho real no servidor.
 - Nao permitir download de midia de outro cliente.
 - Nao permitir download de midia fora da playlist atual.
-
-## Google Drive
-
-Regra:
-- Backend deve intermediar.
-- Player nao acessa Drive diretamente.
-- Link temporario ou stream controlado deve respeitar autorizacao do dispositivo.
 
 ## Erros
 

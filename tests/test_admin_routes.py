@@ -1816,7 +1816,7 @@ def test_admin_returns_safe_operational_configuration():
 
     assert response.status_code == 200
     assert response.json() == {
-        "storage_provider": "local",
+        "storage_provider": "google_drive",
         "max_upload_bytes": 1024,
         "offline_first": True,
     }
