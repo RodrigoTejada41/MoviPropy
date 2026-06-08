@@ -1,8 +1,10 @@
-import { getToken } from "./session";
+import { clearSession, getToken } from "./session";
 import type {
   AdminAudit,
   Cliente,
+  ClienteCreate,
   Dispositivo,
+  DispositivoCreate,
   GoogleDriveFile,
   GoogleDriveFolder,
   GoogleDriveStatus,
@@ -19,6 +21,7 @@ import type {
 } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+export const SESSION_EXPIRED_EVENT = "moviprogy:session-expired";
 
 export class ApiError extends Error {
   constructor(
@@ -41,10 +44,22 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!response.ok) {
     const detail = await response.json().catch(() => null);
     const message = detail?.detail ?? `Erro HTTP ${response.status}`;
+    if (isSessionError(response.status, message)) {
+      clearSession();
+      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
+    }
     throw new ApiError(message, response.status);
   }
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
+}
+
+function isSessionError(status: number, message: string) {
+  const normalized = message.toLowerCase();
+  return (
+    status === 401 ||
+    (status === 403 && (normalized.includes("token invalido") || normalized.includes("token ausente")))
+  );
 }
 
 export const api = {
@@ -66,7 +81,7 @@ export const api = {
   clientes() {
     return request<PageResult<Cliente>>("/api/admin/clientes?limit=50&offset=0");
   },
-  criarCliente(payload: Cliente) {
+  criarCliente(payload: ClienteCreate) {
     return request<Cliente>("/api/admin/clientes", {
       method: "POST",
       body: JSON.stringify(payload)
@@ -81,7 +96,7 @@ export const api = {
   dispositivos() {
     return request<PageResult<Dispositivo>>("/api/admin/dispositivos?limit=50&offset=0");
   },
-  criarDispositivo(payload: Dispositivo) {
+  criarDispositivo(payload: DispositivoCreate) {
     return request<Dispositivo>("/api/admin/dispositivos", {
       method: "POST",
       body: JSON.stringify(payload)

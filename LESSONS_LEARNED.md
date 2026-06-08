@@ -27,6 +27,61 @@ Status:
 
 ## Licoes registradas
 
+### ERR-023
+
+Data: 2026-06-07
+
+Descricao do Problema:
+- Player retornava `falha HTTP 502` ao ativar dispositivo.
+
+Causa Raiz:
+- Nginx do player havia resolvido `moviprogy-api` para um IP antigo.
+- A API foi recriada e o IP interno Docker mudou.
+
+Solucao Aplicada:
+- Configurar Nginx do player e do painel com resolver Docker `127.0.0.11`.
+- Usar upstream via variavel para reavaliar DNS durante execucao.
+
+Como Evitar no Futuro:
+- Proxies internos Docker nao devem depender de resolucao DNS estatica quando containers podem ser recriados.
+- Rebuild/restart de API deve ser validado pelo player e pelo painel.
+
+Arquivos Afetados:
+- `player/nginx.conf`
+- `frontend/nginx.conf`
+
+Status: Resolvido
+
+---
+
+### ERR-022
+
+Data: 2026-06-07
+
+Descricao do Problema:
+- Cadastro de cliente expunha ID e documento como campos manuais na tela principal.
+
+Causa Raiz:
+- Frontend reutilizava o modelo completo do banco como formulario operacional.
+
+Solucao Aplicada:
+- Criar payload de cadastro com nome obrigatorio e ID/documento opcionais.
+- Gerar ID automaticamente no backend quando ausente.
+- Remover campos manuais de ID e documento do cadastro simples.
+
+Como Evitar no Futuro:
+- Nao expor campos tecnicos ou administrativos no fluxo operacional simples.
+- Backend deve ser fonte autoritativa para identificadores sequenciais.
+
+Arquivos Afetados:
+- `backend/moviprogy_api/domain/core.py`
+- `backend/moviprogy_api/routes/admin.py`
+- `frontend/src/pages/ListPages.tsx`
+
+Status: Resolvido
+
+---
+
 ### ERR-018
 
 Data: 2026-06-06
@@ -96,6 +151,30 @@ Como Evitar no Futuro:
 - Executar testes com dependencias declaradas pelo projeto.
 - Nao depender de plugins instalados globalmente.
 - Validar imports em ambiente Linux pelo CI.
+
+Status: Resolvido
+
+---
+
+### ERR-021
+
+Data: 2026-06-07
+
+Descricao do Problema:
+- O formulario de novo dispositivo exigia digitacao manual de ID e codigo de ativacao.
+
+Causa Raiz:
+- O contrato inicial tratava `id` e `codigo_ativacao` como campos obrigatorios informados pelo operador.
+
+Solucao Aplicada:
+- Criado payload de cadastro com ID e codigo opcionais.
+- Backend gera ID sequencial por nome.
+- Backend gera codigo de ativacao unico.
+- Frontend remove campos manuais e mostra apenas ID sugerido.
+
+Como Evitar no Futuro:
+- Campos tecnicos e codigos operacionais devem ser gerados pelo backend.
+- Frontend pode sugerir valores, mas nao deve ser a fonte autoritativa.
 
 Status: Resolvido
 

@@ -931,6 +931,28 @@ def test_admin_creates_and_gets_cliente():
     assert get_response.json()["nome"] == "Cliente Um"
 
 
+def test_admin_generates_cliente_id():
+    app = _create_test_app()
+    client = TestClient(app)
+
+    first_response = client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"nome": "JECA TV"},
+    )
+    second_response = client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"nome": "JECA TV"},
+    )
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 201
+    assert first_response.json()["id"] == "JECA_TV01"
+    assert second_response.json()["id"] == "JECA_TV02"
+    assert first_response.json()["documento"] is None
+
+
 def test_admin_lists_clientes():
     app = _create_test_app()
     client = TestClient(app)
@@ -1038,6 +1060,35 @@ def test_admin_creates_and_gets_dispositivo():
     assert create_response.json()["codigo_ativacao"] == "CODE-001"
     assert get_response.status_code == 200
     assert get_response.json()["nome"] == "TV Entrada"
+
+
+def test_admin_generates_dispositivo_id_and_activation_code():
+    app = _create_test_app()
+    client = TestClient(app)
+    client.post(
+        "/api/admin/clientes",
+        headers=ADMIN_HEADERS,
+        json={"id": "cliente-001", "nome": "Cliente Um"},
+    )
+
+    first_response = client.post(
+        "/api/admin/dispositivos",
+        headers=ADMIN_HEADERS,
+        json={"cliente_id": "cliente-001", "nome": "JECA TV"},
+    )
+    second_response = client.post(
+        "/api/admin/dispositivos",
+        headers=ADMIN_HEADERS,
+        json={"cliente_id": "cliente-001", "nome": "JECA TV"},
+    )
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 201
+    assert first_response.json()["id"] == "JECA_TV01"
+    assert second_response.json()["id"] == "JECA_TV02"
+    assert first_response.json()["codigo_ativacao"].startswith("MOVI-")
+    assert second_response.json()["codigo_ativacao"].startswith("MOVI-")
+    assert first_response.json()["codigo_ativacao"] != second_response.json()["codigo_ativacao"]
 
 
 def test_admin_lists_dispositivos():

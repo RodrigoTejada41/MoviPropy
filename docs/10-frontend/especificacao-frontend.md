@@ -119,7 +119,7 @@ Objetivo:
 
 Funcionalidades:
 - Listar clientes.
-- Criar cliente.
+- Criar cliente preenchendo apenas nome; id e gerado automaticamente pela API.
 - Buscar localmente por id, nome ou documento.
 - Filtrar localmente por status ativo/inativo.
 - Exibir quantidade de dispositivos vinculados por cliente.
@@ -133,6 +133,12 @@ Campos:
 - Documento.
 - Ativo.
 - Quantidade de dispositivos calculada por `GET /api/admin/dispositivos`.
+
+Cadastro simples:
+- Usuario informa somente nome.
+- Frontend nao exibe campo manual de documento.
+- Frontend nao permite digitacao manual de id.
+- Frontend pode exibir previsao do id automatico.
 - Sincronizacao: exibir `Nao informado` enquanto a API nao retornar ultimo sync.
 
 API atual:
@@ -163,6 +169,7 @@ Objetivo:
 Funcionalidades:
 - Listar dispositivos.
 - Criar dispositivo.
+- Gerar ID automatico por nome e sequencia.
 - Buscar localmente por id, nome, cliente, codigo ou playlist.
 - Exibir indicadores de total, ativos, bloqueados e sem playlist.
 - Ver codigo de ativacao.
@@ -189,7 +196,10 @@ Campos ainda nao disponiveis:
 
 Criterios de aceite:
 - Nao permitir dispositivo sem cliente.
-- Exibir codigo de ativacao apos cadastro.
+- Nao exigir digitacao manual de ID.
+- Nao exigir digitacao manual de codigo de ativacao.
+- Exibir ID sugerido antes do cadastro.
+- Exibir codigo de ativacao gerado apos cadastro.
 - Avisar se nao houver playlist vinculada.
 - Nao inventar ultima comunicacao se a API nao retornar esse dado.
 - Acoes sem contrato backend devem aparecer desabilitadas.

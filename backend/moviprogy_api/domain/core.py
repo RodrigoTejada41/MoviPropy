@@ -8,6 +8,13 @@ class Cliente(BaseModel):
     ativo: bool = True
 
 
+class ClienteCreateRequest(BaseModel):
+    id: str | None = Field(default=None, min_length=1)
+    nome: str = Field(min_length=1)
+    documento: str | None = None
+    ativo: bool = True
+
+
 class ClienteListResponse(BaseModel):
     items: list[Cliente]
     limit: int = Field(ge=1)
@@ -26,6 +33,15 @@ class Dispositivo(BaseModel):
     cliente_id: str = Field(min_length=1)
     nome: str = Field(min_length=1)
     codigo_ativacao: str = Field(min_length=1)
+    bloqueado: bool = False
+    playlist_atual_id: str | None = None
+
+
+class DispositivoCreateRequest(BaseModel):
+    id: str | None = Field(default=None, min_length=1)
+    cliente_id: str = Field(min_length=1)
+    nome: str = Field(min_length=1)
+    codigo_ativacao: str | None = Field(default=None, min_length=1)
     bloqueado: bool = False
     playlist_atual_id: str | None = None
 

@@ -33,6 +33,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Listagens administrativas criadas para clientes, dispositivos, midias e playlists.
 - Listagens administrativas possuem `limit`, `offset` e filtros iniciais por status/cliente.
 - Listagens administrativas retornam envelope paginado com `items`, `limit`, `offset` e `total`.
+- Cadastro de cliente gera ID sequencial automaticamente pelo nome e nao exige documento na tela simples.
 - Consulta administrativa de eventos do player criada por dispositivo.
 - Vinculo administrativo de midia em playlist criado.
 - Upload fisico local de midias criado em `POST /api/admin/midias/upload`.
@@ -80,6 +81,7 @@ Os dispositivos devem sincronizar midias quando houver internet e manter reprodu
 - Dashboard redesenhado com cards analiticos, eventos de auditoria e alertas derivados dos dados reais da API.
 - Tela de Clientes redesenhada como gestao operacional com KPIs reais, busca local, filtro por status, cadastro e dispositivos vinculados.
 - Tela de Dispositivos redesenhada como gestao de frota com KPIs, busca local, cadastro e tabela detalhada.
+- Cadastro de dispositivo gera ID sequencial por nome e codigo de ativacao automaticamente.
 - Telas iniciais criadas para Dashboard, Clientes, Dispositivos, Midias, Playlists, Logs/Auditoria, Usuarios, Sincronizacoes, Google Drive e Configuracoes.
 - Listagens iniciais consomem endpoints paginados do backend.
 - Edicao administrativa criada para clientes, dispositivos, midias e playlists.
